@@ -1,0 +1,13 @@
+factor,category,documented_meaning,n_all,pct_all,n_regression,n_zero_q,pct_zero_q,n_unusable,pct_reference_missing,pct_deep_missing,pct_Tm10_default_ratio,pct_remark_do_not_use,n_series,n_geometries
+RF,1,"very reliable: all needed information available, measurements and analysis reliable",3386,32.14963919483479,3189.0,197.0,5.818074424099232,0.0,23.862965150620198,1.2404016538688718,42.23272297696397,4.548139397519196,54.0,714.0
+RF,2,"reliable: some estimations/calculations and/or some uncertainty, overall still reliable",3598,34.16255222180023,3174.0,424.0,11.78432462479155,0.0,27.93218454697054,3.5297387437465257,90.550305725403,3.7798777098387992,72.0,874.0
+RF,3,less reliable: estimations/calculations and uncertainties lead to the class 'less reliable',2642,25.085453854918345,2333.0,309.0,11.695685087055262,0.0,28.61468584405753,7.797123391370174,83.72445117335351,7.418622255866768,79.0,543.0
+RF,4,not reliable: no acceptable estimations possible and/or faulty measurements or calculations,906,8.602354728446638,637.0,139.0,15.342163355408388,143.0,27.262693156732894,6.622516556291391,62.69315673289183,2.5386313465783665,51.0,261.0
+RF,missing,,0,,,,,,,,,,,
+RF,out of range,,0,,,,,,,,,,,
+CF,1,simple: the parameters describe the cross-section exactly or very well,7989,75.85453854918343,7067.0,837.0,10.476905745399925,90.0,21.141569658280133,2.203029165102015,68.73200650894981,4.40605833020403,122.0,1509.0
+CF,2,"quite simple: the parameters describe the cross-section very well, although not exactly",1405,13.340296240030384,1229.0,162.0,11.530249110320284,17.0,38.43416370106761,11.032028469750891,85.69395017793595,0.0,50.0,391.0
+CF,3,"quite complicated: the parameters describe the cross-section appreciably, but not exactly",884,8.393467527535131,825.0,45.0,5.090497737556561,15.0,58.82352941176471,11.76470588235294,78.50678733031674,0.0,27.0,281.0
+CF,4,very complicated: the cross-section is too complex for the chosen parameters; the representation is unreliable,254,2.4116976832510444,212.0,25.0,9.84251968503937,21.0,26.37795275590551,0.0,31.10236220472441,61.811023622047244,9.0,68.0
+CF,missing,,0,,,,,,,,,,,
+CF,out of range,,0,,,,,,,,,,,

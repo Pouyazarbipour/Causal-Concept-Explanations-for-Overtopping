@@ -1,0 +1,13 @@
+{
+  "python": "3.13.18",
+  "platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+  "numpy": "2.5.3",
+  "pandas": "3.0.5",
+  "scipy": "1.18.1",
+  "sklearn": "1.9.1",
+  "xgboost": "3.4.1",
+  "torch": "2.15.0+cu132",
+  "statsmodels": "0.15.0",
+  "matplotlib": "3.11.2",
+  "xlrd": "2.0.2"
+}

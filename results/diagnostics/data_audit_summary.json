@@ -1,0 +1,105 @@
+{
+ "n_raw_rows": 10532,
+ "n_columns": 33,
+ "units": {
+  "Name": "",
+  "Hm0 deep": "m",
+  "Tp deep": "s",
+  "Tm deep": "s",
+  "Tm-1,0 deep": "s",
+  "h deep": "m",
+  "m": "",
+  "b": "\u00b0",
+  "h": "m",
+  "Hm0 toe": "m",
+  "Tp toe": "s",
+  "Tm toe": "s",
+  "Tm-1,0 toe": "s",
+  "ht": "m",
+  "Bt": "m",
+  "gf": "",
+  "cotad": "",
+  "cotau": "",
+  "cotaexcl": "",
+  "cotaincl": "",
+  "Rc": "m",
+  "B": "m",
+  "hb": "m",
+  "tanaB": "",
+  "Bh": "m",
+  "Ac": "m",
+  "Gc": "m",
+  "RF": "",
+  "CF": "",
+  "q": "m3/s/m",
+  "Pow": "%",
+  "Remark": "",
+  "Reference": ""
+ },
+ "response_class": {
+  "positive": 9442,
+  "zero": 1069,
+  "missing": 20,
+  "negative": 1
+ },
+ "q_text_markers": {
+  ".": 7,
+  "-": 5,
+  "?": 1
+ },
+ "n_use_regression": 9333,
+ "n_use_wetdry": 10389,
+ "unusable_reasons": {
+  "": 9333,
+  "zero overtopping: log10(q*) undefined; used in wet/dry model only": 1056,
+  "Hm0,toe missing or non-positive (q* undefined)": 120,
+  "q missing or non-numeric marker": 20,
+  "Tm-1,0,toe missing or non-positive (wavelength undefined)": 1,
+  "q negative": 1,
+  "toe water depth h missing": 1
+ },
+ "exact_duplicate_rows_excluding_name": 85,
+ "physical_duplicates": {
+  "n_duplicate_sets": 83,
+  "n_records": 196,
+  "sets_with_different_RF": 1,
+  "sets_with_different_CF": 1,
+  "sets_spanning_series": 0
+ },
+ "RF_values": [
+  1.0,
+  2.0,
+  3.0,
+  4.0
+ ],
+ "CF_values": [
+  1.0,
+  2.0,
+  3.0,
+  4.0
+ ],
+ "family_counts_regression": {
+  "rough_slope": 4311,
+  "vertical_wall": 1729,
+  "smooth_slope": 1699,
+  "bermed_slope": 726,
+  "slope_with_wall": 603,
+  "wall_with_slope_above": 265
+ },
+ "lab_counts_regression": {
+  "unknown": 2819,
+  "HR Wallingford": 1347,
+  "Aalborg University": 1128,
+  "Univ. Edinburgh": 748,
+  "Delft Hydraulics": 746,
+  "USACE WES/CERC": 734,
+  "LWI Braunschweig": 688,
+  "Ghent University": 257,
+  "PHRI Japan": 242,
+  "Univ. Florence/Rome (Aminti-Franco)": 224,
+  "NRC Canada (Cornett)": 223,
+  "UPV Valencia": 100,
+  "Modimar": 77
+ },
+ "min_positive_q": 2.0159999999999997e-09
+}

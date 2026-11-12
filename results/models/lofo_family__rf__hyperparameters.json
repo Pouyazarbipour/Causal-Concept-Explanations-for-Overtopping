@@ -1,0 +1,80 @@
+[
+ {
+  "fold": 0,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.5,
+   "min_samples_leaf": 2
+  },
+  "inner_rmse": [
+   0.9170233652064738,
+   0.9008126150205996,
+   0.9251125042609556
+  ]
+ },
+ {
+  "fold": 1,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.75,
+   "min_samples_leaf": 4
+  },
+  "inner_rmse": [
+   0.887646504130753,
+   0.8806453127428554,
+   0.8651885172197157
+  ]
+ },
+ {
+  "fold": 2,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.33,
+   "min_samples_leaf": 1
+  },
+  "inner_rmse": [
+   0.9350590590330596,
+   0.9508102888211155,
+   1.0221972908823125
+  ]
+ },
+ {
+  "fold": 3,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.33,
+   "min_samples_leaf": 1
+  },
+  "inner_rmse": [
+   0.9013782375995115,
+   0.9200079916669477,
+   0.9395269753232317
+  ]
+ },
+ {
+  "fold": 4,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.75,
+   "min_samples_leaf": 4
+  },
+  "inner_rmse": [
+   0.8849779930451055,
+   0.8815572259701623,
+   0.8671218932213689
+  ]
+ },
+ {
+  "fold": 5,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.33,
+   "min_samples_leaf": 1
+  },
+  "inner_rmse": [
+   0.9093055453429469,
+   0.9181529696809894,
+   0.9675651030198633
+  ]
+ }
+]
