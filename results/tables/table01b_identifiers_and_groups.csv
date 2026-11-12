@@ -1,0 +1,8 @@
+identifier,origin,n_unique_all,n_unique_regression,median_tests_per_group,max_tests_per_group
+series,original (Name prefix),163,162,27.5,734
+source,original Reference text; series number where blank,187,182,17.0,734
+lab,INFERRED by keyword from Reference (approximate; 'unknown' where blank),13,13,688.0,2819
+geometry,RECONSTRUCTED from water-level-invariant geometry descriptors,2209,2046,1.0,415
+substructure,RECONSTRUCTED: geometry without crest levels,1228,1175,2.0,415
+geometry_coarse,"RECONSTRUCTED: slopes, roughness, berm/toe presence",578,554,5.0,415
+family,RULE-BASED structural family,6,6,1212.5,4311

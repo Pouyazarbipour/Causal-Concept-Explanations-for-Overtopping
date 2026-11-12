@@ -1,0 +1,14 @@
+# Data configuration. The raw workbook is read-only; never write into data/raw.
+raw_file: "data/raw/20250402 - Overtopping Database.xls"
+raw_sheet: "20050101"
+raw_sha256: "data/raw/SHA256SUMS"
+gravity: 9.81
+master_file: "data/processed/clash_master.csv"
+model_file: "data/processed/clash_model_table.csv"
+folds_file: "data/processed/fold_assignments.csv"
+# number of significant digits used when reconstructing geometry keys
+geometry_sig_digits: 3
+# physical predictors of the primary (quality-blind) mean model
+physical_features: [rc_h, ac_h, gc_l, s0, h_l, ht_h, bt_l, b_l, hb_h, tanab, cotad, cotau, gf, beta, fs]
+# fixed (not fitted) sign-preserving log1p transform for heavy-tailed ratios
+log1p_features: [rc_h, ac_h, gc_l, h_l, ht_h, bt_l, b_l, hb_h]

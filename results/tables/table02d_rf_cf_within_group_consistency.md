@@ -1,0 +1,7 @@
+| grouping        |   n_groups |   n_groups_with_>1_test |   groups_with_>1_CF_value |   groups_with_>1_RF_value |   max_CF_range_in_group |   records_in_CF_inconsistent_groups |
+|:----------------|-----------:|------------------------:|--------------------------:|--------------------------:|------------------------:|------------------------------------:|
+| geometry        |       2209 |                    1100 |                        32 |                       166 |                       3 |                                 311 |
+| substructure    |       1228 |                     770 |                        63 |                       148 |                       3 |                                 670 |
+| geometry_coarse |        578 |                     410 |                        55 |                       111 |                       3 |                                1755 |
+| series          |        163 |                     162 |                        34 |                        72 |                       3 |                                3364 |
+| source          |        187 |                     135 |                        36 |                        60 |                       3 |                                4292 |

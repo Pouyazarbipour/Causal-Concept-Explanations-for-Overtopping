@@ -1,0 +1,24 @@
+| flag                    |    n |     pct |   n_RF4 |   n_CF4 |
+|:------------------------|-----:|--------:|--------:|--------:|
+| flag_rf4                |  906 |  8.602  |     906 |      31 |
+| flag_cf4                |  254 |  2.412  |      31 |     254 |
+| flag_rf4_and_cf4        |   31 |  0.2943 |      31 |      31 |
+| flag_rf4_or_cf4         | 1129 | 10.72   |     906 |     254 |
+| flag_remark_do_not_use  |  509 |  4.833  |      23 |     157 |
+| flag_wind               |  223 |  2.117  |       2 |       0 |
+| flag_prototype          |  132 |  1.253  |      21 |       3 |
+| flag_chute              |  154 |  1.462  |       0 |     154 |
+| flag_reference_missing  | 2816 | 26.74   |     247 |      67 |
+| flag_deep_missing       |  435 |  4.13   |      60 |       0 |
+| flag_tm10_default_ratio | 7468 | 70.91   |     568 |      79 |
+| flag_tm_default_ratio   | 6776 | 64.34   |     552 |      79 |
+| flag_toe_equals_deep    | 5694 | 54.06   |     346 |     206 |
+| flag_depth_limited_gt1  |  154 |  1.462  |     152 |       9 |
+| flag_m_missing          |   55 |  0.5222 |      55 |      27 |
+| flag_beta_missing       |   24 |  0.2279 |      24 |       0 |
+| flag_gf_missing         |   16 |  0.1519 |      16 |      10 |
+| flag_toe_emergent       |  111 |  1.054  |     111 |      20 |
+| flag_ac_gt_rc           |  913 |  8.669  |     119 |       3 |
+| flag_duplicate_physical |  196 |  1.861  |      42 |       2 |
+| flag_questionable       |  266 |  2.526  |     264 |      29 |
+| flag_y_outlier_mad4     |    0 |  0      |       0 |       0 |
