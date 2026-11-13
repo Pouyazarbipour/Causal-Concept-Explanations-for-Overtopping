@@ -54,6 +54,32 @@ def run(name, scheme, D, n_jobs=4):
     log.info("%s %s OOF rmse=%.4f (%.0fs)", scheme, name, float(np.sqrt(np.mean((P.mean(0) - y) ** 2))), time.time() - t0)
 
 
+def wet_dry(D):
+    """Two-part strategy, part 1: probability of non-zero overtopping (positive + zero records), grouped CV."""
+    import xgboost as xgb
+    from sklearn.model_selection import GroupKFold
+    from src.baseline_models import FoldPrep
+    from src.features import features_from_raw
+    from src.geometry_grouping import check_no_leakage
+    cfg = D["cfg"]
+    m = D["master"]
+    wd = m[m["use_wetdry"]].reset_index(drop=True)
+    Xw = features_from_raw(wd, D["features"], cfg["data"]["log1p_features"], cfg["data"]["gravity"])
+    wet = (wd["response_class"] == "positive").to_numpy().astype(int)
+    g = wd["geometry"].to_numpy()
+    uniq = np.unique(g)
+    perm = dict(zip(uniq, np.random.RandomState(cfg["experiment"]["seed"]).permutation(len(uniq))))
+    gi = np.array([perm[v] for v in g])
+    p = np.full(len(wd), np.nan)
+    for tr, te in GroupKFold(cfg["experiment"]["n_outer_folds"]).split(Xw, groups=gi):
+        check_no_leakage(g[tr], g[te])
+        prep = FoldPrep(Xw[tr])
+        clf = xgb.XGBClassifier(n_estimators=400, learning_rate=0.05, max_depth=5, subsample=0.8, colsample_bytree=0.8, n_jobs=4,
+                                random_state=cfg["experiment"]["seed"], tree_method="hist").fit(prep.impute(Xw[tr]), wet[tr])
+        p[te] = clf.predict_proba(prep.impute(Xw[te]))[:, 1]
+    wd[["name", "RF", "CF", "family", "geometry", "series", "response_class"]].assign(p_wet=p).to_csv(out("predictions", "wetdry__xgb_geometry.csv"), index=False)
+
+
 def main():
     D = load_model_data()
     E = D["cfg"]["experiment"]
@@ -66,6 +92,8 @@ def main():
             if scheme != E["primary_scheme"] and name != E["reference_model"]:
                 continue        # sensitivity schemes: reference model only
             run(name, scheme, D)
+    wet_dry(D)
+    log.info("all models done")
 
 
 if __name__ == "__main__":
