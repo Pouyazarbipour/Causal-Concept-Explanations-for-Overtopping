@@ -249,14 +249,15 @@ def exp_audit(D, nb, seed):
                 def st(i, aff_=aff_, k_=k_):
                     return [aff_[i][k_[i] == 4].mean() - aff_[i][k_[i] == 1].mean(), stats.spearmanr(aff_[i], k_[i]).statistic]
                 pt, lo, hi, reps = cluster_bootstrap(st, cl_, min(nb, 500), seed)
-                p = max(2 * min((reps[:, 1] <= 0).mean(), (reps[:, 1] >= 0).mean()), 1 / min(nb, 500))
+                p = max(2 * min((reps[:, 1] <= 0).mean(), (reps[:, 1] >= 0).mean()), 1 / min(nb, 500)) if np.isfinite(pt[1]) else np.nan
                 assoc.append({"model": LABEL[m], "factor": key, "rate_diff_cat4_minus_cat1_pct": 100 * pt[0], "diff_lo": 100 * lo[0],
                               "diff_hi": 100 * hi[0], "spearman": pt[1], "sp_lo": lo[1], "sp_hi": hi[1], "boot_p": p})
     save_table(pd.DataFrame(rows), "table07_counterfactual_inconsistency")
     save_table(pd.DataFrame(strat), "table07b_reversals_by_rf_cf_family")
     a = pd.DataFrame(assoc)
     if len(a):
-        a["boot_p_holm"] = holm(a["boot_p"])
+        ok_ = a["boot_p"].notna()   # models without any reversal (monotone XGBoost) have no test
+        a.loc[ok_, "boot_p_holm"] = holm(a.loc[ok_, "boot_p"])
         save_table(a, "table07c_reversal_association_with_rf_cf")
     # ---- Type C: measured matched pairs ----------------------------------------------------------
     mp = matched_freeboard_pairs(df, D["cfg"]["experiment"]["matching"])
@@ -369,31 +370,34 @@ def exp_decomp(D, nb, seed):
     rows = []
 
     def add(label, r, sub, levels, n_boot=nbd):
-        t, fit = decompose(r, sub, levels, n_boot, seed)
+        t, fit = decompose(r, sub.reset_index(drop=True), levels, n_boot, seed)
         t.insert(0, "analysis", label)
         t.insert(1, "n_records", len(sub))
         rows.append(t)
         return fit
     r = y - load_pred(f"{scheme}__{REF_MODEL}")[0, :, 0]
-    fit = add("PRIMARY: XGBoost, geometry-grouped OOF residuals; lab-unit / series / geometry", r, df, ["lab_unit", "series", "geometry"])
-    eff = pd.DataFrame({"geometry": fit["labels"][2], "u_geometry": fit["effects"][2]})
-    eff.to_csv(out("diagnostics", "geometry_random_effects.csv"), index=False)
-    add("grouping sensitivity: geometry_coarse", r, df, ["lab_unit", "series", "geometry_coarse"], 0)
-    add("grouping sensitivity: substructure", r, df, ["lab_unit", "series", "substructure"], 0)
-    add("grouping sensitivity: series / geometry only", r, df, ["series", "geometry"], 0)
+    t0, fit = decompose(r, df, ["series", "geometry"], nbd, seed, blup=True)
+    t0.insert(0, "analysis", "PRIMARY: XGBoost, geometry-grouped OOF residuals; series / geometry")
+    t0.insert(1, "n_records", len(df))
+    rows.append(t0)
+    pd.DataFrame({"geometry_key": list(fit["effects"]), "u_geometry": list(fit["effects"].values())}).to_csv(
+        out("diagnostics", "geometry_random_effects.csv"), index=False)
+    add("grouping sensitivity: geometry_coarse", r, df, ["series", "geometry_coarse"], 0)
+    add("grouping sensitivity: substructure", r, df, ["series", "substructure"], 0)
+    add("grouping sensitivity: source (reference) / series / geometry", r, df, ["source", "series", "geometry"], 0)
     known = (df["lab"] != "unknown").to_numpy()
-    add("records with an inferred laboratory only: lab / series / geometry", r[known], df[known], ["lab", "series", "geometry"], 0)
+    add("records with an INFERRED laboratory only: lab / series / geometry", r[known], df[known], ["lab", "series", "geometry"], nbd)
     rr = y - load_pred(f"random__{REF_MODEL}")[0, :, 0]
-    add("random-CV residuals (optimistic reference)", rr, df, ["lab_unit", "series", "geometry"], 0)
+    add("random-CV residuals (optimistic reference)", rr, df, ["series", "geometry"], 0)
     for m in ("mlp", "ccw_full", "rf"):
         if have(f"{scheme}__{m}"):
-            add(f"model sensitivity: {m}", y - load_pred(f"{scheme}__{m}").mean(0)[:, 0], df, ["lab_unit", "series", "geometry"], 0)
+            add(f"model sensitivity: {m}", y - load_pred(f"{scheme}__{m}").mean(0)[:, 0], df, ["series", "geometry"], 0)
     for v in (1, 2, 3, 4):
         mk = (df["CF"] == v).to_numpy()
-        add(f"stratum CF={v}", r[mk], df[mk], ["series", "geometry"], nbd)
+        add(f"stratum CF={v}", r[mk], df[mk], ["series", "geometry"], nbd // 2)
     for v in (1, 2, 3, 4):
         mk = (df["RF"] == v).to_numpy()
-        add(f"stratum RF={v}", r[mk], df[mk], ["series", "geometry"], nbd)
+        add(f"stratum RF={v}", r[mk], df[mk], ["series", "geometry"], nbd // 2)
     save_table(pd.concat(rows), "table09_hierarchical_error_decomposition")
     # model-induced part: total OOF MSE vs. model-free repeatability variance
     rp = pd.read_csv(ROOT / "results/diagnostics/near_replicate_pairs.csv") if (ROOT / "results/diagnostics/near_replicate_pairs.csv").exists() else replicate_pairs(df)
@@ -404,7 +408,7 @@ def exp_decomp(D, nb, seed):
                          {"quantity": "within-geometry residual variance (REML)", "value": float(prim.variance.iloc[-1])},
                          {"quantity": "near-replicate repeatability variance (model-free, pooled)", "value": rep_var},
                          {"quantity": "n near-replicate pairs", "value": len(rp)},
-                         {"quantity": "share of within-geometry variance attributable to repeatability", "value": rep_var / float(prim.variance.iloc[-1])}])
+                         {"quantity": "ratio: near-replicate variance / within-geometry residual variance", "value": rep_var / float(prim.variance.iloc[-1])}])
     save_table(summ, "table09b_repeatability_vs_residual")
 
 

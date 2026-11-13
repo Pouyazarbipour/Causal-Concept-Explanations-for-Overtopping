@@ -1,0 +1,67 @@
+[
+ {
+  "fold": 0,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.33,
+   "min_samples_leaf": 1
+  },
+  "inner_rmse": [
+   0.5662877513157061,
+   0.5707747642818095,
+   0.5843036392076253
+  ]
+ },
+ {
+  "fold": 1,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.33,
+   "min_samples_leaf": 1
+  },
+  "inner_rmse": [
+   0.57563085661757,
+   0.5777497958351304,
+   0.5954970488818121
+  ]
+ },
+ {
+  "fold": 2,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.5,
+   "min_samples_leaf": 2
+  },
+  "inner_rmse": [
+   0.5426483867334477,
+   0.5380214129520298,
+   0.5462863003663093
+  ]
+ },
+ {
+  "fold": 3,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.33,
+   "min_samples_leaf": 1
+  },
+  "inner_rmse": [
+   0.5343130598950132,
+   0.539012238712755,
+   0.553280421275418
+  ]
+ },
+ {
+  "fold": 4,
+  "params": {
+   "n_estimators": 300,
+   "max_features": 0.33,
+   "min_samples_leaf": 1
+  },
+  "inner_rmse": [
+   0.5649972717209029,
+   0.5666092401109472,
+   0.5789318388914576
+  ]
+ }
+]

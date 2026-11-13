@@ -3,3 +3,4 @@ __pycache__/
 .pytest_cache/
 results/logs/
 data/interim/
+results/diagnostics/ccw_cache/
