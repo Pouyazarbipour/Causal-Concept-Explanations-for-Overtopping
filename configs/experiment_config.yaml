@@ -2,25 +2,12 @@ seed: 20261112
 n_outer_folds: 5
 n_inner_folds: 3
 primary_scheme: geometry
-cv_schemes: [random, geometry, geometry_coarse, series, source, lofo_family]
-neural_schemes: [geometry, series]
+# every model on the primary scheme; the reference model also on two sensitivity schemes
+models: [rf, xgb, catboost, mlp]
+sensitivity_schemes: [random, series]
+reference_model: xgb
 nn_seeds: [0, 1, 2]
 n_boot: 1000
-# counterfactual audit --------------------------------------------------------
-audit:
-  # increments expressed in units of Hm0,toe (dimensionless, scale-free)
-  deltas: [0.05, 0.1, 0.25, 0.5, 1.0]
-  local_delta: 0.05
-  numerical_tol: 1.0e-6        # log10 units; below this a change is numerical noise
-  meaningful_tol: 0.02         # log10 units (~4.7 % in q); minimum meaningful reversal
-  support_quantile: 0.99       # kNN-distance quantile of the training fold defining support
-  support_k: 5
-# matched empirical comparisons ----------------------------------------------
-matching:
-  rel_tol_wave: 0.05           # Hm0,toe and Tm-1,0,toe relative tolerance
-  rel_tol_depth: 0.02          # toe water depth relative tolerance
-  abs_tol_beta: 2.5            # degrees
-  min_rel_drc: 0.05            # minimum (Rc2-Rc1)/Hm0 for a pair to count as a freeboard contrast
 # near-replicate (repeatability) pairs ----------------------------------------
 replicates:
   rel_tol: 0.01

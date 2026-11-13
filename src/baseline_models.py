@@ -1,18 +1,15 @@
 """Baseline learners and the leakage-safe nested cross-validation runner.
 
-All models are evaluated on identical outer folds.  Hyper-parameters are selected on grouped inner
-folds of the outer-training partition only; imputation and scaling are fitted on training rows only.
-Every model returns predictions for the observed test record AND for all its counterfactual views.
+The regression models are diagnostic tools for the data-quality study, not its contribution.
+All models are evaluated on identical outer folds.  Hyper-parameters are selected by Optuna (TPE) on
+grouped inner folds of the outer-training partition only; boosted-tree size is set by early stopping;
+imputation and scaling are fitted on training rows only.
 """
 from __future__ import annotations
 
-import json
-
 import numpy as np
-from joblib import Parallel, delayed
 
 from .geometry_grouping import check_no_leakage, inner_group_folds
-from .utils import out
 
 
 class FoldPrep:
@@ -111,76 +108,139 @@ def train_mlp(Xtr, ytr, groups, params, seed, epochs=150, patience=20, batch_siz
     return model, hist
 
 
-# --------------------------------------------------------------------------- fit/predict
-def _fit_predict(name, params, Xtr, ytr, gtr, Xte_views, seed, weight=None, monotone=None, mcfg=None):
-    """Fit one model on the training partition, predict all test views [n, V]."""
-    n, V, p = Xte_views.shape
-    prep = FoldPrep(Xtr)
-    flat = Xte_views.reshape(-1, p)
-    if name == "rf":
-        from sklearn.ensemble import RandomForestRegressor
-        m = RandomForestRegressor(random_state=seed, n_jobs=1, **params).fit(prep.impute(Xtr), ytr, sample_weight=weight)
-        return m.predict(prep.impute(flat)).reshape(n, V)
-    if name in ("xgb", "xgb_mono"):
-        import xgboost as xgb
-        kw = dict(params)
-        if name == "xgb_mono":
-            kw["monotone_constraints"] = tuple(int(v) for v in monotone)
-        m = xgb.XGBRegressor(random_state=seed, n_jobs=1, tree_method="hist", **kw).fit(prep.impute(Xtr), ytr, sample_weight=weight)
-        return m.predict(prep.impute(flat)).reshape(n, V)
+# --------------------------------------------------------------------------- Optuna search spaces
+def suggest(name: str, trial) -> dict:
+    """Justified search spaces (9 000 records, 15 predictors, noisy target, grouped generalisation)."""
+    if name == "rf":      # variance reduction through feature sub-sampling and leaf size; depth left free or capped
+        return {"n_estimators": 300, "max_features": trial.suggest_float("max_features", 0.2, 1.0),
+                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 10),
+                "max_depth": trial.suggest_int("max_depth", 6, 30)}
+    if name == "xgb":     # number of trees is set by early stopping, not searched
+        return {"learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2, log=True),
+                "max_depth": trial.suggest_int("max_depth", 3, 10),
+                "min_child_weight": trial.suggest_float("min_child_weight", 1.0, 20.0, log=True),
+                "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.4, 1.0),
+                "reg_lambda": trial.suggest_float("reg_lambda", 0.1, 20.0, log=True),
+                "gamma": trial.suggest_float("gamma", 0.0, 1.0)}
+    if name == "catboost":
+        return {"learning_rate": trial.suggest_float("learning_rate", 0.02, 0.3, log=True),
+                "depth": trial.suggest_int("depth", 4, 9),
+                "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1.0, 20.0, log=True),
+                "random_strength": trial.suggest_float("random_strength", 0.0, 2.0),
+                "rsm": trial.suggest_float("rsm", 0.5, 1.0)}
     if name == "mlp":
-        torch = _torch()
-        ymu, ysd = ytr.mean(), ytr.std()
-        model, _ = train_mlp(prep.scale(Xtr), (ytr - ymu) / ysd, gtr, params, seed, mcfg["epochs"], mcfg["patience"],
-                             mcfg["batch_size"], weight)
-        with torch.no_grad():
-            pz = model(torch.tensor(prep.scale(flat), dtype=torch.float32)).numpy()
-        return (pz * ysd + ymu).reshape(n, V)
+        return {"width": trial.suggest_categorical("width", [64, 128, 256]), "depth": trial.suggest_int("depth", 2, 5),
+                "dropout": trial.suggest_float("dropout", 0.0, 0.2),
+                "lr": trial.suggest_float("lr", 3e-4, 5e-3, log=True),
+                "weight_decay": trial.suggest_float("weight_decay", 1e-6, 1e-3, log=True)}
     raise ValueError(name)
 
 
-def _outer_fold(name, grid, k, tr, te, X_views, y, groups, seeds, n_inner, base_seed, weight, monotone, mcfg):
-    Xtr, ytr, gtr = X_views[tr, 0], y[tr], groups[tr]
-    wtr = None if weight is None else weight[tr]
-    scores = []
-    if len(grid) > 1:
-        for params in grid:  # inner grouped CV on the training partition only
-            se, cnt = 0.0, 0
-            for itr, iva in inner_group_folds(gtr, n_inner, base_seed + k):
-                check_no_leakage(gtr[itr], gtr[iva])
-                pv = _fit_predict(name, params, Xtr[itr], ytr[itr], gtr[itr], Xtr[iva][:, None, :], base_seed,
-                                  None if wtr is None else wtr[itr], monotone, mcfg)[:, 0]
-                se += float(((pv - ytr[iva]) ** 2).sum())
-                cnt += len(iva)
-            scores.append(np.sqrt(se / cnt))
-        best = int(np.argmin(scores))
-    else:
-        best = 0
-    preds = np.stack([_fit_predict(name, grid[best], Xtr, ytr, gtr, X_views[te], base_seed + s, wtr, monotone, mcfg)
-                      for s in seeds])
-    return k, te, preds, {"fold": int(k), "params": grid[best], "inner_rmse": [float(s) for s in scores]}
+MAX_TREES = {"xgb": 2000, "catboost": 1500}
+ES_ROUNDS = 50
 
 
-def run_cv(name, grid, X_views, y, fold, groups, *, seeds=(0,), n_inner=3, base_seed=0, train_mask=None,
-           weight=None, monotone=None, mcfg=None, n_jobs=4, tag=None, save=True):
-    """Nested CV.  Returns predictions [S, n, V] (NaN where a record is never in a test fold)."""
-    n, V, _ = X_views.shape
-    train_mask = np.ones(n, bool) if train_mask is None else train_mask
-    tasks = []
-    for k in np.unique(fold):
-        te = np.flatnonzero(fold == k)
-        tr = np.flatnonzero((fold != k) & train_mask)
-        check_no_leakage(groups[tr], groups[te])
-        tasks.append((k, tr, te))
-    res = Parallel(n_jobs=n_jobs)(delayed(_outer_fold)(name, grid, k, tr, te, X_views, y, groups, seeds, n_inner,
-                                                       base_seed, weight, monotone, mcfg) for k, tr, te in tasks)
-    P = np.full((len(seeds), n, V), np.nan, dtype=np.float32)
-    info = []
-    for k, te, preds, inf in res:
-        P[:, te] = preds
-        info.append(inf)
-    if save and tag:
-        np.savez_compressed(out("predictions", f"{tag}.npz"), pred=P)
-        with open(out("models", f"{tag}__hyperparameters.json"), "w") as fh:
-            json.dump(info, fh, indent=1)
-    return P, info
+# --------------------------------------------------------------------------- fit/predict
+def fit_model(name, params, Xtr, ytr, gtr, seed, weight=None, eval_set=None, mcfg=None):
+    """Fit one model on already-imputed training data.  Returns (predict_fn, info).
+
+    Boosted trees: with `eval_set` the number of trees is chosen by early stopping on that set and
+    returned in info["n_trees"]; without it, params must contain the number of trees."""
+    if name == "rf":
+        from sklearn.ensemble import RandomForestRegressor
+        m = RandomForestRegressor(random_state=seed, n_jobs=1, **params).fit(Xtr, ytr, sample_weight=weight)
+        return m.predict, {}
+    if name == "xgb":
+        import xgboost as xgb
+        kw = dict(params)
+        n = kw.pop("n_estimators", MAX_TREES["xgb"])
+        if eval_set is not None:
+            m = xgb.XGBRegressor(random_state=seed, n_jobs=1, tree_method="hist", n_estimators=n, early_stopping_rounds=ES_ROUNDS, **kw)
+            m.fit(Xtr, ytr, sample_weight=weight, eval_set=[eval_set], verbose=False)
+            return m.predict, {"n_trees": int(m.best_iteration) + 1}
+        m = xgb.XGBRegressor(random_state=seed, n_jobs=1, tree_method="hist", n_estimators=n, **kw).fit(Xtr, ytr, sample_weight=weight)
+        return m.predict, {"model": m}
+    if name == "catboost":
+        from catboost import CatBoostRegressor
+        kw = dict(params)
+        n = kw.pop("iterations", MAX_TREES["catboost"])
+        m = CatBoostRegressor(random_seed=seed, thread_count=1, verbose=False, allow_writing_files=False, iterations=n, **kw)
+        if eval_set is not None:
+            m.fit(Xtr, ytr, sample_weight=weight, eval_set=eval_set, early_stopping_rounds=ES_ROUNDS)
+            return m.predict, {"n_trees": int(m.get_best_iteration() or n - 1) + 1}
+        m.fit(Xtr, ytr, sample_weight=weight)
+        return m.predict, {}
+    if name == "mlp":      # early stopping on a grouped validation split of the training data (inside train_mlp)
+        torch = _torch()
+        mu, sd = Xtr.mean(0), Xtr.std(0)
+        sd[sd < 1e-12] = 1.0
+        ymu, ysd = ytr.mean(), ytr.std()
+        model, hist = train_mlp((Xtr - mu) / sd, (ytr - ymu) / ysd, gtr, params, seed, mcfg["epochs"], mcfg["patience"],
+                                mcfg["batch_size"], weight)
+
+        def predict(X):
+            with torch.no_grad():
+                return model(torch.tensor((X - mu) / sd, dtype=torch.float32)).numpy() * ysd + ymu
+        return predict, {"epochs": len(hist)}
+    raise ValueError(name)
+
+
+def tree_key(name):
+    return {"xgb": "n_estimators", "catboost": "iterations"}.get(name)
+
+
+def tune_fold(name, Xtr, ytr, gtr, n_trials, n_inner, seed, mcfg=None):
+    """Optuna (TPE) on grouped inner folds of the training partition only.  Returns (best params incl.
+    number of trees, trials dataframe)."""
+    import optuna
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+    folds = inner_group_folds(gtr, n_inner, seed)
+
+    def objective(trial):
+        params = suggest(name, trial)
+        se, cnt, trees = 0.0, 0, []
+        for itr, iva in folds:
+            check_no_leakage(gtr[itr], gtr[iva])
+            prep = FoldPrep(Xtr[itr])
+            A, B = prep.impute(Xtr[itr]), prep.impute(Xtr[iva])
+            es = (B, ytr[iva]) if tree_key(name) else None
+            pred, info = fit_model(name, params, A, ytr[itr], gtr[itr], seed, eval_set=es, mcfg=mcfg)
+            se += float(((pred(B) - ytr[iva]) ** 2).sum())
+            cnt += len(iva)
+            trees.append(info.get("n_trees", 0))
+        if tree_key(name):
+            trial.set_user_attr("n_trees", int(np.ceil(1.1 * np.mean(trees))))
+        return float(np.sqrt(se / cnt))
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=seed))
+    study.optimize(objective, n_trials=n_trials)
+    best = suggest(name, optuna.trial.FixedTrial(study.best_params))
+    if tree_key(name):
+        best[tree_key(name)] = study.best_trial.user_attrs["n_trees"]
+    df = study.trials_dataframe(attrs=("number", "value", "params", "user_attrs", "duration"))
+    return best, df, float(study.best_value)
+
+
+def outer_fold(name, scheme, k, tr, te, X, y, groups, seeds, n_trials, n_inner, base_seed, mcfg, cache_dir, want_shap=False):
+    """One outer fold: tune on training rows, refit, predict held-out rows.  Checkpointed on disk."""
+    import pickle
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    f = cache_dir / f"{scheme}__{name}__fold{k}.pkl"
+    if f.exists():
+        return pickle.load(open(f, "rb"))
+    check_no_leakage(groups[tr], groups[te])
+    best, trials, val = tune_fold(name, X[tr], y[tr], groups[tr], n_trials, n_inner, base_seed + int(k), mcfg)
+    prep = FoldPrep(X[tr])
+    A, B = prep.impute(X[tr]), prep.impute(X[te])
+    preds, shap = [], None
+    for s in seeds:
+        pred, info = fit_model(name, best, A, y[tr], groups[tr], base_seed + s, mcfg=mcfg)
+        preds.append(pred(B))
+        if want_shap and name == "xgb" and shap is None:   # TreeSHAP of the held-out records (comparator only)
+            import xgboost as xgb
+            shap = info["model"].get_booster().predict(xgb.DMatrix(B), pred_contribs=True)
+    out_ = {"fold": int(k), "te": te, "pred": np.stack(preds), "best": best, "inner_rmse": val, "trials": trials, "shap": shap}
+    tmp = f.with_suffix(".tmp")
+    pickle.dump(out_, open(tmp, "wb"))
+    tmp.rename(f)
+    return out_
