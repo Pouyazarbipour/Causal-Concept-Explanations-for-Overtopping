@@ -62,25 +62,24 @@ def _arrow(ax, a, b, color=INK2, style="-|>", ls="-"):
 
 # ----------------------------------------------------------------------------------------- Fig 1
 def fig01():
-    fig, ax = plt.subplots(figsize=(7.2, 4.3))
+    fig, ax = plt.subplots(figsize=(10.5, 5.6))
     ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-    _box(ax, 0.02, 0.80, 0.22, 0.16, "Original CLASH database\n10 532 tests, RF and CF 1-4\n(no record removed)", bold=True)
+    _box(ax, 0.02, 0.80, 0.22, 0.16, "Original CLASH database\n10 532 tests, RF, CF 1-4\n(no record removed)", bold=True)
     _box(ax, 0.30, 0.80, 0.30, 0.16, "Audit, flags, response classes\nq* = q / (g H$_{m0}^3$)$^{1/2}$,  Y = log$_{10}$ q*\ngeometry reconstruction, folds")
     _box(ax, 0.66, 0.80, 0.32, 0.16, "Quality metadata kept apart\nRF (test level), CF (structure level)\nnever inputs of the mean model", fc="#fdf1ec", ec="#c94a1c")
-    _box(ax, 0.02, 0.50, 0.28, 0.18, "Geometry-grouped nested CV\nRF, XGBoost, monotone XGBoost, MLP\nout-of-fold predictions and residuals")
-    _box(ax, 0.36, 0.50, 0.28, 0.18, "Concept ontology (10 groups)\nCCW-Net: vector concepts, mediator flow,\nnecessity / sufficiency / independence")
-    _box(ax, 0.70, 0.50, 0.28, 0.18, "Counterfactual physical audit\nA input interventions  B representation\ninterventions  C matched measured pairs")
-    _box(ax, 0.02, 0.18, 0.28, 0.20, "RF / CF predictive validity\nordinal trends, variance models,\nrepeatability, geometry-level error", fc="#fdf1ec", ec="#c94a1c")
-    _box(ax, 0.36, 0.18, 0.28, 0.20, "Hierarchical error decomposition\nsource/laboratory, series, geometry,\nwithin-geometry residual", fc="#fdf1ec", ec="#c94a1c")
-    _box(ax, 0.70, 0.18, 0.28, 0.20, "Quality-aware uncertainty\ngroup-calibrated conformal intervals,\ncategory-4 filtering sensitivity", fc="#fdf1ec", ec="#c94a1c")
+    _box(ax, 0.02, 0.50, 0.28, 0.18, "Geometry-grouped nested CV\nRF, XGBoost, monotone XGBoost, MLP\nout-of-fold predictions")
+    _box(ax, 0.36, 0.50, 0.28, 0.18, "Concept ontology (10 groups)\nCCW-Net: vector concepts, mediator\nflow, alignment losses")
+    _box(ax, 0.70, 0.50, 0.28, 0.18, "Counterfactual physical audit\nA input interventions\nB representation interventions\nC matched measured pairs")
+    _box(ax, 0.02, 0.18, 0.28, 0.20, "RF / CF predictive validity\nordinal trends, variance models,\nrepeatability, geometry level", fc="#fdf1ec", ec="#c94a1c")
+    _box(ax, 0.36, 0.18, 0.28, 0.20, "Hierarchical error decomposition\nseries, geometry,\nwithin-geometry residual", fc="#fdf1ec", ec="#c94a1c")
+    _box(ax, 0.70, 0.18, 0.28, 0.20, "Quality-aware uncertainty\ngroup-calibrated conformal,\ncategory-4 filtering sensitivity", fc="#fdf1ec", ec="#c94a1c")
     for a, b in (((0.24, 0.88), (0.30, 0.88)), ((0.45, 0.80), (0.16, 0.68)), ((0.45, 0.80), (0.50, 0.68)), ((0.30, 0.59), (0.36, 0.59)),
                  ((0.64, 0.59), (0.70, 0.59)), ((0.16, 0.50), (0.16, 0.38)), ((0.16, 0.50), (0.48, 0.38)), ((0.30, 0.28), (0.36, 0.28)),
                  ((0.64, 0.28), (0.70, 0.28)), ((0.84, 0.50), (0.84, 0.38))):
         _arrow(ax, a, b)
-    for a, b in (((0.82, 0.80), (0.20, 0.385)), ((0.86, 0.80), (0.88, 0.385))):
-        _arrow(ax, a, b, color="#c94a1c", ls="--")
-    ax.text(0.5, 0.06, "Blue: physical prediction and concept learning.   Orange (dashed links): quality-assessment layer, evaluated against\n"
-            "out-of-fold errors but excluded from the physical mean predictor.", ha="center", fontsize=7, color=INK2)
+    _arrow(ax, (0.965, 0.80), (0.965, 0.385), color="#c94a1c", ls="--")
+    ax.text(0.5, 0.06, "Blue: physical prediction and concept learning.   Orange: analyses that use the RF/CF quality metadata; these are evaluated\n"
+            "against out-of-fold errors and never enter the physical mean predictor.", ha="center", fontsize=7, color=INK2)
     save(fig, "fig01_research_framework")
 
 
@@ -88,7 +87,7 @@ def fig01():
 def fig02():
     d = tab("table02_rf_cf_distribution")
     j = pd.read_csv(T / "table02b_rf_cf_joint_all.csv", index_col=0)
-    fig, axs = plt.subplots(1, 3, figsize=(7.2, 2.6), gridspec_kw={"width_ratios": [1, 1, 1.25]})
+    fig, axs = plt.subplots(1, 3, figsize=(10.5, 2.6), gridspec_kw={"width_ratios": [1, 1, 1.25]})
     for ax, k, letter in zip(axs[:2], ("RF", "CF"), "ab"):
         s = d[(d.factor == k) & d.category.astype(str).isin(list("1234"))]
         ax.bar(s.category.astype(str), s.n_all, color=SEQ, width=0.7)
@@ -116,7 +115,7 @@ def fig03(D):
     df, y = D["df"], D["y"]
     r = y - load_pred("geometry__xgb")[0, :, 0]
     s = tab("table08a_residuals_by_rf_cf")
-    fig, axs = plt.subplots(2, 3, figsize=(7.2, 4.6))
+    fig, axs = plt.subplots(2, 3, figsize=(10.5, 4.6))
     for row, k in enumerate(("RF", "CF")):
         ax = axs[row, 0]
         parts = ax.violinplot([r[df[k] == v] for v in (1, 2, 3, 4)], positions=range(4), showextrema=False, widths=0.8)
@@ -144,9 +143,9 @@ def fig03(D):
 def fig04_10():
     t = tab("table09_hierarchical_error_decomposition")
     G = pd.read_csv(ROOT / "results/diagnostics/geometry_level_residuals.csv")
-    comp_color = {"lab_unit": CAT[3], "lab": CAT[3], "series": CAT[2], "geometry": CAT[0], "geometry_coarse": CAT[0], "substructure": CAT[0],
+    comp_color = {"lab_unit": CAT[3], "lab": CAT[3], "source": CAT[3], "series": CAT[2], "geometry": CAT[0], "geometry_coarse": CAT[0], "substructure": CAT[0],
                   "within-geometry residual": MUTED}
-    nice = {"lab_unit": "source / laboratory unit", "lab": "source / laboratory unit", "series": "test series", "geometry": "geometry",
+    nice = {"lab_unit": "source / laboratory unit", "lab": "source / laboratory unit", "source": "source (reference)", "series": "test series", "geometry": "geometry",
             "geometry_coarse": "geometry", "substructure": "geometry", "within-geometry residual": "within-geometry residual"}
 
     def stacked(ax, labels, analyses, horizontal=True):
@@ -161,22 +160,22 @@ def fig04_10():
                 seen.add(lab)
                 if rw.share > 0.07:
                     ax.text(left + rw.share / 2, i, f"{100 * rw.share:.0f}", ha="center", va="center", fontsize=7,
-                            color=INK if rw.component in ("within-geometry residual", "lab_unit", "lab") else "white")
+                            color=INK if rw.component in ("within-geometry residual", "lab_unit", "lab", "source") else "white")
                 left += rw.share
         ax.set_yticks(range(len(analyses)), labels); ax.set_xlim(0, 1); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
         ax.set_xlabel("share of out-of-fold residual variance")
     an = list(dict.fromkeys(t.analysis))
     prim = an[0]
-    fig, axs = plt.subplots(1, 3, figsize=(7.2, 2.9), gridspec_kw={"width_ratios": [1.25, 1, 1]})
+    fig, axs = plt.subplots(1, 3, figsize=(10.5, 2.9), gridspec_kw={"width_ratios": [1.25, 1, 1]})
     sel = [prim] + [a for a in an if a.startswith("grouping sensitivity")] + [a for a in an if a.startswith("random-CV")]
-    stacked(axs[0], ["primary", "coarse geometry", "sub-structure", "series/geometry", "random CV"][:len(sel)], sel)
+    stacked(axs[0], ["primary", "coarse geometry", "sub-structure", "source/series/geometry", "random CV"][:len(sel)], sel)
     axs[0].legend(loc="upper center", bbox_to_anchor=(0.5, -0.28), ncol=2); panel(axs[0], "a", "Variance components")
     p = t[t.analysis == prim]
     ax = axs[1]
     for i, (_, rw) in enumerate(p.iterrows()):
         err(ax, [i], [rw.sd], [np.sqrt(rw.variance_lo)], [np.sqrt(rw.variance_hi)], comp_color[rw.component])
-    ax.set_xticks(range(len(p)), ["source/\nlab", "series", "geometry", "within\ngeometry"][:len(p)]); ax.set_ylabel("component SD  [log$_{10}$]"); ax.set_ylim(0, None)
-    panel(ax, "b", "Component SD, 95 % cluster-bootstrap CI")
+    ax.set_xticks(range(len(p)), ["series", "geometry", "within\ngeometry"][:len(p)]); ax.set_ylabel("component SD  [log$_{10}$]"); ax.set_ylim(0, None)
+    panel(ax, "b", "Component SD (95 % CI)")
     ax = axs[2]
     g = G[G.n >= 3]
     ax.hist(g.mean_resid, bins=np.linspace(-2, 2, 41), color=CAT[0], edgecolor="white", lw=0.4)
@@ -185,7 +184,7 @@ def fig04_10():
     fig.tight_layout()
     save(fig, "fig04_geometry_level_error_structure")
 
-    fig, axs = plt.subplots(1, 3, figsize=(7.2, 2.7))
+    fig, axs = plt.subplots(1, 3, figsize=(10.5, 2.7))
     for ax, k, letter in zip(axs[:2], ("CF", "RF"), "ab"):
         for comp, col, off in (("geometry", CAT[0], -0.1), ("within-geometry residual", MUTED, 0.1)):
             s = pd.concat([t[(t.analysis == f"stratum {k}={v}") & (t.component == comp)] for v in (1, 2, 3, 4)])
@@ -209,9 +208,9 @@ def fig04_10():
 
 # ----------------------------------------------------------------------------------------- Fig 5
 def fig05():
-    fig, ax = plt.subplots(figsize=(7.2, 3.9))
+    fig, ax = plt.subplots(figsize=(10.5, 5.4))
     ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-    _box(ax, 0.01, 0.50, 0.13, 0.22, "15 dimensionless\nphysical inputs X\n(no RF, CF)")
+    _box(ax, 0.01, 0.50, 0.13, 0.22, "15 dimensionless\nphysical inputs\nX (no RF, CF)")
     _box(ax, 0.18, 0.50, 0.13, 0.22, "Tabular MLP\nbackbone f\n(pre-trained,\nfrozen)  Z")
     _box(ax, 0.35, 0.50, 0.13, 0.22, "Concept\nencoder g\n+ squash")
     for i, nm in enumerate(["freeboard", "steepness", "depth", "obliquity", "...", "foreshore"]):
@@ -219,9 +218,9 @@ def fig05():
     _box(ax, 0.70, 0.56, 0.13, 0.20, "Bias-free\nattention head\nA(M)")
     _box(ax, 0.70, 0.32, 0.13, 0.16, "Pairwise\ninteraction I(M)")
     _box(ax, 0.87, 0.47, 0.12, 0.16, "$\\hat{Y}$ = b + A + I\nlog$_{10}$ q*", bold=True)
-    _box(ax, 0.35, 0.12, 0.30, 0.14, "Mediator: conditional RealNVP per concept\n$\\tilde{M}_j \\sim p(M_j \\mid c_j', X)$  (counterfactual state)", fc="#f1effb", ec="#6250d6", fs=6.8)
+    _box(ax, 0.35, 0.12, 0.30, 0.14, "Mediator: conditional RealNVP per concept\n$\\tilde{M}_j \\sim p(M_j \\mid c_j^{cf}, X)$", fc="#f1effb", ec="#6250d6", fs=6.8)
     _box(ax, 0.35, 0.84, 0.13, 0.11, "state read-out\n(prototypes) L$_{concept}$", fc="#eaf7f1", ec="#1baf7a", fs=6.5)
-    _box(ax, 0.70, 0.84, 0.29, 0.12, "L$_{nec}$: null-state slot swap changes nothing\nL$_{suf}$: active slots reproduce Y\nL$_{ind}$: A additive; non-additivity only in I (L$_{int}$)", fc="#fff7e0", ec="#c98500", fs=6.3)
+    _box(ax, 0.70, 0.84, 0.29, 0.12, "L$_{nec}$: null-state slot swap changes nothing\nL$_{suf}$: active slots reproduce Y\nL$_{ind}$: A additive; non-additivity only in I (L$_{int}$)", fc="#fff7e0", ec="#c98500", fs=6)
     _box(ax, 0.72, 0.08, 0.27, 0.14, "Quality branch (separate): RF, CF\n-> variance / interval width only;\nmean prediction detached", fc="#fdf1ec", ec="#c94a1c", fs=6.6)
     for a, b in (((0.14, 0.61), (0.18, 0.61)), ((0.31, 0.61), (0.35, 0.61)), ((0.48, 0.61), (0.52, 0.61)), ((0.65, 0.66), (0.70, 0.66)),
                  ((0.65, 0.50), (0.70, 0.42)), ((0.83, 0.64), (0.87, 0.58)), ((0.83, 0.40), (0.87, 0.50)), ((0.585, 0.84 + 0.085), (0.48, 0.90))):
@@ -238,7 +237,7 @@ def fig06():
     full, un = tab("table06_concept_attribution_ccw_full_geometry"), tab("table06_concept_attribution_ccw_unaligned_geometry")
     pr = tab("table06b_interaction_pairs_ccw_full_geometry")
     a5 = tab("table05_ccw_alignment_ablation_geometry").set_index("variant")
-    fig, axs = plt.subplots(1, 3, figsize=(7.2, 3.3), gridspec_kw={"width_ratios": [1.3, 1.0, 1.1]})
+    fig, axs = plt.subplots(1, 3, figsize=(10, 3.6), gridspec_kw={"width_ratios": [1.3, 1.0, 1.1]})
     ax = axs[0]
     yy = np.arange(len(full))
     ax.barh(yy - 0.2, full.effect_when_active, 0.36, color=CAT[1], label="CCW-Net, concept active")
@@ -247,13 +246,13 @@ def fig06():
     ax.scatter(full.effect_when_null[nc], yy[nc] - 0.2, marker="D", s=16, color=INK, zorder=3, label="concept in null state")
     ax.scatter(un.effect_when_null[nc], yy[nc] + 0.2, marker="D", s=16, color=INK, zorder=3)
     ax.set_yticks(yy, [c.replace("_", " ") for c in full.concept]); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
-    ax.set_xlabel("mean |$\\Delta\\hat{Y}$| when slot is zeroed  [log$_{10}$]"); ax.legend(loc="lower right", fontsize=6.3)
-    panel(ax, "a", "Concept-level effect (model-internal)")
+    ax.set_xlabel("mean |$\\Delta\\hat{Y}$| when slot is zeroed  [log$_{10}$]"); ax.legend(loc="upper center", bbox_to_anchor=(0.4, -0.2), ncol=1, fontsize=6.5)
+    panel(ax, "a", "Slot-ablation effect")
     ax = axs[1]
     top = pr.head(8)[::-1]
     ax.barh([f"{a.replace('_', ' ')[:14]} x\n{b.replace('_', ' ')[:14]}" for a, b in zip(top.concept_a, top.concept_b)], top.mean_abs_pair_term_log10, color=CAT[2])
     ax.tick_params(axis="y", labelsize=6); ax.grid(axis="y", visible=False); ax.set_xlabel("mean |pair term|  [log$_{10}$]")
-    panel(ax, "b", "Largest explicit interactions")
+    panel(ax, "b", "Largest pair terms")
     ax = axs[2]
     order = [v for v in ["ccw_full", "ccw_unaligned", "ccw_no_nec", "ccw_no_suf", "ccw_no_ind", "ccw_no_interaction", "ccw_scalar", "ccw_no_cond_cf", "ccw_gaussian_mediator", "cbm"] if v in a5.index]
     val = 100 * a5.loc[order, "rho_inactive_per_null_slot"]
@@ -261,7 +260,7 @@ def fig06():
     ax.barh(range(len(order)), val, xerr=sd, color=[CAT[1] if v == "ccw_full" else MUTED for v in order], error_kw={"lw": 0.8, "ecolor": INK2})
     ax.set_yticks(range(len(order)), [v.replace("ccw_", "").replace("_", " ") for v in order]); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
     ax.set_xlabel("effect share per null-state slot  [%]\n(lower = more faithful; bars $\\pm$ SD over runs)")
-    panel(ax, "c", "Effect routed through absent concepts")
+    panel(ax, "c", "Effect via absent concepts")
     fig.tight_layout()
     save(fig, "fig06_causal_concept_attribution")
 
@@ -285,8 +284,8 @@ def fig07(D):
         c = np.flatnonzero(ok & (df.family == f).to_numpy())
         bad = c[rise[c] > 0.05]
         good = c[rise[c] <= 0]
-        picks += [(rng.choice(bad) if len(bad) else c[np.argmax(rise[c])], "violation (XGBoost)"), (rng.choice(good), "consistent")]
-    fig, axs = plt.subplots(2, 3, figsize=(7.2, 4.4), sharex=True)
+        picks += [(rng.choice(bad) if len(bad) else c[np.argmax(rise[c])], "reversal"), (rng.choice(good), "consistent")]
+    fig, axs = plt.subplots(2, 3, figsize=(9.5, 5.4), sharex=True)
     for ax, (i, kind), letter in zip(axs.T.ravel(), picks, "abcdef"):
         for m, lab in models:
             if m in P:
@@ -300,15 +299,16 @@ def fig07(D):
         ax.set_xlabel("crest raised by $\\delta$  [$H_{m0}$]")
     for ax in axs[:, 0]:
         ax.set_ylabel("predicted log$_{10}$ q*")
-    axs[0, 0].legend(loc="upper right", fontsize=6.3)
-    fig.tight_layout()
+    h, l = axs[0, 0].get_legend_handles_labels()
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.legend(h, l, loc="lower center", ncol=4, fontsize=7.5)
     save(fig, "fig07_counterfactual_response_curves")
 
 
 # ----------------------------------------------------------------------------------------- Fig 8
 def fig08():
     t7, s = tab("table07_counterfactual_inconsistency"), tab("table07b_reversals_by_rf_cf_family")
-    fig, axs = plt.subplots(1, 4, figsize=(7.2, 2.9), gridspec_kw={"width_ratios": [1.5, 1, 1, 1.2]})
+    fig, axs = plt.subplots(1, 4, figsize=(10.5, 2.9), gridspec_kw={"width_ratios": [1.4, 1, 1, 1.5]})
     ax = axs[0]
     c = t7[t7.intervention == "crest_up"].reset_index(drop=True)
     yy = np.arange(len(c))
@@ -317,7 +317,7 @@ def fig08():
     ax.errorbar(c.local_reversal_pct, yy - 0.2, xerr=[c.local_reversal_pct - c.local_lo, c.local_hi - c.local_reversal_pct], fmt="none", ecolor=INK2, lw=0.8)
     ax.errorbar(c.global_reversal_pct, yy + 0.2, xerr=[c.global_reversal_pct - c.global_lo, c.global_hi - c.global_reversal_pct], fmt="none", ecolor=INK2, lw=0.8)
     ax.set_yticks(yy, [m.replace(" (", "\n(") for m in c.model], fontsize=6.5); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
-    ax.set_xlabel("reversal rate  [% of valid curves]"); ax.legend(loc="lower right", fontsize=6.3); panel(ax, "a", "Crest raised: reversals")
+    ax.set_xlabel("reversal rate  [% of valid curves]"); ax.legend(loc="upper center", bbox_to_anchor=(0.4, -0.18), ncol=2, fontsize=6.5); panel(ax, "a", "Crest raised: reversals")
     show = [m for m in ("XGBoost", "MLP", "CCW-Net (full)") if m in set(s.model)]
     for ax, k, letter in zip(axs[1:3], ("RF", "CF"), "bc"):
         for i, m in enumerate(show):
@@ -339,7 +339,7 @@ def fig08():
             ax.text(b, a, "n<30" if np.isnan(M[a, b]) else f"{M[a, b]:.0f} %\nn={int(N[a, b])}", ha="center", va="center", fontsize=6.3,
                     color=MUTED if np.isnan(M[a, b]) else ("white" if M[a, b] > np.nanmax(M) * 0.6 else INK))
     ax.set_xticks(range(4), [1, 2, 3, 4]); ax.set_yticks(range(4), [1, 2, 3, 4]); ax.set_xlabel("CF"); ax.set_ylabel("RF"); ax.grid(False)
-    panel(ax, "d", "XGBoost, affected curves")
+    panel(ax, "d", "XGBoost: affected curves")
     fig.tight_layout()
     save(fig, "fig08_reversals_by_rf_cf")
 
@@ -347,7 +347,7 @@ def fig08():
 # ----------------------------------------------------------------------------------------- Fig 9
 def fig09():
     vm, tr, cfg_, j = tab("table08c2_variance_model_main_effects"), tab("table08b_ordinal_trend_tests"), tab("table08d_cf_geometry_level"), tab("table10_rf_cf_joint")
-    fig, axs = plt.subplots(1, 4, figsize=(7.2, 2.9), gridspec_kw={"width_ratios": [1.1, 1.3, 1, 1.2]})
+    fig, axs = plt.subplots(1, 4, figsize=(10.5, 2.9), gridspec_kw={"width_ratios": [1.1, 1.2, 0.9, 1.6]})
     ax = axs[0]
     v = vm[vm.term != "const"].reset_index(drop=True)
     cols = [SEQ[int(t[-1]) - 1] for t in v.term]
@@ -363,12 +363,12 @@ def fig09():
         ax.errorbar(q.spearman_absres, np.arange(len(labs)) + off, xerr=[q.spearman_absres - q.spearman_lo, q.spearman_hi - q.spearman_absres],
                     fmt="o", color=col, ms=4, lw=1.1, capsize=2, label=k)
     ax.axvline(0, color=AXIS, lw=0.8); ax.set_yticks(range(len(labs)), [l.replace(", geometry-grouped", "").replace("_", " ") for l in labs], fontsize=6.5)
-    ax.invert_yaxis(); ax.set_xlabel("Spearman $\\rho$(|residual|, category)"); ax.legend(loc="lower right"); panel(ax, "b", "Ordinal trend, by model")
+    ax.invert_yaxis(); ax.set_xlabel("Spearman $\\rho$(|residual|, category)"); ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2); panel(ax, "b", "Ordinal trend")
     ax = axs[2]
     for i, rw in cfg_.iterrows():
         err(ax, [i], [rw.abs_mean_resid], [rw.abs_mean_resid_lo], [rw.abs_mean_resid_hi], SEQ[i])
     ax.set_xticks(range(4), [f"{int(c)}\n{int(n)}" for c, n in zip(cfg_.CF, cfg_.n_geometries)]); ax.set_xlabel("CF (max in geometry)\nnumber of geometries")
-    ax.set_ylabel("|geometry mean residual|  [log$_{10}$]"); ax.set_ylim(0, None); panel(ax, "c", "Geometry-level error")
+    ax.set_ylabel("|geometry mean residual|  [log$_{10}$]"); ax.set_ylim(0, None); panel(ax, "c", "Geometry level")
     ax = axs[3]
     M = j.pivot(index="RF", columns="CF", values="mae").to_numpy(float)
     N = j.pivot(index="RF", columns="CF", values="n").to_numpy()
@@ -377,10 +377,10 @@ def fig09():
     ax.imshow(Mm, cmap=SEQ_CMAP, aspect="auto", vmin=0.2)
     for a in range(4):
         for b in range(4):
-            ax.text(b, a, f"{M[a, b]:.2f}\nn={N[a, b]}" if okc[a, b] else f"n={N[a, b]}\n(sparse)", ha="center", va="center", fontsize=6.3,
+            ax.text(b, a, f"{M[a, b]:.2f}\nn={N[a, b]}" if okc[a, b] else f"n={N[a, b]}\nsparse", ha="center", va="center", fontsize=6.3,
                     color=MUTED if not okc[a, b] else ("white" if M[a, b] > 0.55 else INK))
     ax.set_xticks(range(4), [1, 2, 3, 4]); ax.set_yticks(range(4), [1, 2, 3, 4]); ax.set_xlabel("CF"); ax.set_ylabel("RF"); ax.grid(False)
-    panel(ax, "d", "MAE by RF x CF  [log$_{10}$]")
+    panel(ax, "d", "MAE by RF x CF")
     fig.tight_layout()
     save(fig, "fig09_rf_cf_validity")
 
@@ -390,14 +390,15 @@ def fig11():
     t, w = tab("table11_quality_aware_uncertainty"), tab("table11c_interval_width_by_rf_cf")
     show = ["split_abs", "norm_physical", "norm_quality_only", "norm_physical+quality", "mondrian_RF", "cqr_physical", "cqr_physical+quality"]
     col = dict(zip(show, [MUTED, CAT[0], CAT[3], CAT[1], CAT[2], CAT[6], CAT[4]]))
-    fig, axs = plt.subplots(1, 4, figsize=(7.2, 2.9), gridspec_kw={"width_ratios": [1.2, 1, 1, 1]})
+    fig, axs = plt.subplots(1, 4, figsize=(10.5, 2.9), gridspec_kw={"width_ratios": [1.3, 1, 1, 1]})
     ax = axs[0]
     q = t.set_index("method").loc[show]
     for i, (m, rw) in enumerate(q.iterrows()):
         err(ax, [rw.mean_width], [100 * rw.coverage], [100 * rw.cov_lo], [100 * rw.cov_hi], col[m])
-        ax.annotate(m.replace("_", " "), (rw.mean_width, 100 * rw.coverage), xytext=(4, 4 if i % 2 else -9), textcoords="offset points", fontsize=6, color=INK2)
+        ax.plot([], [], "o", color=col[m], label=m.replace("_", " "))
     ax.axhline(90, color=INK, lw=0.8, ls="--"); ax.set_xlabel("mean interval width  [log$_{10}$]"); ax.set_ylabel("coverage on unseen geometries  [%]")
-    panel(ax, "a", "Coverage vs width (nominal 90 %)")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.24), ncol=2, fontsize=6)
+    panel(ax, "a", "Coverage vs width")
     for ax, k, letter in zip(axs[1:3], ("RF", "CF"), "bc"):
         for m in ("split_abs", "norm_physical", "norm_physical+quality", "mondrian_RF" if k == "RF" else "mondrian_CF"):
             ax.plot([1, 2, 3, 4], [100 * t.set_index("method").loc[m, f"cov_{k}{v}"] for v in (1, 2, 3, 4)], "-o", ms=4, lw=1.6,
@@ -421,7 +422,7 @@ def fig12():
     order = ["full", "excl_rf4", "excl_cf4", "excl_rf4_or_cf4", "clash_weight_(4-RF)(4-CF)", "soft_weight_(5-RF)(5-CF)"]
     labs = ["full (primary)", "excl. RF=4", "excl. CF=4", "excl. RF=4 or CF=4", "CLASH weights\n(4-RF)(4-CF)", "soft weights\n(5-RF)(5-CF)"]
     subs = ["RF<4 and CF<4", "RF=4", "CF=4"]
-    fig, axs = plt.subplots(1, 3, figsize=(7.2, 2.9), sharey=True)
+    fig, axs = plt.subplots(1, 3, figsize=(10.5, 2.9), sharey=True)
     for ax, sname, letter in zip(axs, subs, "abc"):
         q = t[t.test_subset == sname].set_index("training_set").loc[order]
         for i, (_, rw) in enumerate(q.iterrows()):
@@ -429,7 +430,7 @@ def fig12():
                         color=CAT[1] if i == 0 else CAT[0], ms=4.5, lw=1.2, capsize=2.5)
         ax.axvline(0, color=INK, lw=0.8, ls="--"); ax.set_yticks(range(len(order)), labs); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
         ax.set_xlabel("$\\Delta$RMSE vs full training set  [log$_{10}$]")
-        panel(ax, letter, f"tested on {sname}  (n={int(q.n_test.iloc[0])})")
+        panel(ax, letter, f"test: {sname} (n={int(q.n_test.iloc[0])})")
     fig.tight_layout()
     save(fig, "fig12_filtering_sensitivity")
 
