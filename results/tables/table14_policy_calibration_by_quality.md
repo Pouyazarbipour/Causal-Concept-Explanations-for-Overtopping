@@ -1,0 +1,110 @@
+| learner   | policy                        | test_subset            |    n |   nominal |   coverage |   cov_lo |   cov_hi |   mean_width |    mae |   bias_pred_minus_meas |
+|:----------|:------------------------------|:-----------------------|-----:|----------:|-----------:|---------:|---------:|-------------:|-------:|-----------------------:|
+| xgb       | P1_retain_all                 | all                    | 9333 |       0.9 |     0.8776 |   0.8538 |   0.8983 |        1.549 | 0.3521 |              -0.01057  |
+| xgb       | P1_retain_all                 | common (RF<4 and CF<4) | 8494 |       0.9 |     0.881  |   0.8562 |   0.9018 |        1.55  | 0.3461 |              -0.01124  |
+| xgb       | P1_retain_all                 | RF=4                   |  637 |       0.9 |     0.8132 |   0.7403 |   0.8732 |        1.539 | 0.4578 |              -0.02861  |
+| xgb       | P1_retain_all                 | CF=4                   |  212 |       0.9 |     0.9434 |   0.904  |   0.9732 |        1.518 | 0.2647 |               0.06795  |
+| xgb       | P1_retain_all                 | RF=1                   | 3189 |       0.9 |     0.9116 | nan      | nan      |        1.544 | 0.3092 |              -0.003243 |
+| xgb       | P1_retain_all                 | RF=2                   | 3174 |       0.9 |     0.8702 | nan      | nan      |        1.556 | 0.3699 |              -0.01261  |
+| xgb       | P1_retain_all                 | RF=3                   | 2333 |       0.9 |     0.859  | nan      | nan      |        1.548 | 0.3577 |              -0.01288  |
+| xgb       | P1_retain_all                 | RF=4                   |  637 |       0.9 |     0.8132 | nan      | nan      |        1.539 | 0.4578 |              -0.02861  |
+| xgb       | P1_retain_all                 | CF=1                   | 7067 |       0.9 |     0.8823 | nan      | nan      |        1.551 | 0.3481 |              -0.02912  |
+| xgb       | P1_retain_all                 | CF=2                   | 1229 |       0.9 |     0.8975 | nan      | nan      |        1.561 | 0.3049 |              -0.008534 |
+| xgb       | P1_retain_all                 | CF=3                   |  825 |       0.9 |     0.7915 | nan      | nan      |        1.521 | 0.4789 |               0.1251   |
+| xgb       | P1_retain_all                 | CF=4                   |  212 |       0.9 |     0.9434 | nan      | nan      |        1.518 | 0.2647 |               0.06795  |
+| xgb       | P2_excl_RF4                   | all                    | 9333 |       0.9 |     0.8554 |   0.8284 |   0.8784 |        1.492 | 0.3685 |              -0.003523 |
+| xgb       | P2_excl_RF4                   | common (RF<4 and CF<4) | 8494 |       0.9 |     0.8696 |   0.8474 |   0.8911 |        1.494 | 0.3466 |              -0.001656 |
+| xgb       | P2_excl_RF4                   | RF=4                   |  637 |       0.9 |     0.6436 |   0.5323 |   0.7416 |        1.477 | 0.6933 |              -0.05263  |
+| xgb       | P2_excl_RF4                   | CF=4                   |  212 |       0.9 |     0.9292 |   0.8736 |   0.9705 |        1.449 | 0.263  |               0.07811  |
+| xgb       | P2_excl_RF4                   | RF=1                   | 3189 |       0.9 |     0.9084 | nan      | nan      |        1.496 | 0.3111 |               0.0177   |
+| xgb       | P2_excl_RF4                   | RF=2                   | 3174 |       0.9 |     0.8516 | nan      | nan      |        1.499 | 0.3697 |              -0.00486  |
+| xgb       | P2_excl_RF4                   | RF=3                   | 2333 |       0.9 |     0.8457 | nan      | nan      |        1.479 | 0.3564 |              -0.01731  |
+| xgb       | P2_excl_RF4                   | RF=4                   |  637 |       0.9 |     0.6436 | nan      | nan      |        1.477 | 0.6933 |              -0.05263  |
+| xgb       | P2_excl_RF4                   | CF=1                   | 7067 |       0.9 |     0.8562 | nan      | nan      |        1.497 | 0.3668 |              -0.01727  |
+| xgb       | P2_excl_RF4                   | CF=2                   | 1229 |       0.9 |     0.8893 | nan      | nan      |        1.492 | 0.3118 |              -0.03335  |
+| xgb       | P2_excl_RF4                   | CF=3                   |  825 |       0.9 |     0.7782 | nan      | nan      |        1.454 | 0.4945 |               0.1377   |
+| xgb       | P2_excl_RF4                   | CF=4                   |  212 |       0.9 |     0.9292 | nan      | nan      |        1.449 | 0.263  |               0.07811  |
+| xgb       | P3_excl_CF4                   | all                    | 9333 |       0.9 |     0.8739 |   0.8463 |   0.8944 |        1.566 | 0.3563 |              -0.01258  |
+| xgb       | P3_excl_CF4                   | common (RF<4 and CF<4) | 8494 |       0.9 |     0.8817 |   0.8557 |   0.9015 |        1.567 | 0.3467 |              -0.01741  |
+| xgb       | P3_excl_CF4                   | RF=4                   |  637 |       0.9 |     0.8053 |   0.7275 |   0.8668 |        1.559 | 0.45   |              -0.04502  |
+| xgb       | P3_excl_CF4                   | CF=4                   |  212 |       0.9 |     0.7736 |   0.6835 |   0.833  |        1.545 | 0.4459 |               0.2786   |
+| xgb       | P3_excl_CF4                   | RF=1                   | 3189 |       0.9 |     0.9019 | nan      | nan      |        1.565 | 0.3236 |               0.007072 |
+| xgb       | P3_excl_CF4                   | RF=2                   | 3174 |       0.9 |     0.8658 | nan      | nan      |        1.57  | 0.3711 |              -0.009488 |
+| xgb       | P3_excl_CF4                   | RF=3                   | 2333 |       0.9 |     0.8654 | nan      | nan      |        1.562 | 0.3554 |              -0.03481  |
+| xgb       | P3_excl_CF4                   | RF=4                   |  637 |       0.9 |     0.8053 | nan      | nan      |        1.559 | 0.45   |              -0.04502  |
+| xgb       | P3_excl_CF4                   | CF=1                   | 7067 |       0.9 |     0.8799 | nan      | nan      |        1.568 | 0.3474 |              -0.03779  |
+| xgb       | P3_excl_CF4                   | CF=2                   | 1229 |       0.9 |     0.9089 | nan      | nan      |        1.57  | 0.3018 |              -0.02767  |
+| xgb       | P3_excl_CF4                   | CF=3                   |  825 |       0.9 |     0.7964 | nan      | nan      |        1.549 | 0.4906 |               0.151    |
+| xgb       | P3_excl_CF4                   | CF=4                   |  212 |       0.9 |     0.7736 | nan      | nan      |        1.545 | 0.4459 |               0.2786   |
+| xgb       | P4_excl_RF4_or_CF4            | all                    | 9333 |       0.9 |     0.8507 |   0.8247 |   0.8744 |        1.498 | 0.3662 |              -0.004648 |
+| xgb       | P4_excl_RF4_or_CF4            | common (RF<4 and CF<4) | 8494 |       0.9 |     0.8692 |   0.8444 |   0.8902 |        1.5   | 0.3408 |              -0.008592 |
+| xgb       | P4_excl_RF4_or_CF4            | RF=4                   |  637 |       0.9 |     0.6436 |   0.5334 |   0.7448 |        1.485 | 0.6785 |              -0.05066  |
+| xgb       | P4_excl_RF4_or_CF4            | CF=4                   |  212 |       0.9 |     0.7406 |   0.6535 |   0.7989 |        1.461 | 0.4397 |               0.2972   |
+| xgb       | P4_excl_RF4_or_CF4            | RF=1                   | 3189 |       0.9 |     0.889  | nan      | nan      |        1.502 | 0.3147 |               0.01879  |
+| xgb       | P4_excl_RF4_or_CF4            | RF=2                   | 3174 |       0.9 |     0.8497 | nan      | nan      |        1.505 | 0.3663 |              -0.00939  |
+| xgb       | P4_excl_RF4_or_CF4            | RF=3                   | 2333 |       0.9 |     0.8564 | nan      | nan      |        1.486 | 0.3513 |              -0.01768  |
+| xgb       | P4_excl_RF4_or_CF4            | RF=4                   |  637 |       0.9 |     0.6436 | nan      | nan      |        1.485 | 0.6785 |              -0.05066  |
+| xgb       | P4_excl_RF4_or_CF4            | CF=1                   | 7067 |       0.9 |     0.8567 | nan      | nan      |        1.503 | 0.359  |              -0.02457  |
+| xgb       | P4_excl_RF4_or_CF4            | CF=2                   | 1229 |       0.9 |     0.8869 | nan      | nan      |        1.496 | 0.3121 |              -0.03492  |
+| xgb       | P4_excl_RF4_or_CF4            | CF=3                   |  825 |       0.9 |     0.7745 | nan      | nan      |        1.463 | 0.4899 |               0.1335   |
+| xgb       | P4_excl_RF4_or_CF4            | CF=4                   |  212 |       0.9 |     0.7406 | nan      | nan      |        1.461 | 0.4397 |               0.2972   |
+| xgb       | P5_CLASH_weights              | all                    | 9333 |       0.9 |     0.8459 |   0.8224 |   0.8691 |        1.466 | 0.3717 |              -0.01498  |
+| xgb       | P5_CLASH_weights              | common (RF<4 and CF<4) | 8494 |       0.9 |     0.8648 |   0.8394 |   0.8848 |        1.469 | 0.3446 |              -0.01574  |
+| xgb       | P5_CLASH_weights              | RF=4                   |  637 |       0.9 |     0.6295 |   0.5049 |   0.734  |        1.45  | 0.6998 |              -0.1089   |
+| xgb       | P5_CLASH_weights              | CF=4                   |  212 |       0.9 |     0.7453 |   0.6314 |   0.8194 |        1.419 | 0.464  |               0.3053   |
+| xgb       | P5_CLASH_weights              | RF=1                   | 3189 |       0.9 |     0.889  | nan      | nan      |        1.472 | 0.3131 |               0.0147   |
+| xgb       | P5_CLASH_weights              | RF=2                   | 3174 |       0.9 |     0.8532 | nan      | nan      |        1.475 | 0.3676 |              -0.02064  |
+| xgb       | P5_CLASH_weights              | RF=3                   | 2333 |       0.9 |     0.8363 | nan      | nan      |        1.451 | 0.3676 |              -0.02222  |
+| xgb       | P5_CLASH_weights              | RF=4                   |  637 |       0.9 |     0.6295 | nan      | nan      |        1.45  | 0.6998 |              -0.1089   |
+| xgb       | P5_CLASH_weights              | CF=1                   | 7067 |       0.9 |     0.8527 | nan      | nan      |        1.472 | 0.3609 |              -0.04012  |
+| xgb       | P5_CLASH_weights              | CF=2                   | 1229 |       0.9 |     0.8788 | nan      | nan      |        1.465 | 0.323  |              -0.03581  |
+| xgb       | P5_CLASH_weights              | CF=3                   |  825 |       0.9 |     0.7648 | nan      | nan      |        1.43  | 0.5128 |               0.1491   |
+| xgb       | P5_CLASH_weights              | CF=4                   |  212 |       0.9 |     0.7453 | nan      | nan      |        1.419 | 0.464  |               0.3053   |
+| xgb       | P5b_CLASH_weights_and_remarks | all                    | 9333 |       0.9 |     0.8461 |   0.8199 |   0.8689 |        1.446 | 0.3723 |              -0.01373  |
+| xgb       | P5b_CLASH_weights_and_remarks | common (RF<4 and CF<4) | 8494 |       0.9 |     0.864  |   0.8391 |   0.8849 |        1.447 | 0.3447 |              -0.01488  |
+| xgb       | P5b_CLASH_weights_and_remarks | RF=4                   |  637 |       0.9 |     0.6374 |   0.5126 |   0.7375 |        1.435 | 0.7068 |              -0.1158   |
+| xgb       | P5b_CLASH_weights_and_remarks | CF=4                   |  212 |       0.9 |     0.7642 |   0.6511 |   0.8377 |        1.415 | 0.4706 |               0.351    |
+| xgb       | P5b_CLASH_weights_and_remarks | RF=1                   | 3189 |       0.9 |     0.8881 | nan      | nan      |        1.45  | 0.3147 |               0.02469  |
+| xgb       | P5b_CLASH_weights_and_remarks | RF=2                   | 3174 |       0.9 |     0.8475 | nan      | nan      |        1.451 | 0.3631 |              -0.03278  |
+| xgb       | P5b_CLASH_weights_and_remarks | RF=3                   | 2333 |       0.9 |     0.844  | nan      | nan      |        1.434 | 0.3721 |              -0.01245  |
+| xgb       | P5b_CLASH_weights_and_remarks | RF=4                   |  637 |       0.9 |     0.6374 | nan      | nan      |        1.435 | 0.7068 |              -0.1158   |
+| xgb       | P5b_CLASH_weights_and_remarks | CF=1                   | 7067 |       0.9 |     0.8516 | nan      | nan      |        1.45  | 0.3659 |              -0.03625  |
+| xgb       | P5b_CLASH_weights_and_remarks | CF=2                   | 1229 |       0.9 |     0.8885 | nan      | nan      |        1.443 | 0.3202 |              -0.04338  |
+| xgb       | P5b_CLASH_weights_and_remarks | CF=3                   |  825 |       0.9 |     0.7576 | nan      | nan      |        1.42  | 0.4795 |               0.1296   |
+| xgb       | P5b_CLASH_weights_and_remarks | CF=4                   |  212 |       0.9 |     0.7642 | nan      | nan      |        1.415 | 0.4706 |               0.351    |
+| xgb       | P6a_inverse_variance_weights  | all                    | 9333 |       0.9 |     0.8751 |   0.85   |   0.8949 |        1.524 | 0.3512 |              -0.008571 |
+| xgb       | P6a_inverse_variance_weights  | common (RF<4 and CF<4) | 8494 |       0.9 |     0.8809 |   0.8592 |   0.9011 |        1.525 | 0.3443 |              -0.009576 |
+| xgb       | P6a_inverse_variance_weights  | RF=4                   |  637 |       0.9 |     0.7786 |   0.6917 |   0.8518 |        1.513 | 0.4668 |              -0.02466  |
+| xgb       | P6a_inverse_variance_weights  | CF=4                   |  212 |       0.9 |     0.9387 |   0.8919 |   0.9747 |        1.49  | 0.2744 |               0.07378  |
+| xgb       | P6a_inverse_variance_weights  | RF=1                   | 3189 |       0.9 |     0.9135 | nan      | nan      |        1.525 | 0.3065 |               0.001461 |
+| xgb       | P6a_inverse_variance_weights  | RF=2                   | 3174 |       0.9 |     0.8652 | nan      | nan      |        1.529 | 0.3682 |              -0.007798 |
+| xgb       | P6a_inverse_variance_weights  | RF=3                   | 2333 |       0.9 |     0.8624 | nan      | nan      |        1.518 | 0.3576 |              -0.01894  |
+| xgb       | P6a_inverse_variance_weights  | RF=4                   |  637 |       0.9 |     0.7786 | nan      | nan      |        1.513 | 0.4668 |              -0.02466  |
+| xgb       | P6a_inverse_variance_weights  | CF=1                   | 7067 |       0.9 |     0.8782 | nan      | nan      |        1.528 | 0.347  |              -0.0262   |
+| xgb       | P6a_inverse_variance_weights  | CF=2                   | 1229 |       0.9 |     0.9032 | nan      | nan      |        1.53  | 0.3001 |              -0.01346  |
+| xgb       | P6a_inverse_variance_weights  | CF=3                   |  825 |       0.9 |     0.7903 | nan      | nan      |        1.488 | 0.4827 |               0.1286   |
+| xgb       | P6a_inverse_variance_weights  | CF=4                   |  212 |       0.9 |     0.9387 | nan      | nan      |        1.49  | 0.2744 |               0.07378  |
+| xgb       | P6b_quality_aware_intervals   | all                    | 9333 |       0.9 |     0.8736 |   0.8483 |   0.8932 |        1.536 | 0.3521 |              -0.01057  |
+| xgb       | P6b_quality_aware_intervals   | common (RF<4 and CF<4) | 8494 |       0.9 |     0.8719 |   0.8472 |   0.8916 |        1.5   | 0.3461 |              -0.01124  |
+| xgb       | P6b_quality_aware_intervals   | RF=4                   |  637 |       0.9 |     0.8885 |   0.8391 |   0.9317 |        2.118 | 0.4578 |              -0.02861  |
+| xgb       | P6b_quality_aware_intervals   | CF=4                   |  212 |       0.9 |     0.9009 |   0.8441 |   0.9391 |        1.265 | 0.2647 |               0.06795  |
+| xgb       | P6b_quality_aware_intervals   | RF=1                   | 3189 |       0.9 |     0.8899 | nan      | nan      |        1.393 | 0.3092 |              -0.003243 |
+| xgb       | P6b_quality_aware_intervals   | RF=2                   | 3174 |       0.9 |     0.8661 | nan      | nan      |        1.577 | 0.3699 |              -0.01261  |
+| xgb       | P6b_quality_aware_intervals   | RF=3                   | 2333 |       0.9 |     0.8573 | nan      | nan      |        1.518 | 0.3577 |              -0.01288  |
+| xgb       | P6b_quality_aware_intervals   | RF=4                   |  637 |       0.9 |     0.8885 | nan      | nan      |        2.118 | 0.4578 |              -0.02861  |
+| xgb       | P6b_quality_aware_intervals   | CF=1                   | 7067 |       0.9 |     0.8773 | nan      | nan      |        1.535 | 0.3481 |              -0.02912  |
+| xgb       | P6b_quality_aware_intervals   | CF=2                   | 1229 |       0.9 |     0.8682 | nan      | nan      |        1.348 | 0.3049 |              -0.008534 |
+| xgb       | P6b_quality_aware_intervals   | CF=3                   |  825 |       0.9 |     0.8424 | nan      | nan      |        1.898 | 0.4789 |               0.1251   |
+| xgb       | P6b_quality_aware_intervals   | CF=4                   |  212 |       0.9 |     0.9009 | nan      | nan      |        1.265 | 0.2647 |               0.06795  |
+| xgb       | P6c_weights_and_intervals     | all                    | 9333 |       0.9 |     0.8729 |   0.8479 |   0.8926 |        1.513 | 0.3512 |              -0.008571 |
+| xgb       | P6c_weights_and_intervals     | common (RF<4 and CF<4) | 8494 |       0.9 |     0.8729 |   0.8481 |   0.8893 |        1.477 | 0.3443 |              -0.009576 |
+| xgb       | P6c_weights_and_intervals     | RF=4                   |  637 |       0.9 |     0.8681 |   0.8039 |   0.9216 |        2.085 | 0.4668 |              -0.02466  |
+| xgb       | P6c_weights_and_intervals     | CF=4                   |  212 |       0.9 |     0.8962 |   0.8559 |   0.9327 |        1.245 | 0.2744 |               0.07378  |
+| xgb       | P6c_weights_and_intervals     | RF=1                   | 3189 |       0.9 |     0.8859 | nan      | nan      |        1.371 | 0.3065 |               0.001461 |
+| xgb       | P6c_weights_and_intervals     | RF=2                   | 3174 |       0.9 |     0.8677 | nan      | nan      |        1.555 | 0.3682 |              -0.007798 |
+| xgb       | P6c_weights_and_intervals     | RF=3                   | 2333 |       0.9 |     0.8637 | nan      | nan      |        1.495 | 0.3576 |              -0.01894  |
+| xgb       | P6c_weights_and_intervals     | RF=4                   |  637 |       0.9 |     0.8681 | nan      | nan      |        2.085 | 0.4668 |              -0.02466  |
+| xgb       | P6c_weights_and_intervals     | CF=1                   | 7067 |       0.9 |     0.8745 | nan      | nan      |        1.513 | 0.347  |              -0.0262   |
+| xgb       | P6c_weights_and_intervals     | CF=2                   | 1229 |       0.9 |     0.8804 | nan      | nan      |        1.326 | 0.3001 |              -0.01346  |
+| xgb       | P6c_weights_and_intervals     | CF=3                   |  825 |       0.9 |     0.8424 | nan      | nan      |        1.864 | 0.4827 |               0.1286   |
+| xgb       | P6c_weights_and_intervals     | CF=4                   |  212 |       0.9 |     0.8962 | nan      | nan      |        1.245 | 0.2744 |               0.07378  |
