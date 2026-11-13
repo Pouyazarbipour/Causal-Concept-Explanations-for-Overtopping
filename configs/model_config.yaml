@@ -1,5 +1,5 @@
 # Optuna trials per outer fold (TPE sampler, grouped inner 3-fold objective = RMSE)
-optuna_trials: {rf: 12, xgb: 30, catboost: 15, mlp: 12, ccw: 8}
+optuna_trials: {rf: 12, xgb: 30, catboost: 15, mlp: 8, ccw: 6}
 mlp:
   epochs: 150
   patience: 20

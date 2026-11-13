@@ -24,8 +24,8 @@ the RMSE of a grouped inner 3-fold cross-validation:
 | Random Forest | max_features 0.2–1; min_samples_leaf 1–10; max_depth 6–30; 300 trees | 12 |
 | XGBoost | learning rate 0.01–0.2 (log); depth 3–10; min_child_weight 1–20 (log); subsample 0.5–1; colsample 0.4–1; lambda 0.1–20 (log); gamma 0–1 | 30 |
 | CatBoost | learning rate 0.02–0.3 (log); depth 4–9; l2_leaf_reg 1–20 (log); random_strength 0–2; rsm 0.5–1 | 15 |
-| MLP | width 64/128/256; depth 2–5; dropout 0–0.2; learning rate 3e-4–5e-3 (log); weight decay 1e-6–1e-3 (log) | 12 |
-| CCW-Net wrapper | concept dimension 4/8/16; encoder width 64/128/256; learning rate 3e-4–3e-3 (log); interaction rank 2/4/8; alignment-weight multiplier 0.1–10 (log) | 8 |
+| MLP | width 64/128/256; depth 2–5; dropout 0–0.2; learning rate 3e-4–5e-3 (log); weight decay 1e-6–1e-3 (log) | 8 |
+| CCW-Net wrapper | concept dimension 4/8/16; encoder width 64/128/256; learning rate 3e-4–3e-3 (log); interaction rank 2/4/8; alignment-weight multiplier 0.1–10 (log) | 6 |
 
 Early stopping: boosted trees stop on the inner validation fold (50 rounds); the final model uses 1.1 x the
 mean best iteration. Networks stop on a grouped validation split of the training partition. Imputation and
