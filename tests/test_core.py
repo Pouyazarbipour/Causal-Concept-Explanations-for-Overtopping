@@ -6,7 +6,7 @@ import pytest
 from src.concept_ontology import CONCEPTS, concept_labels
 from src.counterfactual_audit import build_views, curve_metrics, features_from_raw, support_flags
 from src.data_preprocessing import dimensionless_discharge, response_class, signed_log1p
-from src.error_decomposition import reml_em
+from src.error_decomposition import reml_nested
 from src.evaluation import regression_metrics
 from src.geometry_grouping import add_groups, check_no_leakage, make_folds
 from src.statistical_analysis import cluster_bootstrap, holm, weighted_kappa, weighted_quantile
@@ -131,5 +131,5 @@ def test_reml_recovers_variance_components():
     r = np.random.RandomState(0)
     g = np.repeat(np.arange(150), 8)
     y = r.normal(0, 0.5, 150)[g] + r.normal(0, 0.3, len(g))
-    f = reml_em(y, [g.astype(str)])
+    f = reml_nested(y, [g.astype(str)])
     assert f["var"][0] == pytest.approx(0.25, rel=0.3) and f["resid_var"] == pytest.approx(0.09, rel=0.15)

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import pickle
 import time
 
 import numpy as np
@@ -17,10 +18,25 @@ from joblib import Parallel, delayed
 from src.ccw_net import VARIANTS, run_fold
 from src.geometry_grouping import check_no_leakage
 from src.pipeline import groups_for, load_model_data
-from src.utils import get_logger, out
+from src.utils import ROOT, get_logger, out
 
 log = get_logger("ccw")
 SENS = ["ccw_weights_x0.1", "ccw_weights_x10"]
+CORE = ["ccw_full", "ccw_unaligned", "cbm"]
+CACHE = ROOT / "results" / "diagnostics" / "ccw_cache"
+
+
+def cached_fold(scheme, k, seed, *args):
+    """Checkpoint every fold-seed job so that an interrupted run resumes instead of restarting."""
+    CACHE.mkdir(parents=True, exist_ok=True)
+    f = CACHE / f"{scheme}__fold{k}__seed{seed}.pkl"
+    if f.exists():
+        return pickle.load(open(f, "rb"))
+    r = run_fold(k, seed, *args)
+    tmp = f.with_suffix(".tmp")
+    pickle.dump(r, open(tmp, "wb"))
+    tmp.rename(f)
+    return r
 
 
 def main() -> None:
@@ -38,14 +54,16 @@ def main() -> None:
         primary = scheme == E["primary_scheme"]
         jobs = []
         for seed in E["nn_seeds"]:
-            if primary:
-                variants = [v for v in VARIANTS if v not in SENS or seed == E["nn_seeds"][0]] + ["cbm"]
-            else:
-                variants = ["ccw_full", "ccw_unaligned", "cbm"]
+            # full model, unaligned wrapper and CBM: all seeds; loss/architecture ablations: first two seeds;
+            # loss-weight sensitivity: first seed (primary scheme only)
+            si = E["nn_seeds"].index(seed)
+            variants = list(CORE)
+            if primary and si < 2:
+                variants += [v for v in VARIANTS if v not in CORE and (v not in SENS or si == 0)]
             for k in np.unique(fold):
                 tr, te = np.flatnonzero(fold != k), np.flatnonzero(fold == k)
                 check_no_leakage(groups[tr], groups[te])
-                jobs.append(delayed(run_fold)(int(k), seed, tr, te, Xv, y, labels, groups, rfcf, cfg["model"], variants, E["seed"],
+                jobs.append(delayed(cached_fold)(scheme, int(k), seed, tr, te, Xv, y, labels, groups, rfcf, cfg["model"], variants, E["seed"],
                                               E["audit"]["meaningful_tol"], primary and seed == E["nn_seeds"][0]))
         t0 = time.time()
         res = Parallel(n_jobs=a.n_jobs)(jobs)

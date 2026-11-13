@@ -1,7 +1,8 @@
 """Hierarchical decomposition of out-of-fold residuals:  r = mu + sum_k (random intercept of level k) + e.
 
-REML estimates by the EM algorithm on Henderson's mixed-model equations (dense; a few thousand random
-effects).  Levels are whatever identifiers exist, e.g. laboratory/source unit, test series, geometry.
+Exact REML for nested random intercepts, evaluated cluster by cluster and maximised numerically.
+Levels are whatever identifiers exist: test series (original identifier) and reconstructed geometry;
+a laboratory level is only identifiable for the records whose laboratory could be inferred.
 
 Terminology.  The residual component e is "within-geometry residual variation".  It contains
 measurement-associated uncertainty, natural experimental variability, input uncertainty and remaining
@@ -14,67 +15,95 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 
-def reml_em(y: np.ndarray, levels: list[np.ndarray], n_iter: int = 300, tol: float = 1e-7, init=None):
-    """Return dict(mu, var=[sigma2 per level], resid_var, effects=[BLUP arrays], labels)."""
+def _prepare(y, levels):
+    """Per top-level cluster: residual vector and the 0/1 design blocks of every level."""
+    top = levels[0]
+    out = []
+    for c in np.unique(top):
+        idx = np.flatnonzero(top == c)
+        Zs = []
+        for l in levels:
+            _, inv = np.unique(l[idx], return_inverse=True)
+            Z = np.zeros((len(idx), inv.max() + 1))
+            Z[np.arange(len(idx)), inv] = 1.0
+            Zs.append(Z @ Z.T)
+        out.append((idx, y[idx], Zs))
+    return out
+
+
+def _neg_reml(theta, clusters):
+    """-2 x restricted log-likelihood (intercept-only mean) for variances exp(theta)."""
+    v = np.exp(theta)
+    ld, a, b, c = 0.0, 0.0, 0.0, 0.0
+    for _, yc, Zs in clusters:
+        V = v[-1] * np.eye(len(yc))
+        for k, ZZ in enumerate(Zs):
+            V += v[k] * ZZ
+        L = np.linalg.cholesky(V)
+        ld += 2 * np.log(np.diag(L)).sum()
+        w = np.linalg.solve(L, np.column_stack([np.ones(len(yc)), yc]))
+        a += w[:, 0] @ w[:, 0]
+        b += w[:, 0] @ w[:, 1]
+        c += w[:, 1] @ w[:, 1]
+    return ld + np.log(a) + c - b * b / a
+
+
+def reml_nested(y: np.ndarray, levels: list[np.ndarray], init=None, clusters=None, blup_level: int | None = None):
+    """REML variance components for nested random intercepts: r = mu + sum_k u_k + e.
+
+    `levels[0]` defines independent top-level clusters; every further level must be nested in it
+    (labels are made unique within the parent by the caller).  The likelihood is evaluated exactly,
+    cluster by cluster, and maximised over log-variances with L-BFGS-B."""
+    from scipy.optimize import minimize
     y = np.asarray(y, float)
-    n = len(y)
-    codes, uniq = zip(*[np.unique(l, return_inverse=True)[::-1] for l in levels])
-    q = [len(u) for u in uniq]
-    off = np.concatenate([[0], np.cumsum(q)])
-    Q = off[-1]
-    Z = np.zeros((n, Q), dtype=np.float32)
-    for k, c in enumerate(codes):
-        Z[np.arange(n), off[k] + c] = 1.0
-    ZtZ = (Z.T @ Z).astype(float)
-    Zt1 = Z.sum(0).astype(float)
-    Zty = (Z.T @ y).astype(float)
-    s2 = np.array(init[:-1] if init is not None else [y.var() / (len(levels) + 1)] * len(levels), float)
-    se2 = float(init[-1] if init is not None else y.var() / (len(levels) + 1))
-    C = np.empty((Q + 1, Q + 1))
-    rhs = np.concatenate([[y.sum()], Zty])
-    for _ in range(n_iter):
-        C[0, 0], C[0, 1:], C[1:, 0] = n, Zt1, Zt1
-        C[1:, 1:] = ZtZ
-        d = np.concatenate([np.full(q[k], se2 / max(s2[k], 1e-12)) for k in range(len(q))])
-        C[1:, 1:][np.diag_indices(Q)] += d
-        Ci = np.linalg.inv(C)
-        sol = Ci @ rhs
-        mu, u = sol[0], sol[1:]
-        new = np.array([(u[off[k]:off[k + 1]] @ u[off[k]:off[k + 1]] + se2 * np.trace(Ci[1 + off[k]:1 + off[k + 1], 1 + off[k]:1 + off[k + 1]])) / q[k]
-                        for k in range(len(q))])
-        new_e = float(y @ (y - mu - Z @ u) / (n - 1))
-        done = max(np.max(np.abs(new - s2)), abs(new_e - se2)) < tol
-        s2, se2 = new, max(new_e, 1e-12)
-        if done:
-            break
-    return {"mu": float(mu), "var": s2, "resid_var": se2, "effects": [u[off[k]:off[k + 1]] for k in range(len(q))],
-            "labels": list(uniq), "n_groups": q}
+    clusters = clusters if clusters is not None else _prepare(y, levels)
+    x0 = np.log(np.full(len(levels) + 1, y.var() / (len(levels) + 1))) if init is None else np.log(np.maximum(init, 1e-8))
+    res = minimize(_neg_reml, x0, args=(clusters,), method="L-BFGS-B", bounds=[(-14, 3)] * len(x0), options={"maxiter": 60, "ftol": 1e-9})
+    v = np.exp(res.x)
+    v[v < 2e-6] = 0.0           # at the lower bound: component not distinguishable from zero
+    out = {"var": v[:-1], "resid_var": float(v[-1]), "converged": bool(res.success), "n_groups": [len(np.unique(l)) for l in levels]}
+    if blup_level is not None:   # BLUPs of one level (e.g. geometry effects)
+        a = b = 0.0
+        sol = []
+        for idx, yc, Zs in clusters:
+            V = v[-1] * np.eye(len(yc)) + sum(v[k] * ZZ for k, ZZ in enumerate(Zs))
+            Vi1, Viy = np.linalg.solve(V, np.ones(len(yc))), np.linalg.solve(V, yc)
+            a, b = a + Vi1.sum(), b + Viy.sum()
+            sol.append((idx, Vi1, Viy))
+        mu = b / a
+        lab = levels[blup_level]
+        eff = {}
+        for idx, Vi1, Viy in sol:
+            alpha = Viy - mu * Vi1
+            for g in np.unique(lab[idx]):
+                eff[g] = v[blup_level] * alpha[lab[idx] == g].sum()
+        out["mu"], out["effects"] = float(mu), eff
+    return out
 
 
-def _boot_one(y, levels, top, seed, init):
+def _boot_one(clusters, n_levels, seed, init):
     rng = np.random.RandomState(seed)
-    uniq = np.unique(top)
-    members = {u: np.flatnonzero(top == u) for u in uniq}
-    idx, tag = [], []
-    for b, u in enumerate(rng.choice(uniq, len(uniq))):
-        idx.append(members[u])
-        tag.append(np.full(len(members[u]), b))
-    idx, tag = np.concatenate(idx), np.concatenate(tag)
-    lv = [np.char.add(np.char.add(tag.astype(str), "#"), l[idx].astype(str)) for l in levels]
-    f = reml_em(y[idx], lv, n_iter=40, init=init)
+    pick = rng.randint(0, len(clusters), len(clusters))
+    f = reml_nested(None if False else np.concatenate([clusters[i][1] for i in pick]), [None] * n_levels, init, [clusters[i] for i in pick])
     return np.concatenate([f["var"], [f["resid_var"]]])
 
 
-def decompose(y, df: pd.DataFrame, level_cols: list[str], n_boot: int = 100, seed: int = 0, n_jobs: int = 4) -> pd.DataFrame:
-    """Variance components with cluster-bootstrap CIs (clusters = top level).  Lower levels are nested by
-    construction of their labels (series within lab unit, geometry within series)."""
-    levels = [df[c].astype(str).to_numpy() for c in level_cols]
-    fit = reml_em(y, levels)
+def decompose(y, df: pd.DataFrame, level_cols: list[str], n_boot: int = 100, seed: int = 0, n_jobs: int = 4, blup: bool = False):
+    """Variance components with cluster-bootstrap CIs (clusters = top level, resampled whole).
+    Lower-level labels are prefixed by their parents so that the hierarchy is nested by construction."""
+    levels, prefix = [], None
+    for c in level_cols:
+        lab = df[c].astype(str).to_numpy()
+        prefix = lab if prefix is None else np.char.add(np.char.add(prefix, "/"), lab)
+        levels.append(prefix.copy())
+    y = np.asarray(y, float)
+    clusters = _prepare(y, levels)
+    fit = reml_nested(y, levels, clusters=clusters, blup_level=len(levels) - 1 if blup else None)
     est = np.concatenate([fit["var"], [fit["resid_var"]]])
     rows = pd.DataFrame({"component": level_cols + ["within-geometry residual"], "n_units": fit["n_groups"] + [len(y)],
                          "variance": est, "share": est / est.sum(), "sd": np.sqrt(est)})
     if n_boot:
-        reps = np.array(Parallel(n_jobs=n_jobs)(delayed(_boot_one)(y, levels, levels[0], seed + b, est) for b in range(n_boot)))
+        reps = np.array(Parallel(n_jobs=n_jobs)(delayed(_boot_one)(clusters, len(levels), seed + b, est) for b in range(n_boot)))
         sh = reps / reps.sum(1, keepdims=True)
         rows["variance_lo"], rows["variance_hi"] = np.percentile(reps, [2.5, 97.5], axis=0)
         rows["share_lo"], rows["share_hi"] = np.percentile(sh, [2.5, 97.5], axis=0)
