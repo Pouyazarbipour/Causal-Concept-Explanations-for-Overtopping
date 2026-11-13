@@ -442,7 +442,7 @@ def fig13():
 # ----------------------------------------------------------------------------------------- Fig 14
 def fig14():
     c = tab("table14_policy_calibration_by_quality")
-    c = c[c.learner == "xgb"]
+    c = c[c.learner == "xgb"].drop_duplicates(["policy", "test_subset"])
     show = ["P1_retain_all", "P4_excl_RF4_or_CF4", "P5_CLASH_weights", "P6b_quality_aware_intervals"]
     col = dict(zip(show, [MUTED, CAT[0], CAT[2], CAT[1]]))
     fig, axs = plt.subplots(1, 4, figsize=(11.5, 3.4))
@@ -483,7 +483,8 @@ def fig15(D):
 # ----------------------------------------------------------------------------------------- Fig S1
 def figS1():
     d = ROOT / "results" / "models" / "optuna"
-    files = sorted(d.glob("geometry__*__trials.csv"))
+    order = ["rf", "xgb", "catboost", "mlp", "ccw"]
+    files = sorted(d.glob("geometry__*__trials.csv"), key=lambda f: order.index(f.stem.split("__")[1]))
     fig, axs = plt.subplots(1, len(files), figsize=(2.4 * len(files), 2.9))
     for ax, f, letter in zip(np.atleast_1d(axs), files, "abcdefg"):
         t = pd.read_csv(f)
@@ -491,7 +492,7 @@ def figS1():
             v = g.sort_values("number")["value"].to_numpy()
             ax.plot(np.arange(1, len(v) + 1), v, "o", ms=2.5, color=MUTED, alpha=0.6)
             ax.plot(np.arange(1, len(v) + 1), np.minimum.accumulate(v), "-", lw=1.4, color=CAT[int(k) % 8])
-        ax.set_xlabel("Optuna trial"); panel(ax, letter, f.stem.split("__")[1].replace("ccw", "CCW-Net"))
+        ax.set_xlabel("Optuna trial"); panel(ax, letter, {"rf": "Random Forest", "xgb": "XGBoost", "catboost": "CatBoost", "mlp": "MLP", "ccw": "CCW-Net"}[f.stem.split("__")[1]])
     np.atleast_1d(axs)[0].set_ylabel("Inner grouped-CV RMSE\n(line: best so far, per outer fold)")
     fig.tight_layout()
     save(fig, "figS1_optuna_history")

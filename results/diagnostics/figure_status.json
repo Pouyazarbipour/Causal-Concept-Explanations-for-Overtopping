@@ -1,0 +1,31 @@
+{
+ "done": [
+  "fig01",
+  "fig02",
+  "fig03",
+  "fig04",
+  "fig05",
+  "fig06",
+  "fig07",
+  "fig08",
+  "fig09",
+  "fig11",
+  "fig13",
+  "fig15",
+  "figS1"
+ ],
+ "failed": [
+  [
+   "fig10",
+   "FileNotFoundError(2, 'No such file or directory')"
+  ],
+  [
+   "fig12",
+   "FileNotFoundError(2, 'No such file or directory')"
+  ],
+  [
+   "fig14",
+   "ValueError('x and y must have same first dimension, but have shapes (4,) and (5,)')"
+  ]
+ ]
+}

@@ -78,7 +78,7 @@ and width by category; bias by structural family; share of predictions changed b
 
 Adaptation of Rountree et al. (2026, arXiv:2611.14407); details and derivation in the supplementary
 outline (S3). Frozen tabular backbone; encoder producing one squashed vector per concept group (ten groups,
-Table 3); bias-free attention read-out A(M) plus explicit low-rank pairwise interaction I(M); linear
+Table S); bias-free attention read-out A(M) plus explicit low-rank pairwise interaction I(M); linear
 output on the standardised target. Loss
 
     L = L_task + l_cls L_concept + l_nec L_nec + l_suf L_suf + l_ind L_ind + l_int L_int

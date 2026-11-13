@@ -11,7 +11,7 @@ hyper-parameters, inner objective and outer error (Table 4); Optuna histories (F
 rules; performance on the sensitivity schemes (random records, series held out); wet/dry model (Table S).
 
 **S3 Regression CCW-Net.** Mapping to the original method and list of adaptations; concept ontology with
-thresholds and counts (Table 3); head equations and the zero-reference property; derivation of each loss
+thresholds and counts (Table S, `tableS_concept_ontology`); head equations and the zero-reference property; derivation of each loss
 term; mediator model; training schedule; evaluation estimators (necessity, sufficiency, independence,
 zero-ablation shares, matched label-swap Shapley estimator); interaction pairs (Table S); variance branch
 (Table S); convergence diagnostics.
