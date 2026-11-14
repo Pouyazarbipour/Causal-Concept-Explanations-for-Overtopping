@@ -15,7 +15,9 @@ Scales compared:
   physical predictors only       prospective proxy: no rating available
   physical + RF + CF             both
 Sensitivity: calibration fraction {0.15, 0.25, 0.35} x 5 calibration seeds.
-Guarantee: marginal over a new geometry only; subgroup coverages are empirical, not guaranteed.
+Guarantee: marginal over a new geometry only (each geometry weighted equally: the geometry-mean coverage is the
+guaranteed quantity; record-level coverage is lower when large geometries are harder); subgroup coverages are
+empirical, not guaranteed.
 Outputs: revision/tables/C*.csv
 """
 from __future__ import annotations
@@ -122,7 +124,9 @@ def evaluate(D, iv, nb=300, seed=20261112):
             gcov = pd.Series(cov).groupby(geo).mean()
             scov = pd.Series(cov).groupby(ser).mean()
             rep_cov = [c.mean() for c in covs]
+            gpt, glo, ghi, _ = cluster_bootstrap(lambda i: [pd.Series(cov[i]).groupby(geo[i]).mean().mean()], geo, 200, seed)
             row = {"calib_fraction": fr, "scale": s, "coverage": pt[0], "cov_lo": lo[0], "cov_hi": hi[0],
+                   "geometry_mean_coverage": gpt[0], "geo_cov_lo": glo[0], "geo_cov_hi": ghi[0],
                    "coverage_sd_over_calibration_seeds": float(np.std(rep_cov)),
                    "mean_width": float(width.mean()), "median_width": float(np.median(width)),
                    "median_width_as_factor": float(10 ** (np.median(width) / 2)), "winkler": float(wk.mean()),

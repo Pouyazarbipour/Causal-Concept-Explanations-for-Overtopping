@@ -214,7 +214,7 @@ hl = [f"All 10 532 CLASH tests are audited. The models use 10 389 tests (occurre
       "The complexity factor shows no ordered relation to geometry-level error. CF = 3 is the difficult class, and much of its error comes from a few series."]
 if PF is not None:
     hl.append(f"Excluding category-4 tests leaves the other predictions unchanged (|ΔRMSE| ≤ {f(PF.loc[EXCL, 'd_rmse_common'].abs().max(), 3)}) and degrades category-4 predictions, with fixed or with re-tuned learners.")
-hl.append("Quality-aware conformal intervals with all tests retained remove the RF under-coverage. CF = 3 remains under-covered.")
+hl.append(f"Quality-aware conformal intervals with all tests retained raise RF = 4 coverage from {pct(C25.loc['constant', 'cov_RF4'])} to {pct(C25.loc['physical+RF+CF', 'cov_RF4'])}. CF = 3 remains under-covered.")
 bl(hl)
 
 h1("Abstract")
@@ -230,8 +230,9 @@ abs_ = (f"Each test in the CLASH wave-overtopping database carries a Reliability
 if PF is not None:
     abs_ += (f"On identical held-out tests, excluding or zero-weighting category-4 tests changes the error of the remaining tests by at most {f(PF.loc[EXCL, 'd_rmse_common'].abs().max(), 3)} log10 units. "
              f"It increases the error of RF = 4 tests by {prange(PF, 'd_rmse_RF4', EX_RF4)}, also when each policy receives its own tuned learner. ")
-abs_ += (f"Retaining all tests and scaling split-conformal intervals by RF and CF raises RF = 4 coverage of 90 % intervals to {pct(C25.loc['RF+CF main effects', 'cov_RF4'])}, at similar width. "
-         f"CF = 3 tests remain under-covered ({pct(C25.loc['RF+CF main effects', 'cov_CF3'])}). "
+abs_ += (f"Retaining all tests and scaling group-weighted split-conformal intervals by RF, CF and the physical inputs raises RF = 4 coverage of 90 % intervals "
+         f"from {pct(C25.loc['constant', 'cov_RF4'])} to {pct(C25.loc['physical+RF+CF', 'cov_RF4'])} and gives the best interval score. "
+         f"CF = 3 tests remain under-covered ({pct(C25.loc['physical+RF+CF', 'cov_CF3'])}). "
          f"Exclusion also changes engineering decisions: it raises the share of missed exceedances of allowable discharges for RF = 4 tests and removes almost all depth-limited tests. "
          f"The ratings should be evaluated empirically before they are used to discard data, and are better used to manage predictive uncertainty than to exclude tests.")
 p(abs_)
@@ -560,17 +561,23 @@ h1("8. Quality-aware uncertainty quantification")
 rows = []
 for sc in ["constant", "RF+CF main effects", "RFxCF shrunk cells", "CF only", "physical only", "physical+RF+CF"]:
     r = C25.loc[sc]
-    rows.append([sc, pct(r.coverage, 1) + " " + f"[{pct(r.cov_lo, 1)}, {pct(r.cov_hi, 1)}]", pct(r.cov_RF4, 1), pct(r.cov_CF3, 1), pct(r.cov_CF4, 1),
+    rows.append([sc, pct(r.geometry_mean_coverage, 1) + " " + f"[{pct(r.geo_cov_lo, 1)}, {pct(r.geo_cov_hi, 1)}]", pct(r.coverage, 1), pct(r.cov_RF4, 1), pct(r.cov_CF3, 1), pct(r.cov_CF4, 1),
                  f"{100 * r.max_abs_dev_RF:.1f}", f(r.mean_width, 2), f(r.winkler, 2), pct(r["pct_series_coverage_below_0.8"] / 100)])
 T_("conf", "Split-conformal 90 % intervals by scale function (calibration fraction 0.25, five calibration seeds, all tests retained).",
-   ["Scale", "Coverage [95 % CI]", "RF = 4", "CF = 3", "CF = 4", "Max dev. over RF (pts)", "Mean width", "Winkler", "Series < 80 %"], rows,
-   [1.6, 1.4, 0.7, 0.7, 0.7, 0.8, 0.7, 0.7, 0.8], fs=14,
+   ["Scale", "Geometry-mean coverage [95 % CI]", "Record coverage", "RF = 4", "CF = 3", "CF = 4", "Max dev. over RF (pts)", "Mean width", "Winkler", "Series < 80 %"], rows,
+   [1.5, 1.5, 0.8, 0.7, 0.7, 0.7, 0.8, 0.7, 0.7, 0.8], fs=13,
    note="Width and Winkler (interval) score in log10 units; a width w corresponds to a factor 10^{w/2} either side of the prediction. Coverage within categories is empirical; only the marginal coverage over new geometries is guaranteed.")
 qa, cst, phy = C25.loc["RF+CF main effects"], C25.loc["constant"], C25.loc["physical only"]
 sens = C1[C1.scale == "RF+CF main effects"]
-p(f"Constant intervals cover {pct(cst.coverage, 1)} of tests overall but only {pct(cst.cov_RF4, 1)} of RF = 4 tests ({tref('conf')}, {fref('conf')}). "
+bw = C25.sort_values("winkler").iloc[0]
+p(f"Every scale attains the guaranteed quantity, the coverage averaged over held-out geometries ({pct(C25.geometry_mean_coverage.min(), 1)}–{pct(C25.geometry_mean_coverage.max(), 1)}; "
+  f"{tref('conf')}). Record-level coverage is lower ({pct(C25.coverage.min(), 1)}–{pct(C25.coverage.max(), 1)}), because geometries with many tests are harder to "
+  f"predict. The hierarchical guarantee does not extend to individual tests, and this must be considered when intervals are read per test. "
+  f"Constant intervals cover only {pct(cst.cov_RF4, 1)} of RF = 4 tests ({fref('conf')}). "
   f"Scaling by the RF and CF main effects raises RF = 4 coverage to {pct(qa.cov_RF4, 1)} and reduces the largest coverage deviation across RF from "
   f"{100 * cst.max_abs_dev_RF:.1f} to {100 * qa.max_abs_dev_RF:.1f} points, at a mean width of {f(qa.mean_width, 2)} against {f(cst.mean_width, 2)}. "
+  f"The lowest interval (Winkler) score is obtained by the {bw.name} scale ({f(bw.winkler, 2)} against {f(cst.winkler, 2)} for constant intervals), "
+  f"with RF = 4 coverage {pct(bw.cov_RF4, 1)} and a largest RF deviation of {100 * bw.max_abs_dev_RF:.1f} points, at a mean width of {f(bw.mean_width, 2)}. "
   f"Partial pooling of the 16 RF × CF cells gives {pct(C25.loc['RFxCF shrunk cells', 'cov_RF4'], 1)} for RF = 4 and {pct(C25.loc['RFxCF shrunk cells', 'cov_CF3'], 1)} for CF = 3, "
   f"with no unstable widths. The results are stable across calibration fractions (RF = 4 coverage {pct(sens.cov_RF4.min(), 1)}–{pct(sens.cov_RF4.max(), 1)}) and seeds. "
   f"CF = 3 tests remain under-covered under every scale ({pct(C25.cov_CF3.min(), 1)}–{pct(C25.cov_CF3.max(), 1)}), because their error is concentrated in a few series "
