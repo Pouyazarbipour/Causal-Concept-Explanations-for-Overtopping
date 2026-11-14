@@ -4,7 +4,8 @@ import pandas as pd
 import pytest
 
 from src.concept_ontology import CONCEPTS, concept_labels
-from src.counterfactual_audit import build_views, curve_metrics, features_from_raw, support_flags
+from src.data_selection import design_q, fit_variance_model, sigma2
+from src.features import features_from_raw
 from src.data_preprocessing import dimensionless_discharge, response_class, signed_log1p
 from src.error_decomposition import reml_nested
 from src.evaluation import regression_metrics
@@ -68,37 +69,35 @@ def test_folds_have_no_group_leakage():
         check_no_leakage(["a", "b"], ["b"])
 
 
-def test_counterfactual_views_touch_only_intended_features():
+def test_features_are_dimensionless_and_scale_invariant():
     df = toy()
-    X, vt, feas = build_views(df, FEATS, LOG1P, [0.1, 0.5])
-    base = X[:, 0]
-    i = int(np.flatnonzero((vt.intervention == "crest_up") & (vt.delta == 0.5))[0])
-    changed = np.flatnonzero(~np.isclose(X[:, i], base).all(0))
-    assert set(changed) == {FEATS.index("rc_h"), FEATS.index("ac_h")}
-    assert np.allclose(np.expm1(X[:, i, 0]) - np.expm1(base[:, 0]), 0.5)   # exactly +0.5 Hm0
-    j = int(np.flatnonzero((vt.intervention == "wall_up") & (vt.delta == 0.1))[0])
-    assert (feas[:, j] == (df.rc >= df.ac - 1e-9)).all()
-    k = int(np.flatnonzero((vt.intervention == "crest_wider") & (vt.delta == 0.1))[0])
-    assert (feas[:, k] == (df.gc > 0)).all()
-    r = int(np.flatnonzero((vt.intervention == "rougher") & (vt.delta == 0.5))[0])
-    assert not feas[df.gf_raw == 0.5, r].any()   # 0.5 - 0.20 < 0.35 is outside the documented gamma_f range
+    X1 = features_from_raw(df, FEATS, LOG1P)
+    big = df.copy()                                   # Froude scaling: lengths x 25, times x 5
+    for c in ("hm0_toe", "h", "ht", "bt", "rc", "b_berm", "hb", "ac", "gc"):
+        big[c] = df[c] * 25
+    big["tm10_toe"] = df["tm10_toe"] * 5
+    assert np.allclose(X1, features_from_raw(big, FEATS, LOG1P))
+    assert np.allclose(np.expm1(X1[:, 0]), df.rc / df.hm0_toe)
 
 
-def test_support_flags_reject_extrapolation():
+def test_policy_variance_model_recovers_category_ratios():
     r = np.random.RandomState(0)
-    Xtr = r.normal(size=(500, 3))
-    Xv = np.stack([Xtr[:50], Xtr[:50] + 25.0], axis=1)
-    s = support_flags(Xtr, Xv)
-    assert s[:, 0].mean() > 0.9 and not s[:, 1].any()
+    rf, cf = r.randint(1, 5, 20000), r.randint(1, 5, 20000)
+    sd = np.where(rf == 4, 2.0, 1.0)
+    beta = fit_variance_model(r.normal(0, sd), rf, cf)
+    ratio = sigma2(beta, np.array([4]), np.array([1]))[0] / sigma2(beta, np.array([1]), np.array([1]))[0]
+    assert ratio == pytest.approx(4.0, rel=0.15) and design_q(rf, cf).shape == (20000, 7)
 
 
-def test_curve_metrics_counts_steps_and_curves_separately():
-    vt = pd.DataFrame({"intervention": ["base", "a", "a", "a"], "delta": [0, 0.05, 0.5, 1.0]})
-    P = np.array([[0.0, -0.1, -0.2, -0.3], [0.0, 0.1, -0.2, -0.1], [0.0, 0.001, 0.0, -0.5]])
-    m = curve_metrics(P, vt, np.ones_like(P, bool), "a", tol=0.02, local_delta=0.05)
-    assert list(m.n_steps_up) == [0, 2, 0] and list(m.curve_affected) == [False, True, False]
-    assert list(m.local_reversal) == [False, True, False] and list(m.global_reversal) == [False, False, False]
-    assert m.max_step_rise[1] == pytest.approx(0.1)
+def test_optuna_tuning_uses_only_training_groups_and_is_reproducible():
+    from src.baseline_models import tune_fold
+    r = np.random.RandomState(0)
+    X = r.normal(size=(300, 4))
+    y = X[:, 0] + 0.1 * r.normal(size=300)
+    g = np.repeat(np.arange(60), 5).astype(str)
+    b1, df1, v1 = tune_fold("xgb", X, y, g, 3, 3, 0)
+    b2, _, v2 = tune_fold("xgb", X, y, g, 3, 3, 0)
+    assert b1 == b2 and v1 == v2 and len(df1) == 3 and b1["n_estimators"] >= 1
 
 
 def test_concept_labels_cover_states_and_use_no_response():

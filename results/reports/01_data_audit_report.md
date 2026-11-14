@@ -1,7 +1,7 @@
 # 1. Repository and original-data audit
 
 All numbers below are produced by `python -m src.data_audit` and stored in `results/tables/table01*`,
-`table02*`, `table04*` and `results/diagnostics/data_audit_summary.json`.
+`table02*`, `tableS_concept_ontology` and `results/diagnostics/data_audit_summary.json`.
 
 ## 1.1 What the repository contained
 
@@ -9,10 +9,10 @@ All numbers below are produced by `python -m src.data_audit` and stored in `resu
 |---|---|
 | `20250402 - Overtopping Database.xls` (now `data/raw/`) | The CLASH database. Sheet `20050101`: 10 532 tests x 33 columns, one header row and one units row. Sheet `cross-section`: a plotting helper that redraws one pasted row; it holds no data. |
 | `2611.14407v1.pdf` (now `docs/`) | Rountree et al. (2026), the CCW-Net reference. |
-| `Prompt.md` (now `docs/`) | The research brief. |
+| `Prompt.md` (now `docs/`) | The first research brief (superseded by the data-quality brief). |
 | `README.md` | Title only. |
 
-There were **no** previous scripts, processed or filtered datasets, data dictionary, laboratory reports,
+There were **no** experimental reports, the two previous papers were not in the repository, and there were no previous scripts, processed or filtered datasets, data dictionary, laboratory reports,
 measurement protocols or earlier geometry-grouping procedures. Consequences:
 
 * The variable dictionary (Table 1) was written from the workbook's header and units rows and the

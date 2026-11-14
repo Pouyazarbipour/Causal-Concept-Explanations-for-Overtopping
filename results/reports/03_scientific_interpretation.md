@@ -1,320 +1,232 @@
 # 3. Scientific interpretation
 
-Response: Y = log10 q*, q* = q / sqrt(g Hm0,toe^3). All errors are in log10 units (0.30 = factor 2).
-Unless stated otherwise, results are for the 9 333 positive-discharge records, 5-fold geometry-grouped
-nested cross-validation, with 95 % cluster-bootstrap intervals in brackets (clusters: geometry for
-prediction and coverage, test series for RF/CF statistics). Residual-based RF/CF analyses use the
-pre-specified reference model (XGBoost on physical predictors).
+**Engineering question.** Are the CLASH data-quality ratings valid and useful for deciding which experimental
+observations should be retained, down-weighted or excluded when developing prediction models?
 
-Evidence classes used below:
-**[D]** demonstrated directly by the data; **[P]** predictive association only; **[M]** property of a
-model's internal representation; **[C]** physical input counterfactual of a fitted model;
-**[N]** not identifiable with this repository.
+Response: Y = log10 q*, q* = q / sqrt(g Hm0,toe^3). Errors are in log10 units (0.30 = factor 2). Unless stated
+otherwise: 9 333 positive-discharge tests, 5-fold geometry-grouped nested cross-validation with Optuna tuning
+inside the training folds, 95 % cluster-bootstrap intervals in brackets (test series for RF/CF statistics,
+geometry for prediction, policy and coverage statistics). RF/CF residual analyses use the pre-specified
+reference model (XGBoost) and are repeated with the other models.
+
+Evidence classes: **[D]** directly demonstrated by the data; **[P]** predictive association only;
+**[M]** property of a model's internal representation; **[N]** not identifiable with the available evidence.
 
 ---
 
-## 3.1 Predictive performance (Experiment 2; Table 3, `table03*`)
+## 3.1 Diagnostic models (Tables 3, 4; Figures 3–7, S1)
 
-| Validation scheme | RF | XGBoost | Monotone XGBoost | MLP | CCW-Net |
+| Model | RMSE | MAE | R² | bias | F10 |
 |---|---|---|---|---|---|
-| Random records (optimistic) | 0.399 | 0.354 | 0.369 | 0.389 | – |
-| **Geometry-grouped (primary)** | 0.526 | **0.493** [0.448, 0.541] | 0.521 | 0.590 | 0.594 [0.539, 0.653] |
-| Coarse geometry | 0.611 | 0.605 | 0.630 | – | – |
-| Test series held out | 0.769 | 0.755 [0.670, 0.836] | 0.781 | 0.836 | 0.844 |
-| Source (reference) held out | 0.785 | 0.782 | 0.811 | – | – |
-| Structural family held out | 0.905 | 0.828 | 0.858 | – | – |
+| Random Forest | 0.539 [0.489, 0.590] | 0.375 | 0.787 | +0.002 | 3.46 |
+| XGBoost | **0.501** [0.458, 0.547] | 0.348 | 0.816 | −0.010 | 3.17 |
+| CatBoost | 0.513 [0.462, 0.567] | 0.347 | 0.808 | −0.011 | 3.26 |
+| MLP (3 seeds) | 0.576 [0.522, 0.636] | 0.403 | 0.757 | −0.003 | 3.77 |
+| CCW-Net (3 seeds) | 0.590 [0.534, 0.647] | 0.409 | 0.745 | −0.006 | 3.89 |
 
-(RMSE; MLP and CCW-Net are means of three seeds.)
+F10 here is 10^RMSE, the geometric standard-deviation factor of predicted/measured discharge. Bias is
+predicted minus measured. For the MLP and CCW-Net the table gives the mean of per-seed metrics; averaging the three
+seeds' predictions (seed ensemble, Figure 3) gives RMSE 0.550 and 0.553.
 
-* [D] The validation scheme changes the error more than the choice of learner. Random-record
-  cross-validation understates the error on an unseen geometry by about 30 % and on an unseen test series
-  by about 50 %. Reported CLASH accuracies from random splits should be read as interpolation within
-  series.
-* [D] XGBoost is the most accurate learner under every scheme. The neural models are about 0.10 worse
-  under geometry grouping. On the primary scheme: backbone 0.594, concept bottleneck 0.608, unaligned
-  wrapper 0.602, CCW-Net 0.594.
-* [D] Monotonicity constraints cost 0.028 RMSE (0.493 -> 0.521) and remove every reversal by construction.
-* [D] Holding out a whole structural family gives RMSE 0.48–0.94 and biases up to 0.5 (smooth slopes are
-  under-predicted by 0.5 on average when absent from training). No claim of validity outside the represented families is made.
-* Wet/dry model (10 389 records with q >= 0; Table 3d): AUC 0.927 overall; 0.92–0.96 for RF 1–3 and CF 1–3,
-  0.81 for RF = 4 and 0.77 for CF = 4.
-* Secondary ablation, RF/CF as inputs of the mean model: RMSE changes by -0.005 [-0.013, +0.005]
-  (Table 3c). There is no predictive reason to put them into the mean model.
+* [D] The models serve as instruments for obtaining leakage-free residuals; the ranking is not a
+  contribution. The boosted trees are the most accurate; the networks are 0.07–0.09 worse.
+* [D] The Optuna objective (inner grouped CV) is close to the outer test error for every model (XGBoost
+  0.544 inner vs 0.500 outer). The best-so-far curves flatten within the budget for the tree models
+  (Figure S1); the MLP and CCW-Net budgets are small (L9).
+* [D] Residual-versus-prediction plots show no systematic trend over the bulk of the range. The binned
+  median rises to +0.3 to +0.5 below log10 q* ≈ −6 for XGBoost, CatBoost and the MLP, where the smallest
+  measured discharges are under-predicted (Figure 7).
+* [D] Sensitivity of the reference model to the validation unit: random records 0.354, geometry 0.501, test
+  series held out 0.749.
 
-## 3.2 RQ1 – Does RF distinguish tests with different predictive and measurement-associated uncertainty?
+## 3.2 RQ1 – RF validity: does RF separate tests by measurement-associated uncertainty?
 
-**Partly. RF = 1 and RF = 4 are separated; RF = 2 and RF = 3 are not distinguishable from each other.**
+**Partly. RF = 4 is distinguished from RF = 1; RF = 2 and RF = 3 are not distinguishable from each other.
+The scale is not an ordered measure of uncertainty.**
 
-| RF | n | series | MAE | RMSE | within-geometry residual SD |
+| RF | n | series | MAE | RMSE | within-geometry SD | repeat SD (near-replicates) |
+|---|---|---|---|---|---|---|
+| 1 | 3 189 | 54 | 0.306 [0.262, 0.357] | 0.431 [0.375, 0.494] | 0.340 [0.298, 0.384] | 0.19 [0.14, 0.23] (130 pairs) |
+| 2 | 3 174 | 71 | 0.363 [0.298, 0.455] | 0.527 [0.419, 0.661] | 0.395 [0.318, 0.492] | 0.23 [0.17, 0.32] (483) |
+| 3 | 2 333 | 76 | 0.357 [0.294, 0.442] | 0.516 [0.416, 0.633] | 0.350 [0.309, 0.394] | 0.36 [0.21, 0.44] (457) |
+| 4 | 637 | 41 | 0.451 [0.373, 0.545] | 0.630 [0.522, 0.751] | 0.470 [0.378, 0.570] | 0.22 [0.13, 0.31] (66) |
+
+(Tables 5a, 5h; Figures 8, 9.)
+
+* [P] Residual variance of RF = 4 relative to RF = 1, adjusted for CF: 2.34 [1.41, 3.81]. For RF = 2 and RF = 3
+  the ratios are 1.38 [0.90, 2.15] and 1.50 [0.86, 2.34]. Every learner gives an RMSE ratio RF4/RF1 between
+  1.39 and 1.58 with intervals above 1 (Table 5b).
+* [P] As an ordered scale RF is weakly informative: Spearman ρ(|residual|, RF) = 0.07 [−0.01, 0.15]; odds ratio
+  per SD of |residual| 1.17 [0.98, 1.35]; no trend test survives Holm correction (Tables 5b, 5c).
+* [D] Model-free repeatability increases from RF 1 to RF 3 (0.19 → 0.36) but not to RF 4 (0.22, 66 pairs).
+  This is the only evidence in the repository that does not depend on a model.
+* [D] Construct-related evidence: RF rises with inferred indicators of estimated or missing parameters
+  (Spearman 0.30 [0.11, 0.46]). A spectral period equal to exactly Tp/1.1 predicts a higher RF more strongly
+  (OR 2.06 [1.14, 3.53]) than the prediction error does (Table 5c). All records with unusable inputs have
+  RF = 4.
+* [P] RF = 4 tests have more zero-overtopping records (16.5 % vs 5.8 % for RF = 1) and a weaker wet/dry
+  discrimination (AUC 0.81 vs 0.92–0.96).
+* [N] Whether individual RF assignments are correct, and how much of the RF-4 excess is measurement error
+  rather than input uncertainty or unrepresented physics, cannot be determined.
+
+## 3.3 RQ2 – CF validity: does CF identify geometries that are hard to represent?
+
+**No ordered relation. CF = 3 is the difficult class; CF = 2 and CF = 4 are not harder than CF = 1.**
+
+| CF (max in geometry) | geometries | series | |geometry mean residual| | geometry RMSE | grouped − random RMSE |
 |---|---|---|---|---|---|
-| 1 | 3 189 | 54 | 0.294 [0.252, 0.343] | 0.418 [0.362, 0.479] | 0.329 [0.288, 0.367] |
-| 2 | 3 174 | 71 | 0.355 [0.287, 0.447] | 0.520 [0.405, 0.657] | 0.385 [0.310, 0.481] |
-| 3 | 2 333 | 76 | 0.349 [0.287, 0.437] | 0.512 [0.410, 0.626] | 0.349 [0.303, 0.398] |
-| 4 | 637 | 41 | 0.430 [0.348, 0.527] | 0.615 [0.509, 0.733] | 0.470 [0.377, 0.571] |
+| 1 | 1 367 | 120 | 0.259 [0.232, 0.297] | 0.316 | 0.046 [0.033, 0.066] |
+| 2 | 363 | 48 | 0.239 [0.201, 0.282] | 0.303 | 0.043 [0.023, 0.065] |
+| 3 | 263 | 27 | 0.319 [0.261, 0.399] | 0.391 | 0.024 [0.003, 0.055] |
+| 4 | 53 | 7 | 0.255 [0.147, 0.380] | 0.326 | 0.087 [0.041, 0.189] |
 
-(Table 8a, Figure 3.)
+(Tables 6a, 6b; Figure 9d.)
 
-* [P] RMSE ratio RF4/RF1 = 1.47 [1.16, 1.83]; residual-variance ratio RF4 vs RF1, adjusted for CF,
-  2.36 [1.38, 3.61] (Table 8c2, Figure 9a). The same contrast holds for every learner (ratios 1.39–1.80,
-  all intervals above 1; Table 8b).
-* [P] The ordinal trend as a whole is weak: Spearman rho(|residual|, RF) = 0.07 [-0.02, 0.16]; odds ratio
-  of a higher RF per SD of |residual| 1.17 [0.99, 1.37] (Table 8). The intermediate steps are not ordered:
-  RF 2 and RF 3 have the same error, and the variance ratios for RF 2 and RF 3 (1.41, 1.56) have intervals
-  that include 1. The naive Jonckheere test is "highly significant" (z = 6.8) only because it treats 9 333
-  clustered records as independent; it is reported for completeness and should not be quoted alone.
-* [D] Model-free repeatability (1 136 near-replicate pairs: same geometry, Hm0, Tm-1,0, h, Rc within 1 %;
-  Table 8h, Figure 10c): repeat SD of log10 q* is 0.19 [0.14, 0.23] when both tests have RF = 1, 0.23
-  [0.17, 0.32] with RF <= 2, 0.36 [0.21, 0.44] with RF <= 3, and 0.22 [0.13, 0.31] for pairs involving an
-  RF = 4 test (only 66 pairs). The increase from RF 1 to RF 3 is the only evidence in the repository that
-  does not depend on any model; it is not monotone through RF = 4.
-* [D] Construct-related evidence (Table 8f): RF rises with the inferred number of estimated or missing
-  parameters (Spearman 0.30 [0.11, 0.46]); all records with unusable inputs and nearly all physically
-  questionable records are RF = 4. In an ordinal model, the default-period indicator (Tm-1,0 = Tp/1.1)
-  predicts RF more strongly (OR 2.06 [1.14, 3.53]) than the prediction error does.
-* [N] Whether an individual RF assignment is correct, and how much of the RF-4 excess variance is
-  measurement error rather than input uncertainty or unrepresented physics, cannot be determined.
+* [P] No geometry-level quantity is rank-correlated with CF: |mean residual| 0.03 [−0.06, 0.10], geometry
+  RMSE 0.03 [−0.10, 0.13], generalisation gap 0.00 [−0.07, 0.06]. Geometry-level ordinal model: OR 1.07
+  [0.89, 1.24] per SD of |mean residual|.
+* [P] CF = 3 has the largest record-level error (RMSE 0.71 [0.47, 0.98]) and variance ratio 2.18 [1.01, 3.87].
+  When whole test series are held out, CF shows a weak positive trend (ρ = 0.11 [0.01, 0.22], Holm-adjusted
+  p = 0.32), which suggests that CF relates to transfer between investigations rather than between
+  geometries within one investigation.
+* [D] CF = 4 consists of 212 usable tests from 7 series, dominated by one chute investigation, and is
+  predicted well (RMSE 0.36). This says that those tests are internally consistent, not that complex
+  sections are easy to represent.
+* [D] CF is not constant within 32 reconstructed geometries, so it is not a pure structure-level label in
+  this file.
+* [N] Whether CF correctly rates geometric complexity needs an independent re-rating of cross-sections.
 
-## 3.3 RQ2 – Does CF identify structures that are hard to represent and generalise?
+**RF × CF (Table 7).** No interaction: the linear-by-linear term in the variance model is 1.06 [0.83, 1.29].
+Six of sixteen cells are too sparse to interpret (all CF = 4 cells and RF 4/CF 3).
 
-**Not as an ordered scale. CF = 3 stands out; CF = 2 and CF = 4 do not show larger errors than CF = 1.**
+## 3.4 RQ3 – Can test-level, geometry-level and source effects be separated? (Table 8; Figure 10)
 
-| CF (max in geometry) | geometries | series | |geometry mean residual| | generalisation gap (grouped - random RMSE) |
-|---|---|---|---|---|
-| 1 | 1 367 | 120 | 0.248 [0.220, 0.288] | 0.035 [0.024, 0.057] |
-| 2 | 363 | 48 | 0.227 [0.182, 0.281] | 0.025 [0.011, 0.042] |
-| 3 | 263 | 27 | 0.311 [0.252, 0.395] | 0.024 [0.000, 0.055] |
-| 4 | 53 | 7 | 0.221 [0.129, 0.343] | 0.028 [0.006, 0.137] |
+**Test-level and geometry-level components are separated with useful precision. A series component is poorly
+determined; a laboratory component is not identifiable.**
 
-(Table 8d, Figure 9c.)
-
-* [P] No geometry-level quantity is rank-correlated with CF: |mean residual| 0.01 [-0.08, 0.10], grouped
-  RMSE 0.02 [-0.13, 0.13], generalisation gap -0.02 [-0.09, 0.03] (Table 8e). Geometry-level ordinal model:
-  OR 1.07 [0.87, 1.26] per SD.
-* [P] CF = 3 has the largest record-level error (RMSE 0.71 [0.46, 0.99]; variance ratio vs CF 1 of
-  2.2 [0.98, 4.2]) and the largest fraction of XGBoost response curves with an upward step (41 %
-  [34, 47] against 28 % for CF 1). The interval of the variance ratio includes 1; the result rests on 27
-  series.
-* [D] CF = 4 does **not** show larger errors (RMSE 0.33 [0.26, 0.60]). This is not evidence that very
-  complex sections are easy: CF = 4 consists of 212 usable records from 7 series, 62 % of them chute tests
-  from one investigation, tested over a narrow range of conditions. What the data show is that the CF = 4
-  records in this database are internally consistent and predictable from each other, and that they are
-  poorly predicted when removed from training (Section 3.8).
-* [D] CF is not constant within a reconstructed structure (32 geometries, 311 records), so it is not a
-  pure structure-level label in this file.
-* [N] Whether CF is a correct rating of geometric complexity cannot be tested without independent
-  re-rating of the cross-sections.
-
-## 3.4 RQ – RF x CF interaction (Experiment 7; Table 10, Figure 9d)
-
-* [P] No interaction is detectable: linear-by-linear RF x CF term in the variance model 1.06 per
-  step x step [0.83, 1.30] (Table 8c). The main-effects description is adequate.
-* [D] Six of the sixteen cells cannot support any statement (fewer than 50 records or fewer than three
-  series): every CF = 4 cell and (RF 4, CF 3). They are reported with counts and marked "INSUFFICIENT".
-* [P] Among adequately supported cells, MAE ranges from 0.26 (RF 1, CF 2) to 0.59 (RF 4, CF 2) and
-  0.58 (RF 3, CF 3); intervals are wide outside CF = 1.
-
-## 3.5 RQ3 – Does causal concept learning give more faithful, physically interpretable predictions?
-
-**It makes the model's own explanation measurably more faithful by the alignment criteria, at no cost in
-accuracy relative to its backbone. It does not make the prediction more accurate than gradient boosting,
-and it does not disentangle the concepts.**
-
-Model-internal alignment, geometry-grouped, mean over fold x seed runs (Table 5; SD over runs):
-
-| Variant | RMSE | necessity: |dY| on null-slot swap | sufficiency: active-only vs output | effect share per null-state slot | routed through changed slot (matched) |
-|---|---|---|---|---|---|
-| CCW-Net (full) | 0.590 | 0.033 +- 0.008 | 0.098 +- 0.014 | 3.2 % +- 0.5 | 0.138 +- 0.012 |
-| unaligned wrapper | 0.597 | 0.055 +- 0.017 | 0.295 +- 0.051 | 4.6 % +- 0.9 | 0.137 +- 0.015 |
-| no necessity | 0.605 | 0.042 | 0.102 | 3.5 % | 0.140 |
-| no sufficiency | 0.593 | 0.042 | 0.218 | 4.5 % | 0.137 |
-| no independence | 0.594 | 0.033 | 0.102 | 3.3 % | 0.139 |
-| no interaction term | 0.594 | 0.040 | 0.111 | 4.1 % | 0.129 |
-| scalar concepts (D = 1) | 0.597 | 0.059 | 0.396 | 3.8 % | 0.157 |
-| no conditional counterfactual | 0.597 | 0.028 | 0.087 | 2.9 % | 0.140 |
-| Gaussian mediator | 0.595 | 0.034 | 0.101 | 3.3 % | 0.140 |
-| concept bottleneck | 0.605 | – | – | 9.6 % +- 1.5 | – |
-
-* [M] Alignment lowers the effect of physically absent concepts on the prediction (necessity 0.055 ->
-  0.033; null-slot share 4.6 % -> 3.2 %) and makes the "active concepts only" reconstruction three times
-  closer to the model output (0.295 -> 0.098). The same ordering holds on the series-held-out scheme
-  (necessity 0.046 -> 0.029, sufficiency 0.367 -> 0.147). The concept-bottleneck model routes three times
-  more effect through absent concepts than CCW-Net, at similar concept accuracy (85 % vs 90 %): concept
-  accuracy does not imply faithful use, as in the original paper.
-* [M] What each term contributes: sufficiency is responsible for most of the sufficiency gain and part of
-  the null-slot gain; necessity for the necessity score; independence only for the additivity residual
-  (0.050 vs 0.098 without it) with no effect on the other scores; the explicit interaction term improves
-  necessity and null-slot share slightly. Vector concepts matter for concept read-out (accuracy 90 % vs
-  76 % scalar) and sufficiency.
-* [M] **Negative results.** (i) The conditional flow is not needed: drawing counterfactuals by permuting
-  batch rows, or from a conditional Gaussian, gives the same or slightly better scores. (ii) The matched
-  label-swap estimator shows that when a concept's label changes between comparable tests, only 14 % of
-  the output change passes through that concept's slot (10 % would be indiscriminate) for every variant.
-  The slots are entangled: each one carries information about the whole input, because all slots are
-  computed from one shared backbone latent and nothing in the losses restricts slot j to concept j.
-  (iii) Unaligned wrapper and CCW-Net use more interaction than intended (interaction share 0.28 for the
-  full model). (iv) Moving the freeboard slot to the next-higher freeboard state raises the prediction in
-  29 % of cases (25 % unaligned): the representation-level direction is not reliably physical.
-  (v) Alignment training had not fully converged in the 60-epoch budget (validation objective still
-  falling; best epoch on average 54 of 60).
-* [M] Concept-level effects (Table 6, Figure 6): zeroing the steepness, depth, freeboard and profile slots
-  changes the prediction by 0.30, 0.30, 0.24 and 0.20 on average; null-capable concepts by 0.05–0.15 when
-  present and 0.03–0.05 when absent. The largest explicit pair terms are steepness x depth (0.054),
-  freeboard x steepness (0.045) and freeboard x depth (0.034) - physically plausible pairs, but these are
-  magnitudes of model terms, not physical interaction strengths.
-* [D]+[C] Physical consistency is a property of smoothness, not of concept learning: the plain MLP has
-  fewer crest-raising reversals than CCW-Net (Section 3.6).
-* Loss-weight sensitivity (one seed): x10 weights improve necessity (0.019), sufficiency (0.067) and
-  null-slot share (2.5 %) with RMSE 0.595; x0.1 moves all scores toward the unaligned model. The default
-  is therefore not at an optimum, and stronger alignment was not penalised in accuracy within this range.
-
-## 3.6 RQ4 – Are physically inconsistent counterfactual predictions concentrated in particular RF/CF categories?
-
-**They are concentrated in particular model classes, not in particular RF categories; for CF there is a
-CF = 3 excess for tree models only.**
-
-Type A, crest raised by up to one Hm0 at fixed water level and waves (Rc and Ac together), supported
-counterfactual points only (5.6 % of counterfactual points fall outside the training support and are
-excluded); a reversal is an increase of more than 0.02 log10 units (Table 7, Figures 7–8):
-
-| Model | curves with >= 1 upward step | upward steps / valid steps | local reversal (0.05 Hm0) | global reversal (1 Hm0) | median / max rise |
-|---|---|---|---|---|---|
-| Random Forest | 24.2 % [22.3, 26.6] | 6.9 % | 8.2 % | 3.2 % | 0.06 / 0.57 |
-| XGBoost | 28.2 % [25.8, 30.9] | 7.4 % | 9.7 % | 1.6 % | 0.06 / 0.79 |
-| Monotone XGBoost | 0 | 0 | 0 | 0 | – |
-| MLP | 3.9 % [2.7, 5.6] | 1.3 % | 0.2 % | 1.9 % | 0.10 / 0.61 |
-| Concept bottleneck | 8.3 % | 2.7 % | 1.2 % | 2.4 % | 0.09 / 1.61 |
-| Unaligned wrapper | 5.8 % | 2.1 % | 0.6 % | 2.6 % | 0.10 / 1.84 |
-| CCW-Net | 5.3 % [4.0, 7.2] | 1.9 % | 0.5 % | 2.5 % | 0.10 / 2.08 |
-
-8 992 valid curves and about 43 600 valid steps per model; curves and steps are different units.
-
-* [C] More than a quarter of unconstrained tree-model response curves contain at least one step in the
-  wrong direction, mostly small local steps (step artefacts of piecewise-constant models); global reversals
-  over one wave height are rare for all models (1.6–3.2 %). Smooth networks have few local reversals but as
-  many global ones. The other interventions behave similarly (wall raised, crest widened, rougher armour;
-  Table 7); "rougher" is the least consistent for XGBoost (34 % of curves, 25 % local).
-* [C]/[P] By RF (XGBoost): 27, 28, 29, 33 % of curves for RF 1–4; difference RF4 - RF1 = +5.9 points
-  [-4.1, +16.9]; no association for any model after Holm correction except a small one for the concept
-  bottleneck (Table 7c). By CF (XGBoost): 28, 21, 41, 31 %; CF 3 is higher (41 % [34, 47]). For CCW-Net and
-  the MLP the highest rate is in CF 4 (12.5 % [7.8, 21.4] and 8.4 %), based on 210 curves from 7 series.
-* [D] Type C, measured pairs (same sub-structure, same h, Hm0, Tm-1,0, beta within tolerance, higher
-  crest; 3 906 pairs in 208 sub-structures; Table 7d): the *measurements* show more overtopping at the
-  higher crest in 4.7 % [3.5, 6.0] of pairs, with no trend in RF (6.8, 4.2, 4.8, 5.5 %). Out-of-fold
-  predictions reverse in 2.5–4.9 % of the same pairs; for pairs involving RF = 4 tests XGBoost reverses in
-  17 % against 5.5 % measured. A model reversal is not evidence that a measurement is wrong, and a measured
-  reversal of this size is within the repeat scatter (repeat SD 0.2–0.35).
-* [M] Type B (representation interventions) is reported in Section 3.5 and is not comparable with type A.
-
-## 3.7 RQ5 – Can hierarchical analysis separate test-level, geometry-level and source effects?
-
-**Geometry-level and within-geometry components are separated with useful precision; a series component
-is poorly determined; a laboratory component cannot be estimated.**
-
-REML decomposition of geometry-grouped XGBoost residuals (Table 9, Figures 4 and 10):
-
-| Component | units | SD | share of variance |
+| Component (XGBoost, geometry-grouped residuals) | units | SD | share of residual variance |
 |---|---|---|---|
-| test series | 162 | 0.155 | 11 % [1, 27] |
-| geometry within series | 2 046 | 0.260 | 30 % [20, 40] |
-| within-geometry residual | 9 333 | 0.365 | 59 % [50, 65] |
+| test series | 162 | 0.177 | 13 % [2, 29] |
+| geometry within series | 2 046 | 0.262 | 29 % [20, 40] |
+| within-geometry residual | 9 333 | 0.372 | 58 % [48, 64] |
 
-* [D] Stable to the grouping definition (coarse geometry 26 % / sub-structure 28 % geometry share;
-  residual 60–61 %).
-* [D] Under random-record cross-validation the geometry share falls to 12 % and the series share to 1 %:
-  the model memorises structure-specific offsets, which is exactly the leakage that grouped validation
-  removes.
-* [D] The decomposition depends on the model: for the MLP and CCW-Net the series component is 37–40 %
-  (they generalise worse across series). The "model-induced" part is therefore not a fixed property of the
-  data; the difference between models at a level is the model-induced error at that level.
-* [N] Laboratory: no laboratory identifier exists. With laboratories inferred from reference keywords
-  (12 laboratories, 6 514 records), the laboratory variance is estimated at zero and the series share at
-  2 % [0, 33]. With 12 units, heavy confounding with structure type, and 30 % of records unassignable, this
-  is absence of evidence, not evidence of no laboratory effect. A reference-level component is 1 %.
-* [P] By CF: the geometry SD is the same in every CF class (0.25, 0.26, 0.26, 0.20); CF = 3 differs in its
-  *within-geometry* residual (0.51 [0.30, 0.71] against 0.35) - the opposite of the expected pattern, in
-  which CF would track the geometry-level component.
-* [P] By RF: the within-geometry SD is 0.32, 0.39, 0.35, 0.42 for RF 1–4 (expected direction between RF 1
-  and RF 4, intervals overlap in between), and the geometry SD is also larger for RF 4 (0.35 [0.27, 0.49]
-  against 0.25). RF therefore relates to both levels, not only to the test level.
-* [D] Model-free repeatability variance from near-replicates is 0.080 (SD 0.28 [0.21, 0.36]), about 60 % of
-  the within-geometry residual variance of 0.133. The within-geometry residual is consequently **not**
-  pure measurement error, and near-replicates are themselves an upper bound on repeatability because
-  unrecorded differences (wind, spectral shape, measurement set-up) may exist between them.
+* [D] The shares are stable under other geometry definitions (geometry 25–28 %, residual 56–60 %).
+* [D] They depend on the validation unit and the model, which is the model-induced part. Under random
+  splits the geometry share falls to 11 % because the model memorises geometry offsets. With whole series
+  held out, the series share rises to 45 %. For the networks the series share is 35–39 % against 13–19 %
+  for the tree models.
+* [N] Source and laboratory: a reference-level component is 2 %. With 12 inferred laboratories
+  (6 514 records) the laboratory variance is estimated at zero. Given confounding with structure type and
+  30 % unassignable records, this is absence of evidence, not evidence of absence.
+* [D] Model-free repeatability: the near-replicate variance (0.080; SD 0.28) is 58 % of the within-geometry
+  residual variance (0.138). The within-geometry residual is therefore **not** pure measurement error; about
+  40 % of it is unexplained test-to-test variation beyond what replicate pairs show. Replicate pairs are
+  themselves an upper bound on repeatability.
+* [P] **Does RF explain the test level and CF the geometry level, as their definitions imply? Not cleanly.**
+  * Within-geometry SD by RF: 0.33, 0.40, 0.35, 0.42 (RF 1–4). This is the expected direction between RF 1
+    and RF 4, with overlapping intervals in between.
+  * The geometry-level SD is also larger for RF = 4 (0.36 [0.28, 0.52] vs 0.26), so RF = 4 marks harder
+    geometries as well as noisier tests.
+  * The geometry-level SD is the same in every CF class (0.26, 0.24, 0.26, 0.21). CF = 3 differs instead in
+    its *within-geometry* residual (0.53 [0.33, 0.74] vs 0.35), the opposite of what a structure-level
+    complexity rating should show.
 
-## 3.8 RQ6 – Can RF/CF improve calibration without entering the mean predictor?
+## 3.5 RQ4/RQ6 – Counterfactual data-selection policies (Tables 13–15; Figures 13–15)
 
-**Yes for RF, modestly: RF/CF-informed interval widths remove the under-coverage of RF = 4 tests. The gain
-comes from interval width; the mean predictor is untouched by construction.**
+Only the training policy changes; folds, learner, hyper-parameters, seeds and calibration geometries are
+held fixed. ΔRMSE is relative to retaining all records (P1), on the same held-out tests (XGBoost).
 
-90 % intervals, geometry-grouped split conformal with group-weighted calibration, 3 calibration splits
-(Table 11, Figure 11):
+| Policy | records used | ΔRMSE, RF<4 & CF<4 (n = 8 494) | ΔRMSE, RF = 4 (n = 637) | ΔRMSE, CF = 4 (n = 212) | 90 % coverage RF = 4 / CF = 4 | max coverage deviation across RF | predictions changed > factor 2 (category-4 tests) |
+|---|---|---|---|---|---|---|---|
+| P1 retain all | 9 333 | 0 | 0 (RMSE 0.641) | 0 (0.360) | 81 % / 94 % | 8.7 pts | – |
+| P2 exclude RF = 4 | 8 696 | +0.001 [−0.007, +0.009] | **+0.282** [+0.185, +0.395] | −0.016 | **64 %** / 93 % | 25.6 | 26 % |
+| P3 exclude CF = 4 | 9 121 | 0.000 [−0.006, +0.006] | −0.011 | **+0.225** [+0.171, +0.295] | 81 % / **77 %** | 9.5 | 9 % |
+| P4 exclude RF = 4 or CF = 4 | 8 494 | −0.005 [−0.012, +0.002] | +0.266 [+0.160, +0.388] | +0.222 [+0.163, +0.294] | 64 % / 74 % | 25.6 | 35 % |
+| P5 weights (4−RF)(4−CF) | 8 494 | −0.003 [−0.013, +0.008] | +0.297 [+0.189, +0.416] | +0.266 [+0.205, +0.357] | 63 % / 75 % | 27.0 | 38 % |
+| P5b P5 + "do not use" removed | 8 195 | −0.007 [−0.028, +0.011] | +0.310 | +0.262 | 64 % / 76 % | 26.3 | 41 % |
+| P6a empirical weights 1/σ²(RF,CF) | 9 333 | −0.001 [−0.010, +0.011] | +0.013 [−0.014, +0.036] | +0.013 | 78 % / 94 % | 12.1 | 4 % |
+| P6b retain all + RF/CF-aware intervals | 9 333 | 0 | 0 | 0 | **89 %** / 90 % | **4.3** | 0 % |
+| P6c P6a + P6b | 9 333 | −0.001 | +0.013 | +0.013 | 87 % / 90 % | 3.6 | 4 % |
 
-| Method | coverage (records) | coverage (mean over geometries) | mean width | RF 1 / 2 / 3 / 4 | CF 1 / 2 / 3 / 4 |
-|---|---|---|---|---|---|
-| constant width | 85.4 % [82.7, 87.7] | 89.8 % | 1.43 | 89 / 85 / 83 / **78** | 86 / 89 / 78 / 93 |
-| scale from physical inputs | 89.2 % [86.8, 91.1] | 90.1 % | 1.75 | 93 / 87 / 89 / 82 | 90 / 89 / 79 / 93 |
-| scale from RF, CF only | 85.5 % | 90.0 % | 1.45 | 87 / 85 / 83 / 87 | 86 / 86 / 82 / 88 |
-| scale from physical + RF, CF | 89.3 % [87.2, 91.1] | 90.0 % | 1.75 | 92 / 88 / 89 / **88** | 90 / 88 / 83 / 92 |
-| Mondrian by RF | 86.2 % | 90.5 % | 1.53 | 89 / 83 / 84 / 94 | – |
-| conformalised quantile regression | 89.7 % | 90.3 % | 2.65 | 88 / 91 / 93 / 80 | 90 / 90 / 88 / 89 |
-| Gaussian, uncalibrated | 76.5 % | 76.9 % | 1.16 | 82 / 74 / 75 / 68 | – |
+* [D] **No exclusion or conventional weighting policy improves prediction on the tests it keeps**: all
+  differences on the common tests lie within ±0.01 with intervals spanning zero. Random Forest agrees
+  (−0.002 to +0.009).
+* [D] **Every policy that removes or zero-weights category 4 makes the predictions for that category much
+  worse**: +0.22 to +0.31 RMSE, i.e. from a typical error factor of 4.4 to 8.7 for RF = 4 tests, and moves
+  26–41 % of category-4 predictions by more than a factor 2 (up to 10 % by more than a factor 10). Coverage
+  of 90 % intervals for RF = 4 tests drops to 63–64 %.
+* [D] Excluding RF = 4 does not harm CF = 4 predictions and vice versa: the information loss is specific to
+  the removed category.
+* [D] Geometry-level bias increases under every exclusion policy (0.251 → 0.279–0.287); structure-family
+  bias changes little (largest family bias 0.07–0.09; Table 15).
+* [P] The empirically weighted policy (P6a) is neutral. Down-weighting noisy tests in proportion to their
+  estimated residual variance neither helps the common tests nor harms category 4 materially.
+* [P] **The defensible alternative is P6b**: keep every test with equal weight in the mean model and let
+  RF/CF widen the uncertainty band. It equalises coverage across RF categories (largest deviation 4.3 points
+  against 8.7 for P1 and 26–27 for conventional practice) at the same average width. Coverage for CF = 3
+  improves from 79 % to 84 % but remains below nominal.
+* The difference between these policies is a change in the training data, not a change in any physical
+  input. It is an "intervention" on the data-selection decision.
 
-* [D] The guarantee of group-calibrated conformal prediction is for a test drawn from a new geometry with
-  geometries weighted equally; that quantity is 90 % for every conformal method, as designed. Record-level
-  coverage is lower for constant-width intervals (85 %) because a few large geometries are harder than
-  average. No per-category guarantee is claimed, except within-category calibration for Mondrian variants.
-* [P] Adding RF/CF to the scale model leaves overall coverage and width unchanged and reduces the largest
-  deviation across RF categories from 7.7 to 2.4 points (RF 4: 82 % -> 88 %, with RF-4 intervals widened
-  from 2.16 to 2.70). Across CF the largest deviation falls from 10.8 to 7.3 points; CF = 3 stays
-  under-covered (83 %) with every method except quantile regression, which pays with 50 % wider intervals.
-* [P] The worst adequately supported cell is (RF 3, CF 3) or (RF 2, CF 3) at 64–76 % for the
-  absolute-residual methods; worst structural family 82–86 %.
-* [D] Uncalibrated heteroscedastic intervals under-cover badly (77 %): out-of-geometry errors are larger
-  than in-sample variance models suggest.
-* [M] The CCW-Net quality branch (variance heads on the frozen network, Table 5b) agrees in direction: the
-  eight-parameter RF/CF head has a better held-out likelihood than a constant variance (0.904 vs 0.916),
-  whereas variance heads fed with concept vectors overfit (1.07) and under-cover (82 %).
+## 3.6 RQ5 – Causal concept explanations (Tables 9–12; Figures 11, 12)
 
-## 3.9 RQ7 – Does keeping RF = 4 and CF = 4 records provide information that filtering discards?
+CCW-Net was tuned with Optuna in every outer fold (concept dimension 4–16, encoder width, learning rate,
+interaction rank, alignment-weight multiplier 0.1–10). Ablations reuse the tuned configuration.
 
-**Yes. Removing them does not improve predictions for the remaining tests and makes predictions for the
-removed kind of test much worse.**
+| Variant | RMSE | necessity: effect of swapping an absent concept | sufficiency: active-only vs output | additivity residual | effect share per absent concept | share via changed concept (matched) |
+|---|---|---|---|---|---|---|
+| CCW-Net | **0.587** ± 0.063 | **0.024** ± 0.006 | **0.060** ± 0.016 | 0.028 | **2.5 %** ± 0.9 | 0.135 ± 0.014 |
+| unaligned wrapper | 0.597 | 0.053 ± 0.011 | 0.216 ± 0.079 | 0.077 | 3.8 % | 0.140 |
+| without necessity | 0.595 | 0.039 | 0.081 | 0.022 | 3.1 % | 0.135 |
+| without sufficiency | 0.593 | 0.030 | 0.151 | 0.023 | 3.4 % | 0.130 |
+| without independence | 0.593 | 0.023 | 0.065 | 0.084 | 2.6 % | 0.130 |
+| without interaction term | 0.598 | 0.030 | 0.077 | 0.040 | 3.3 % | 0.127 |
+| without conditional counterfactual | 0.594 | 0.019 | 0.058 | 0.029 | 2.1 % | 0.131 |
+| concept bottleneck | 0.600 | – | – | – | 9.4 % | – |
 
-Change in RMSE relative to training on all records (XGBoost; same folds, same test records; Table 12,
-Figure 12):
+(± = SD over fold × seed runs; 15 runs for CCW-Net, unaligned and bottleneck, 10 for ablations.)
 
-| Training set | tested on RF<4 and CF<4 (n = 8 494) | tested on RF = 4 (n = 637) | tested on CF = 4 (n = 212) |
-|---|---|---|---|
-| excluding RF = 4 | +0.002 [-0.005, +0.011] | **+0.277** [+0.186, +0.378] | +0.012 |
-| excluding CF = 4 | +0.012 [+0.004, +0.021] | -0.009 | **+0.236** [+0.169, +0.323] |
-| excluding RF = 4 or CF = 4 | +0.001 [-0.006, +0.008] | +0.287 [+0.185, +0.394] | +0.248 [+0.178, +0.335] |
-| CLASH weights (4-RF)(4-CF) | +0.006 [-0.004, +0.017] | +0.288 | +0.274 |
-| soft weights (5-RF)(5-CF), nothing removed | +0.001 [-0.007, +0.008] | +0.015 [-0.015, +0.058] | +0.028 [+0.005, +0.051] |
+* [M] Alignment does what it is designed to do. Necessity, sufficiency and independence each improve the
+  criterion they target; removing one degrades mainly that criterion. Relative to the unaligned wrapper the
+  necessity effect halves, the sufficiency gap falls from 0.22 to 0.06, and the additivity residual from
+  0.08 to 0.03, at equal or slightly better accuracy (0.587 vs 0.597).
+* [M] **Negative results.** (i) The conditional flow is unnecessary: drawing counterfactuals from other
+  batch rows gives the same or better scores. (ii) When a concept's label changes between comparable tests,
+  only 13.5 % of the output change passes through that concept's slot, for every variant (10 % would be
+  indiscriminate). The slots are entangled because all are computed from one shared backbone latent.
+  (iii) A third of the output variation passes through the explicit interaction term.
+* **Value beyond conventional feature attribution (Table 11).**
+  * [M] CCW-Net attributes 2.5 % of its effect per physically absent concept (no berm, no toe, normal
+    incidence, smooth, plain crest, flat foreshore). Grouped TreeSHAP of XGBoost attributes 6.4 %, the
+    unaligned wrapper 3.8 % and the bottleneck model 9.4 %.
+  * This difference is partly by construction, not a demonstration of greater physical truth. CCW-Net is
+    trained to give null states no effect, whereas "smooth slope" or "normal incidence" do physically affect
+    overtopping, and SHAP correctly gives them weight (for example roughness: |SHAP| 0.53 when smooth).
+  * The two methods also disagree completely on which concepts matter (Spearman 0.03 over ten concepts).
+    CCW-Net ranks depth and steepness first; SHAP ranks freeboard and roughness first, which agrees with
+    established overtopping formulae.
+  * The added value of CCW-Net is therefore a *testable* explanation: necessity, sufficiency and additivity
+    can be measured and enforced. Its concept importances are not more physically credible than SHAP and
+    should not be read as physical effects.
+* **Explanation quality versus data quality (Tables 12a–c).**
+  * [M] Explanation-quality measures do not differ by CF.
+  * [M] With RF they move weakly and in mixed directions. Interaction magnitude rises with RF (ρ = 0.14
+    [0.03, 0.24]), the share attributed to absent concepts falls (−0.15 [−0.28, −0.05]), and concept
+    read-out accuracy falls for RF = 4 (0.86 vs 0.93). None survives Holm correction across 28 tests.
+  * [P] A linear probe recovers RF = 4 from the learned physical concept vectors better than from the raw
+    predictors (AUC 0.70 vs 0.59, geometry-grouped). CF ≥ 3 is recoverable within series (0.79) but not
+    across series (0.46). The quality categories therefore mark particular regions of the physical input
+    space and particular investigations; they do not transfer as a property of the physics.
+* [M] The RF/CF variance branch on the frozen network has a better held-out likelihood than a constant
+  variance (0.894 vs 0.911), whereas branches fed with concept vectors overfit (1.09–1.14).
 
-* [D] Conventional filtering buys nothing measurable on the "clean" tests (differences of 0.001–0.012,
-  intervals including or touching zero) and costs 0.24–0.29 on category-4 tests (RMSE 0.62 -> 0.90 for
-  RF 4; 0.33 -> 0.58 for CF 4). Random Forest gives the same picture (+0.003 / +0.21 / +0.21).
-* [D] The category-4 records occupy parts of the input space that the other records do not cover (depth-
-  limited conditions with Hm0 > h, emergent toes, the chute configurations). Their value is coverage of
-  those conditions, not extra precision elsewhere.
-* [P] They are noisier (Section 3.2), which is handled by wider intervals (Section 3.8), not by deletion.
-* Caveat: this holds for flexible learners that can localise noisy data. It does not show that category-4
-  records are accurate, and "RF = 4 predicted from other RF = 4 tests" partly reflects shared series.
+## 3.7 Acceptance criteria (brief, Section 12)
 
-## 3.10 What the study does and does not establish
-
-| Statement | Class |
+| Criterion | Result |
 |---|---|
-| Random-split accuracy on CLASH overstates accuracy for new structures; grouping changes RMSE from 0.35 to 0.49–0.83 | D |
-| RF = 4 tests have about 2.4 times the residual variance of RF = 1 tests; RF 2 and RF 3 are not separable by error | P |
-| CF is not an ordered predictor of error or of generalisation difficulty; CF = 3 is the difficult class; CF = 4 rests on 7 series | P |
-| Alignment losses make the concept wrapper's explanation more faithful by necessity and sufficiency scores | M |
-| The concept slots are not disentangled; label changes are not routed through the matching slot | M |
-| Unconstrained tree models reverse the freeboard response locally in about a quarter of curves; reversals are not tied to RF | C |
-| 59 % of out-of-geometry residual variance is within geometry; near-replicate scatter explains about 60 % of that | D |
-| RF/CF-aware interval widths equalise coverage across RF without touching the mean model | P |
-| Filtering category 4 does not help clean tests and harms category-4 predictions | D |
-| RF or CF are correct ratings; RF measures measurement error; any laboratory effect | N |
-
-Notes on sign conventions: `bias` in Table 3 is prediction minus measurement; `bias` in Table 8a is
-measurement minus prediction (the residual).
+| 1. Measurable predictive validity of RF and CF | RF: yes for the RF 4 vs 1 contrast (variance ratio 2.3), not as an ordered scale. CF: no ordered relation; CF = 3 differs. Established as predictive association only |
+| 2. Test-level vs geometry-level separation | Yes statistically (58 % within geometry, 29 % between geometries). RF and CF do not map onto these levels as intended: RF = 4 is elevated at both levels; CF does not track the geometry level |
+| 3. Is category-4 exclusion justified? | **No.** It does not improve the retained tests and costs 0.22–0.31 RMSE and 26 coverage points on category-4 tests |
+| 4. Does quality-aware selection improve reliability? | Empirical down-weighting: no measurable effect. Quality-aware *intervals* with all data retained: yes, coverage equalised across RF |
+| 5. Does causal concept learning add explanatory value over feature attribution? | Partly. It makes explanations testable and more faithful by its own criteria. It does not disentangle concepts, its importances disagree with SHAP and with established formulae, and it is less accurate. Inconclusive as an engineering explanation tool |
+| 6. Distinct from the two previous papers? | Yes for the core contributions (Section 6 report). Residual overlap: use of geometry-grouped validation and conformal intervals as instruments; to be checked against the full texts |

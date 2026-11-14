@@ -10,8 +10,9 @@ import sys
 STAGES = {
     "audit": [sys.executable, "-m", "src.data_audit"],
     "tests": [sys.executable, "-m", "pytest", "-q", "tests"],
-    "baselines": [sys.executable, "-m", "experiments.run_baselines"],
+    "models": [sys.executable, "-m", "experiments.run_models"],
     "ccw": [sys.executable, "-m", "experiments.run_ccw"],
+    "policies": [sys.executable, "-m", "experiments.run_policies"],
     "analysis": [sys.executable, "-m", "experiments.run_analysis"],
     "figures": [sys.executable, "-m", "src.plotting"],
 }

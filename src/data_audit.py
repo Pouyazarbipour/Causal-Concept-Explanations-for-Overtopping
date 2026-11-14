@@ -120,7 +120,7 @@ def run() -> None:
                        "n_RF4": [int((master[c] & master.flag_rf4).sum()) for c in flags],
                        "n_CF4": [int((master[c] & master.flag_cf4).sum()) for c in flags]})
     save_table(fl, "table02e_flag_counts")
-    save_table(ontology_table(labels[master["use_regression"]]), "table04_concept_ontology")
+    save_table(ontology_table(labels[master["use_regression"]]), "tableS_concept_ontology")
     grp = pd.DataFrame([{"identifier": c, "origin": o, "n_unique_all": master[c].nunique(),
                          "n_unique_regression": master.loc[master.use_regression, c].nunique(),
                          "median_tests_per_group": float(master.loc[master.use_regression, c].value_counts().median()),

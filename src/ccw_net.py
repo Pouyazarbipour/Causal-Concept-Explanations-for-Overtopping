@@ -189,20 +189,14 @@ VARIANTS = {  # name -> overrides
     "ccw_no_suf": {"w": {"suf": 0.0}},
     "ccw_no_ind": {"w": {"ind": 0.0}},
     "ccw_no_interaction": {"interaction": False},
-    "ccw_scalar": {"D": 1},
     "ccw_no_cond_cf": {"cf_mode": "permute"},
-    "ccw_gaussian_mediator": {"flow_layers": 0},
-    "ccw_weights_x0.1": {"wmult": 0.1},
-    "ccw_weights_x10": {"wmult": 10.0},
 }
 
 
-def train_wrapper(Ztr, Xtr, ytr, Ltr, groups, C, seed, variant):
+def train_wrapper(Ztr, Xtr, ytr, Ltr, groups, C, seed, variant, final_flow=True):
     """Stages 2-4: warm-up, mediator fit, alignment with early stopping.  Returns model, flow, history."""
     ov = VARIANTS[variant]
     w = dict(C["weights"])
-    for k in ("nec", "suf", "ind"):
-        w[k] *= ov.get("wmult", 1.0)
     w.update(ov.get("w", {}))
     align, cf_mode = ov.get("align", True), ov.get("cf_mode", "flow")
     D = ov.get("D", C["concept_dim"])
@@ -259,6 +253,8 @@ def train_wrapper(Ztr, Xtr, ytr, Ltr, groups, C, seed, variant):
                 break
     model.load_state_dict(best_state)
     model.eval()
+    if not final_flow:      # hyper-parameter search: no evaluation mediator needed
+        return model, None, support, hist, {"epochs_run": len(hist)}
     # the mediator used for EVALUATION is always refitted on the final encoder (all variants alike)
     flow = ConceptFlow(J, D, KMAX + Xtr.shape[1], ov.get("flow_layers", C["flow"]["layers"]), C["flow"]["hidden"])
     with torch.no_grad():
@@ -269,7 +265,7 @@ def train_wrapper(Ztr, Xtr, ytr, Ltr, groups, C, seed, variant):
 
 # ------------------------------------------------------------------------------- evaluation
 @torch.no_grad()
-def evaluate(model, flow, support, Z, X, y_std, L, ysd, seed, tol):
+def evaluate(model, flow, support, Z, X, y_std, L, ysd, seed):
     """Model-internal alignment metrics on held-out records (all in log10 units unless a share)."""
     g = torch.Generator().manual_seed(seed)
     M = squash(model.pre(Z))
@@ -289,6 +285,7 @@ def evaluate(model, flow, support, Z, X, y_std, L, ysd, seed, tol):
     # necessity: counterfactual swap of null-state slots
     null = (L == 0) & NULLCAP
     dn, cnt = torch.zeros(J), torch.zeros(J)
+    rec_nec = torch.zeros(len(M))
     for _ in range(8):
         alt = alt_states(L, support, g)
         Mt = squash(flow.sample(make_cond(alt, X, KMAX), g))
@@ -298,6 +295,7 @@ def evaluate(model, flow, support, Z, X, y_std, L, ysd, seed, tol):
             d = (model.head(Mr)[0] - yhat).abs()
             dn[j] += (d * null[:, j]).sum()
             cnt[j] += null[:, j].sum()
+            rec_nec += d * null[:, j]
     res["nec_abs_effect"] = float(dn.sum() / cnt.sum().clamp_min(1)) * ysd
     # zero-ablation effect shares (mediator-free, as in the paper's per-input evaluation)
     e = torch.zeros(len(M), J)
@@ -337,27 +335,12 @@ def evaluate(model, flow, support, Z, X, y_std, L, ysd, seed, tol):
     per.update({"concept_acc": acc, "concept_f1": f1, "concept_ordinal_mae": omae, "concept_ece": ece})
     res.update({"concept_acc": float(np.mean(acc)), "concept_macro_f1": float(np.mean(f1)),
                 "concept_ordinal_mae": float(np.nanmean(omae)), "concept_ece": float(np.mean(ece))})
-    # ---- type B audit: representation interventions (NOT physical interventions) ------------
-    # move an ordinal slot to the next state whose expected physical direction is "less overtopping"
-    for name, j in (("freeboard", 0), ("obliquity", 3), ("roughness", 6)):
-        nxt = L[:, j] + 1
-        ok = (L[:, j] >= 0) & (nxt < N_STATES[j])
-        ok &= torch.tensor([support[j][min(int(k), KMAX - 1)] for k in nxt])
-        if ok.sum() < 20:
-            res[f"repr_{name}_reversal_rate"], res[f"repr_{name}_median_dy"] = np.nan, np.nan
-            continue
-        alt = L.clone()
-        alt[:, j] = nxt.clamp(max=N_STATES[j] - 1)
-        d = []
-        for _ in range(8):
-            Mt = squash(flow.sample(make_cond(alt, X, KMAX), g))
-            Mr = M.clone()
-            Mr[:, j] = Mt[:, j]
-            d.append((model.head(Mr)[0] - yhat) * ysd)
-        d = torch.stack(d).mean(0)[ok]
-        res[f"repr_{name}_reversal_rate"] = float((d > tol).float().mean())
-        res[f"repr_{name}_median_dy"] = float(d.median())
-    return res, per, M, pred
+    # per-record explanation-quality quantities (used to relate explanations to RF / CF categories)
+    rec = {"nec_effect": (torch.where(null.any(1), rec_nec / null.sum(1).clamp_min(1) / 8, torch.full((len(M),), float("nan"))) * ysd).numpy(),
+           "suf_gap": ((suf_pred - yhat).abs() * ysd).numpy(), "ind_resid": ((add - d0.sum(1)).abs() * ysd).numpy(),
+           "interaction_abs": (I.abs() * ysd).numpy(), "rho_inactive": torch.where(has_null_slot, (rho * null).sum(1), torch.full((len(M),), float("nan"))).numpy(),
+           "concept_correct": ((pred == L) | (L < 0)).float().mean(1).numpy(), "abl_effect": (e * ysd).numpy()}
+    return res, per, M, pred, rec
 
 
 @torch.no_grad()
@@ -477,17 +460,49 @@ def train_cbm(Ztr, ytr, Ltr, groups, C, seed):
 
 
 # ------------------------------------------------------------------------------- fold driver
-def run_fold(k, seed, tr, te, X_views, y, labels, groups, rfcf, mcfg, variants, base_seed, tol, want_reps=False):
-    """Train backbone (stage 1) once, then every requested variant, on one outer fold and one seed."""
+def tune_ccw(Ztr, Xt, yt, Lt, groups, C, n_trials, seed):
+    """Optuna (TPE) for the wrapper on the training partition only.  Objective: validation RMSE of the
+    aligned wrapper on a grouped validation split (shortened schedule).  The alignment-weight multiplier is
+    part of the search, so alignment strength is chosen without looking at held-out geometries."""
+    import copy
+    import optuna
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+    def build(params):
+        c = copy.deepcopy(C)
+        c.update({"concept_dim": params["concept_dim"], "encoder_hidden": params["encoder_hidden"], "lr": params["lr"],
+                  "interaction_rank": params["interaction_rank"]})
+        for k in ("nec", "suf", "ind"):
+            c["weights"][k] = C["weights"][k] * params["align_mult"]
+        return c
+
+    def objective(trial):
+        params = {"concept_dim": trial.suggest_categorical("concept_dim", [4, 8, 16]),
+                  "encoder_hidden": trial.suggest_categorical("encoder_hidden", [64, 128, 256]),
+                  "lr": trial.suggest_float("lr", 3e-4, 3e-3, log=True),
+                  "interaction_rank": trial.suggest_categorical("interaction_rank", [2, 4, 8]),
+                  "align_mult": trial.suggest_float("align_mult", 0.1, 10.0, log=True)}
+        c = build(params)
+        t = C["tune_epochs"]
+        c.update({"warmup_epochs": t["warmup"], "flow_epochs": t["flow"], "align_epochs": t["align"]})
+        _, _, _, hist, _ = train_wrapper(Ztr, Xt, yt, Lt, groups, c, seed, "ccw_full", final_flow=False)
+        return float(np.sqrt(min(h["val_task"] for h in hist if h["stage"] == "align")))
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=seed))
+    study.optimize(objective, n_trials=n_trials)
+    return build(study.best_params), dict(study.best_params), float(study.best_value), study.trials_dataframe(attrs=("number", "value", "params", "duration"))
+
+
+def run_fold(k, seed, tr, te, X, y, labels, groups, rfcf, mcfg, variants, base_seed, tuned=None):
+    """Stage 1 backbone, (optional) Optuna for the wrapper, then every requested variant on one fold/seed.
+    `tuned` = (C, params, value) from an earlier seed of the same fold re-uses the selected configuration."""
     torch.set_num_threads(1)
     C = mcfg["ccw"]
     s = base_seed + 1000 * seed + k
-    prep = FoldPrep(X_views[tr, 0])
+    prep = FoldPrep(X[tr])
     ymu, ysd = float(y[tr].mean()), float(y[tr].std())
-    Xtr = prep.scale(X_views[tr, 0])
+    Xtr = prep.scale(X[tr])
     ytr = (y[tr] - ymu) / ysd
-    n, V, p = X_views[te].shape
-    Xte_all = torch.tensor(prep.scale(X_views[te].reshape(-1, p)), dtype=torch.float32)
+    Xte = torch.tensor(prep.scale(X[te]), dtype=torch.float32)
     bb, _ = train_mlp(Xtr, ytr, groups[tr], C["backbone"], s, mcfg["mlp"]["epochs"], mcfg["mlp"]["patience"], C["batch_size"],
                       latent=C["backbone"]["latent"])
     for q in bb.parameters():
@@ -496,20 +511,24 @@ def run_fold(k, seed, tr, te, X_views, y, labels, groups, rfcf, mcfg, variants, 
     yt = torch.tensor(ytr, dtype=torch.float32)
     Lt = torch.tensor(labels[tr])
     with torch.no_grad():
-        Ztr, Zte_all = bb.latent(Xt), bb.latent(Xte_all)
-        bb_pred = (bb(Xte_all).numpy() * ysd + ymu).reshape(n, V)
-    Zte, Xte = Zte_all.view(n, V, -1)[:, 0], Xte_all.view(n, V, -1)[:, 0]
+        Ztr, Zte = bb.latent(Xt), bb.latent(Xte)
+        bb_pred = bb(Xte).numpy() * ysd + ymu
     Lte = torch.tensor(labels[te])
     yte_std = torch.tensor((y[te] - ymu) / ysd, dtype=torch.float32)
     outp = {"fold": k, "seed": seed, "te": te, "preds": {"backbone": bb_pred}, "metrics": [], "per_concept": [], "shapley": [],
-            "history": {}, "quality": []}
+            "history": {}, "quality": [], "records": {}, "reps": {}}
+    if tuned is None:
+        Ct, params, val, trials = tune_ccw(Ztr, Xt, yt, Lt, groups[tr], C, mcfg["optuna_trials"]["ccw"], s)
+        outp["tuning"] = {"params": params, "value": val, "trials": trials}
+    else:
+        Ct = tuned
+    outp["C"] = Ct
     for name in variants:
         if name == "cbm":
-            m = train_cbm(Ztr, yt, Lt, groups[tr], C, s)
+            m = train_cbm(Ztr, yt, Lt, groups[tr], Ct, s)
             with torch.no_grad():
-                yh, pr = m(Zte_all)
-                outp["preds"][name] = (yh.numpy() * ysd + ymu).reshape(n, V)
                 y0, pr0 = m(Zte)
+                outp["preds"][name] = y0.numpy() * ysd + ymu
                 acc = [float((p_.argmax(-1) == Lte[:, j])[Lte[:, j] >= 0].float().mean()) for j, p_ in enumerate(pr0)]
                 e = torch.stack([(y0 - m(Zte, zero=j)[0]).abs() for j in range(J)], 1)
                 rho = e / e.sum(1, keepdim=True).clamp_min(1e-12)
@@ -520,10 +539,10 @@ def run_fold(k, seed, tr, te, X_views, y, labels, groups, rfcf, mcfg, variants, 
                                     "rho_inactive_per_null_slot": float(((rho * null).sum(1) / null.sum(1).clamp_min(1))[hn].mean()),
                                     "rho_active_per_active_slot": float(((rho * (~null)).sum(1) / (~null).sum(1)).mean())})
             continue
-        model, flow, support, hist, extra = train_wrapper(Ztr, Xt, yt, Lt, groups[tr], C, s, name)
+        model, flow, support, hist, extra = train_wrapper(Ztr, Xt, yt, Lt, groups[tr], Ct, s, name)
         with torch.no_grad():
-            outp["preds"][name] = (model.head(squash(model.pre(Zte_all)))[0].numpy() * ysd + ymu).reshape(n, V)
-        res, per, Mte, pred = evaluate(model, flow, support, Zte, Xte, yte_std, Lte, ysd, s, tol)
+            outp["preds"][name] = model.head(squash(model.pre(Zte)))[0].numpy() * ysd + ymu
+        res, per, Mte, pred, rec = evaluate(model, flow, support, Zte, Xte, yte_std, Lte, ysd, s)
         sh = matched_shapley(model, Mte, Xte.numpy(), Lte, s)
         tot_n = sum(r["n"] for r in sh)
         res["rho_changed_matched"] = float(sum(r["n"] * r["rho_changed"] for r in sh) / tot_n) if tot_n else np.nan
@@ -533,9 +552,10 @@ def run_fold(k, seed, tr, te, X_views, y, labels, groups, rfcf, mcfg, variants, 
         outp["per_concept"].append({"variant": name, "fold": k, "seed": seed, **per})
         outp["shapley"] += [{"variant": name, "fold": k, "seed": seed, **r} for r in sh]
         outp["history"][name] = hist
+        if name in ("ccw_full", "ccw_unaligned"):
+            outp["records"][name] = rec
+            outp["reps"][name] = Mte.flatten(1).numpy()
         if name == "ccw_full":
-            if want_reps:
-                outp["reps"] = Mte.numpy()
             outp["quality"] += quality_branch(model, Ztr, yt, extra["val_idx"], Zte, yte_std, rfcf[tr], rfcf[te], ysd, s, k, seed)
     return outp
 
