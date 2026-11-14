@@ -4,9 +4,9 @@ Usage: python -m experiments.run_optimized [--learners ...] [--partitions]
 
 * Same pre-specified outer geometry folds and all 9 333 records as the original study.
 * Budgets and spaces in src/model_optimization.py (configs/optimized_models.yaml documents them).
-* `--partitions`: repeated grouped CV, i.e. the baseline XGBoost (original code, 30 trials) and the
-  optimised XGBoost on two further geometry partitions drawn with other seeds, plus the optimised
-  XGBoost on the series-held-out folds.  These are sensitivity analyses; the pre-specified partition
+* `--partitions`: repeated grouped CV, i.e. the baseline XGBoost (original code, 30 trials) on two further
+  geometry partitions drawn with other seeds, the optimised XGBoost (50 trials) on the first of them and on
+  the series-held-out folds.  These are sensitivity analyses; the pre-specified partition
   remains the primary result (no partition is chosen by its test error).
 Writes revision/outputs/models/<tag>.npz (pred [seeds, n]) and <tag>__trials.csv / __best.csv / __budget.csv.
 """
@@ -87,15 +87,17 @@ def main():
         run(name, f"geometry__{name}", Xp if name == "xgb_phys" else X, y, fold, groups, D, MO.BUDGET[name])
     if a.partitions:
         seed = D["cfg"]["experiment"]["seed"]
-        for s in (1, 2):
+        # budget-limited for runtime: baseline XGBoost (30 trials) on two further partitions; v2 XGBoost with 50 trials
+        # on the first further partition and on the series folds (on the primary partition 50 trials give 0.498 vs 0.493 with 100, M3)
+        for s, vers in ((1, ((1, 30), (2, 50))), (2, ((1, 30),))):
             f2 = alt_partition(groups, seed + 1000 * s)
-            for name, ver, nt in (("xgb", 1, 30), ("xgb", 2, MO.BUDGET["xgb"])):
-                tag = f"geometry_alt{s}__{name}_v{ver}"
+            for ver, nt in vers:
+                tag = f"geometry_alt{s}__xgb_v{ver}"
                 if not (OUT / f"{tag}.npz").exists():
-                    run(name, tag, X, y, f2, groups, D, nt, version=ver)
+                    run("xgb", tag, X, y, f2, groups, D, nt, version=ver)
         fs, gs = D["folds"]["series"].to_numpy(), groups_for(df, "series")
         if not (OUT / "series__xgb.npz").exists():
-            run("xgb", "series__xgb", X, y, fs, gs, D, MO.BUDGET["xgb"])
+            run("xgb", "series__xgb", X, y, fs, gs, D, 50)
     log.info("done")
 
 

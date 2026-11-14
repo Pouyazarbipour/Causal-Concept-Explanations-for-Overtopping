@@ -1,0 +1,33 @@
+geometry,series,n,CF_values,n_contiguous_blocks,test_numbers,in_regression,differences_between_lowest_and_highest_CF
+030|0.14|0.14|0|0|0|0|0|1|1|1|0|1e+03,030,10,1/2,2,368–477,6,wave conditions differ; obliquity differs
+030|0.14|0.14|0|0|0|0|0|2|2|1|0|1e+03,030,7,1/2,2,374–480,4,wave conditions differ; obliquity differs
+030|0.14|0.14|0|0|0|0|0|4|4|1|0|1e+03,030,6,1/2,2,380–485,1,wave conditions differ; obliquity differs
+030|0.18|0.18|0|0|0|0|0|1|1|1|0|1e+03,030,15,1/2/3,3,365–500,15,wave conditions differ; obliquity differs
+030|0.18|0.18|0|0|0|0|0|2|2|1|0|1e+03,030,8,1/2,2,371–479,8,wave conditions differ; obliquity differs
+030|0.18|0.18|0|0|0|0|0|4|4|1|0|1e+03,030,14,1/2/3,3,377–501,10,wave conditions differ; obliquity differs
+030|0.26|0.26|0.08|0|0.4|0|0|1|1|1|0|20,030,3,1/2/3,3,112–492,3,wave conditions differ; obliquity differs; RF also differs
+030|0.26|0.26|0.08|0|0.4|0|0|4|4|1|0|20,030,4,1/2/3,3,290–495,4,wave conditions differ; obliquity differs; RF also differs
+030|0.26|0.26|0|0.08|0|0.4|0|1|1|1|0|20,030,14,1/2/3,3,113–494,14,wave conditions differ; obliquity differs; RF also differs
+030|0.26|0.26|0|0.08|0|0.4|0|2|2|1|0|20,030,10,1/2,2,198–459,10,wave conditions differ; obliquity differs
+030|0.26|0.26|0|0.08|0|0.4|0|4|4|1|0|20,030,14,1/2/3,3,291–497,14,wave conditions differ; obliquity differs; RF also differs
+030|0.26|0.26|0|0.12|0|0.4|0|1|1|1|0|20,030,9,1/2,2,138–456,9,wave conditions differ; obliquity differs
+030|0.26|0.26|0|0.12|0|0.4|0|2|2|1|0|20,030,14,1/2,2,224–462,14,wave conditions differ; obliquity differs
+030|0.26|0.26|0|0.12|0|0.4|0|4|4|1|0|20,030,12,1/2,2,313–470,11,wave conditions differ; obliquity differs
+030|0.26|0.26|0|0|0|0|0|1|1|1|0|20,030,21,1/2/3,3,11–488,21,wave conditions differ; obliquity differs; RF also differs
+030|0.26|0.26|0|0|0|0|0|2|2|1|0|20,030,13,1/2,2,30–443,13,wave conditions differ; obliquity differs
+030|0.26|0.26|0|0|0|0|0|4|4|1|0|20,030,24,1/2/3,3,50–491,24,wave conditions differ; obliquity differs; RF also differs
+205|0.385|0.368|0.0811|0|0.235|0|0.564|1.5|1.5|0.47|0|42.5,205,7,1/2,2,18–24,7,wave conditions differ
+223|1.16|1.16|0|0.66|0|2|0|0|0|1|0|1e+03,223,3,1/2,2,53–56,3,wave conditions differ; RF also differs
+326|0.339|0.353|0|0|0|0|0.278|2|2|0.4|0|20,326,14,1/2,2,8–21,14,wave conditions differ
+328|0.364|0.331|0|0|0|0|0.333|2|2|0.4|0|100,328,32,1/3,2,1–32,32,wave conditions differ
+329|0.365|0.361|0|0|0|0|0.431|2|2|0.4|0|100,329,32,1/3,2,9–40,32,none in documented hydraulic variables
+355|1.25|1.25|0.25|0|0.425|0|0|0|0|0.722|0|1e+03,355,2,1/3,2,8–30,2,wave conditions differ
+355|1.25|1.25|0.25|0|0.425|0|0|0|0|0.731|0|1e+03,355,2,1/3,2,9–20,2,wave conditions differ
+355|1.25|1.25|0.25|0|0.425|0|0|0|0|0.769|0|1e+03,355,2,1/3,2,3–17,2,wave conditions differ; RF also differs
+355|1.48|1.48|0.25|0|0.425|0|0|0|0|0.722|0|1e+03,355,2,2/4,2,74–96,1,wave conditions differ; RF also differs
+355|1.48|1.48|0.25|0|0.425|0|0|0|0|0.731|0|1e+03,355,2,2/4,2,75–86,1,wave conditions differ; RF also differs
+355|1.48|1.48|0.25|0|0.425|0|0|0|0|0.769|0|1e+03,355,2,3/4,2,69–83,2,wave conditions differ
+355|1.48|1.48|0.25|0|0.425|0|0|0|0|0.783|0|1e+03,355,2,2/3,2,70–73,1,wave conditions differ; RF also differs
+919|0.191|0.173|0.0523|0.125|0.131|0.174|0.0305|0|0|1|0.05|150,919,4,1/4,2,158–164,4,wave conditions differ
+919|0.191|0.173|0.0523|0.125|0.131|0.174|0.0305|0|0|1|0.05|160,919,4,1/4,2,159–165,4,wave conditions differ
+919|0.209|0.187|0.0523|0.105|0.131|0.239|0.0348|0|2.17|0.9|0.0333|150,919,3,2/4,3,185–188,3,none in documented hydraulic variables
