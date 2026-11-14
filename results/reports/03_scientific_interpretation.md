@@ -22,14 +22,14 @@ Evidence classes: **[D]** directly demonstrated by the data; **[P]** predictive 
 | XGBoost | **0.501** [0.458, 0.547] | 0.348 | 0.816 | −0.010 | 3.17 |
 | CatBoost | 0.513 [0.462, 0.567] | 0.347 | 0.808 | −0.011 | 3.26 |
 | MLP (3 seeds) | 0.576 [0.522, 0.636] | 0.403 | 0.757 | −0.003 | 3.77 |
-| CCW-Net (3 seeds) | 0.590 [0.534, 0.647] | 0.409 | 0.745 | −0.006 | 3.89 |
+| CCW-Net (3 seeds) | 0.601 [0.542, 0.665] | 0.415 | 0.736 | −0.020 | 3.99 |
 
 F10 here is 10^RMSE, the geometric standard-deviation factor of predicted/measured discharge. Bias is
 predicted minus measured. For the MLP and CCW-Net the table gives the mean of per-seed metrics; averaging the three
-seeds' predictions (seed ensemble, Figure 3) gives RMSE 0.550 and 0.553.
+seeds' predictions (seed ensemble, Figure 3) gives RMSE 0.550 and 0.564.
 
 * [D] The models serve as instruments for obtaining leakage-free residuals; the ranking is not a
-  contribution. The boosted trees are the most accurate; the networks are 0.07–0.09 worse.
+  contribution. The boosted trees are the most accurate; the networks are 0.07–0.10 worse.
 * [D] The Optuna objective (inner grouped CV) is close to the outer test error for every model (XGBoost
   0.544 inner vs 0.500 outer). The best-so-far curves flatten within the budget for the tree models
   (Figure S1); the MLP and CCW-Net budgets are small (L9).
@@ -171,54 +171,70 @@ held fixed. ΔRMSE is relative to retaining all records (P1), on the same held-o
 ## 3.6 RQ5 – Causal concept explanations (Tables 9–12; Figures 11, 12)
 
 CCW-Net was tuned with Optuna in every outer fold (concept dimension 4–16, encoder width, learning rate,
-interaction rank, alignment-weight multiplier 0.1–10). Ablations reuse the tuned configuration.
+interaction rank, alignment-weight multiplier 0.1–10). Ablations reuse the tuned configuration. The
+losses and the matched interventional-effect estimator follow the reference implementation of Rountree
+et al. (2026) after the corrections listed in report 08. **All CCW-Net numbers in earlier drafts,
+including the "13.5 % routed through the changed concept" statement, were produced by a biased estimator
+and are withdrawn.**
 
-| Variant | RMSE | necessity: effect of swapping an absent concept | sufficiency: active-only vs output | additivity residual | effect share per absent concept | share via changed concept (matched) |
-|---|---|---|---|---|---|---|
-| CCW-Net | **0.587** ± 0.063 | **0.024** ± 0.006 | **0.060** ± 0.016 | 0.028 | **2.5 %** ± 0.9 | 0.135 ± 0.014 |
-| unaligned wrapper | 0.597 | 0.053 ± 0.011 | 0.216 ± 0.079 | 0.077 | 3.8 % | 0.140 |
-| without necessity | 0.595 | 0.039 | 0.081 | 0.022 | 3.1 % | 0.135 |
-| without sufficiency | 0.593 | 0.030 | 0.151 | 0.023 | 3.4 % | 0.130 |
-| without independence | 0.593 | 0.023 | 0.065 | 0.084 | 2.6 % | 0.130 |
-| without interaction term | 0.598 | 0.030 | 0.077 | 0.040 | 3.3 % | 0.127 |
-| without conditional counterfactual | 0.594 | 0.019 | 0.058 | 0.029 | 2.1 % | 0.131 |
-| concept bottleneck | 0.600 | – | – | – | 9.4 % | – |
+| Variant | RMSE | necessity: effect of swapping an absent concept | sufficiency: active-only vs output | additivity residual | zero-ablation share per absent concept | matched share via changed concept | matched share per held absent concept |
+|---|---|---|---|---|---|---|---|
+| CCW-Net | 0.597 ± 0.073 | **0.038** ± 0.012 | **0.108** ± 0.029 | 0.062 | **3.4 %** ± 0.5 | 0.171 ± 0.017 | **3.8 %** ± 0.5 |
+| unaligned wrapper | 0.592 | 0.055 ± 0.016 | 0.273 ± 0.134 | 0.049 | 4.5 % | 0.169 | 5.2 % |
+| without necessity | 0.593 | 0.045 | 0.117 | 0.053 | 3.6 % | 0.176 | 4.4 % |
+| without sufficiency | 0.605 | 0.043 | 0.209 | 0.052 | 4.3 % | 0.168 | 5.0 % |
+| without independence | 0.605 | 0.035 | 0.118 | 0.128 | 3.4 % | 0.166 | 3.8 % |
+| without interaction term | 0.607 | 0.037 | 0.107 | 0.059 | 3.9 % | 0.152 | 4.2 % |
+| without conditional counterfactual | 0.600 | 0.030 | 0.103 | 0.056 | 3.2 % | 0.162 | 3.2 % |
+| concept bottleneck | 0.599 | – | – | – | 9.6 % | – | – |
 
-(± = SD over fold × seed runs; 15 runs for CCW-Net, unaligned and bottleneck, 10 for ablations.)
+(± = SD over fold × seed runs; 15 runs for CCW-Net, unaligned and bottleneck, 10 for ablations. RMSE here is
+the mean over runs; Table 3 gives the mean of per-seed pooled metrics, 0.601. Reference value for an
+indiscriminate split over ten concepts: 0.10.)
 
-* [M] Alignment does what it is designed to do. Necessity, sufficiency and independence each improve the
-  criterion they target; removing one degrades mainly that criterion. Relative to the unaligned wrapper the
-  necessity effect halves, the sufficiency gap falls from 0.22 to 0.06, and the additivity residual from
-  0.08 to 0.03, at equal or slightly better accuracy (0.587 vs 0.597).
-* [M] **Negative results.** (i) The conditional flow is unnecessary: drawing counterfactuals from other
-  batch rows gives the same or better scores. (ii) When a concept's label changes between comparable tests,
-  only 13.5 % of the output change passes through that concept's slot, for every variant (10 % would be
-  indiscriminate). The slots are entangled because all are computed from one shared backbone latent.
-  (iii) A third of the output variation passes through the explicit interaction term.
+* [M] **Alignment does what it is trained to do, but only for its own criteria.** Relative to the unaligned
+  wrapper the necessity effect falls by a third (0.038 vs 0.055, paired difference 0.017 ± 0.009, 95 %), the
+  sufficiency gap from 0.27 to 0.11 (0.165 ± 0.066) and the share of the explicit interaction term from 0.55
+  to 0.23. Accuracy is unchanged (paired ΔRMSE −0.005 ± 0.007, not significant). Each ablation degrades mainly
+  the criterion its loss targets: without necessity +0.008 ± 0.006 necessity effect, without sufficiency
+  +0.099 ± 0.084 sufficiency gap, without independence +0.069 ± 0.023 additivity residual.
+* [M] **Negative results.**
+  * (i) The additivity residual of the aligned model (0.062) is not lower than that of the unaligned wrapper
+    (0.049; difference not significant). The independence loss only prevents a deterioration that alignment
+    otherwise causes.
+  * (ii) The conditional flow is unnecessary. Drawing counterfactuals from other rows of the batch gives the
+    same or slightly better scores (necessity −0.007 ± 0.003).
+  * (iii) Concept routing is better than indiscriminate but not improved by alignment. When a concept's label
+    differs between matched tests, 17.1 % of the interventional effect passes through that concept's slot,
+    against 16.9 % for the unaligned wrapper and 10 % for an indiscriminate split. The slots stay entangled
+    because all are computed from one shared backbone latent.
 * **Value beyond conventional feature attribution (Table 11).**
-  * [M] CCW-Net attributes 2.5 % of its effect per physically absent concept (no berm, no toe, normal
-    incidence, smooth, plain crest, flat foreshore). Grouped TreeSHAP of XGBoost attributes 6.4 %, the
-    unaligned wrapper 3.8 % and the bottleneck model 9.4 %.
+  * [M] Under matched interventions CCW-Net attributes 3.8 % of the effect to each held absent concept (no
+    berm, no toe, normal incidence, smooth, plain crest, flat foreshore), against 5.2 % for the unaligned
+    wrapper (difference 0.015 ± 0.013, marginal). Zero-ablation gives 3.4 % (CCW-Net), 4.5 % (unaligned), 9.6 %
+    (bottleneck) and 6.4 % (grouped TreeSHAP of XGBoost).
   * This difference is partly by construction, not a demonstration of greater physical truth. CCW-Net is
     trained to give null states no effect, whereas "smooth slope" or "normal incidence" do physically affect
     overtopping, and SHAP correctly gives them weight (for example roughness: |SHAP| 0.53 when smooth).
-  * The two methods also disagree completely on which concepts matter (Spearman 0.03 over ten concepts).
-    CCW-Net ranks depth and steepness first; SHAP ranks freeboard and roughness first, which agrees with
-    established overtopping formulae.
+  * The two methods disagree on which concepts matter (Spearman 0.07 over ten concepts). CCW-Net spreads
+    importance almost evenly over profile type, relative depth, steepness and relative freeboard
+    (0.22–0.26 log10 units each); SHAP ranks relative freeboard and roughness first (0.47 each), which agrees
+    with established overtopping formulae.
   * The added value of CCW-Net is therefore a *testable* explanation: necessity, sufficiency and additivity
     can be measured and enforced. Its concept importances are not more physically credible than SHAP and
     should not be read as physical effects.
 * **Explanation quality versus data quality (Tables 12a–c).**
   * [M] Explanation-quality measures do not differ by CF.
-  * [M] With RF they move weakly and in mixed directions. Interaction magnitude rises with RF (ρ = 0.14
-    [0.03, 0.24]), the share attributed to absent concepts falls (−0.15 [−0.28, −0.05]), and concept
-    read-out accuracy falls for RF = 4 (0.86 vs 0.93). None survives Holm correction across 28 tests.
-  * [P] A linear probe recovers RF = 4 from the learned physical concept vectors better than from the raw
-    predictors (AUC 0.70 vs 0.59, geometry-grouped). CF ≥ 3 is recoverable within series (0.79) but not
-    across series (0.46). The quality categories therefore mark particular regions of the physical input
-    space and particular investigations; they do not transfer as a property of the physics.
+  * [M] With RF they move weakly. Absolute error rises with RF (ρ = 0.12 [0.02, 0.21]). The zero-ablation
+    share of absent concepts falls (−0.15 [−0.31, −0.01]). Concept read-out accuracy is lower for RF = 4 (0.84
+    vs 0.92 for RF = 1). Necessity, sufficiency and additivity do not change with RF or CF. None of the 28
+    trend tests survives Holm correction.
+  * [P] A linear probe recovers RF = 4 from the learned concept vectors better than from the raw predictors
+    (AUC 0.73 vs 0.59, geometry-grouped). CF ≥ 3 is recoverable across geometries (0.77) but not across test
+    series (0.48). The quality categories therefore mark particular regions of the physical input space and
+    particular investigations; they do not transfer as a property of the physics.
 * [M] The RF/CF variance branch on the frozen network has a better held-out likelihood than a constant
-  variance (0.894 vs 0.911), whereas branches fed with concept vectors overfit (1.09–1.14).
+  variance (0.912 vs 0.933), whereas branches fed with concept vectors overfit (1.17–1.24).
 
 ## 3.7 Acceptance criteria (brief, Section 12)
 
@@ -228,5 +244,5 @@ interaction rank, alignment-weight multiplier 0.1–10). Ablations reuse the tun
 | 2. Test-level vs geometry-level separation | Yes statistically (58 % within geometry, 29 % between geometries). RF and CF do not map onto these levels as intended: RF = 4 is elevated at both levels; CF does not track the geometry level |
 | 3. Is category-4 exclusion justified? | **No.** It does not improve the retained tests and costs 0.22–0.31 RMSE and 26 coverage points on category-4 tests |
 | 4. Does quality-aware selection improve reliability? | Empirical down-weighting: no measurable effect. Quality-aware *intervals* with all data retained: yes, coverage equalised across RF |
-| 5. Does causal concept learning add explanatory value over feature attribution? | Partly. It makes explanations testable and more faithful by its own criteria. It does not disentangle concepts, its importances disagree with SHAP and with established formulae, and it is less accurate. Inconclusive as an engineering explanation tool |
+| 5. Does causal concept learning add explanatory value over feature attribution? | Partly. It makes explanations testable and more faithful by its own necessity and sufficiency criteria. It does not route effects to the changed concept better than an unaligned wrapper (17 % vs 17 %, chance 10 %), its importances disagree with SHAP and with established formulae, and it is less accurate than the boosted trees (0.60 vs 0.50). Inconclusive as an engineering explanation tool |
 | 6. Distinct from the two previous papers? | Yes for the core contributions (Section 6 report). Residual overlap: use of geometry-grouped validation and conformal intervals as instruments; to be checked against the full texts |
