@@ -213,7 +213,9 @@ hl = [f"All 10 532 CLASH tests are audited. The models use 10 389 tests (occurre
       f"RF = 4 tests have {f(vr4.variance_ratio, 1)} times the residual variance of RF = 1 tests, consistently across learners and validation schemes. RF 1–3 show no ordered trend.",
       "The complexity factor shows no ordered relation to geometry-level error. CF = 3 is the difficult class, and much of its error comes from a few series."]
 if PF is not None:
-    hl.append(f"Excluding category-4 tests leaves the other predictions unchanged (|ΔRMSE| ≤ {f(PF.loc[EXCL, 'd_rmse_common'].abs().max(), 3)}) and degrades category-4 predictions, with fixed or with re-tuned learners.")
+    hl.append(f"Excluding category-4 tests changes the other predictions by at most {f(PF.loc[EXCL, 'd_rmse_common'].abs().max(), 3)} (fixed learner)"
+              + (f" or {f(PT.loc[EXCL, 'd_rmse_common'].abs().max(), 3)} (re-tuned, not significant)" if PT is not None else "")
+              + " but degrades category-4 predictions by about 0.25 log10 units.")
 hl.append(f"Quality-aware conformal intervals with all tests retained raise RF = 4 coverage from {pct(C25.loc['constant', 'cov_RF4'])} to {pct(C25.loc['physical+RF+CF', 'cov_RF4'])}. CF = 3 remains under-covered.")
 bl(hl)
 
@@ -229,7 +231,8 @@ abs_ = (f"Each test in the CLASH wave-overtopping database carries a Reliability
         f"Near-replicate variance accounts for {pct(rrat.value)} {ci(100*rrat.lo, 100*rrat.hi, 0).replace('[', '[').replace(']', ' %]')} of the within-geometry part, so that part is not pure measurement error. ")
 if PF is not None:
     abs_ += (f"On identical held-out tests, excluding or zero-weighting category-4 tests changes the error of the remaining tests by at most {f(PF.loc[EXCL, 'd_rmse_common'].abs().max(), 3)} log10 units. "
-             f"It increases the error of RF = 4 tests by {prange(PF, 'd_rmse_RF4', EX_RF4)}, also when each policy receives its own tuned learner. ")
+             + (f"With a learner re-tuned for each policy the retained tests gain at most {f(-PT.loc[EXCL, 'd_rmse_common'].min(), 3)} (not significant). " if PT is not None else "")
+             + f"Both ways, the error of RF = 4 tests increases by {prange(PF, 'd_rmse_RF4', EX_RF4)}. ")
 abs_ += (f"Retaining all tests and scaling group-weighted split-conformal intervals by RF, CF and the physical inputs raises RF = 4 coverage of 90 % intervals "
          f"from {pct(C25.loc['constant', 'cov_RF4'])} to {pct(C25.loc['physical+RF+CF', 'cov_RF4'])} and gives the best interval score. "
          f"CF = 3 tests remain under-covered ({pct(C25.loc['physical+RF+CF', 'cov_CF3'])}). "
@@ -537,8 +540,15 @@ if PF is not None:
     txt = (f"No exclusion or conventional weighting policy improves prediction of the tests it keeps ({tref('pol')}, {fref('pol')}). "
            f"With fixed hyper-parameters the common-test differences lie between {s(PF.loc[EXCL, 'd_rmse_common'].min())} and {s(PF.loc[EXCL, 'd_rmse_common'].max())}. ")
     if PT is not None:
-        txt += (f"With policy-specific tuning they lie between {s(PT.loc[EXCL, 'd_rmse_common'].min())} and {s(PT.loc[EXCL, 'd_rmse_common'].max())}, so a learner "
-                f"tuned to the curated data does not recover a benefit. ")
+        nsig = int(sum(sig(PT.loc[k, 'd_rmse_common_lo'], PT.loc[k, 'd_rmse_common_hi']) for k in EXCL))
+        kb = PT.loc[EXCL, 'd_rmse_common'].idxmin()
+        txt += (f"With policy-specific tuning they lie between {s(PT.loc[EXCL, 'd_rmse_common'].min())} and {s(PT.loc[EXCL, 'd_rmse_common'].max())}. "
+                f"The largest gain ({lab.get(kb, kb)}: {s(PT.loc[kb, 'd_rmse_common'])} {ci(PT.loc[kb, 'd_rmse_common_lo'], PT.loc[kb, 'd_rmse_common_hi'])}, "
+                f"{pct(-PT.loc[kb, 'd_rmse_common'] / PT.loc['P1_retain_all', 'rmse_common'], 1)} of the common-test RMSE) is "
+                + ("not significant at the 95 % level" if nsig == 0 else f"significant for {nsig} of {len(EXCL)} policies")
+                + ". Re-tuning on curated data thus yields at most a small gain on the retained tests. Part of it reflects a different selected "
+                f"model (shallower, faster-learning trees) rather than cleaner data: the inner objective is computed on the retained tests only and is "
+                f"therefore lower ({f(PT.loc[kb, 'inner_rmse_mean'])} against {f(PT.loc['P1_retain_all', 'inner_rmse_mean'])}). ")
     txt += (f"Every policy that removes or zero-weights a category degrades that category: RF = 4 tests gain {prange(PF, 'd_rmse_RF4', EX_RF4)} RMSE and CF = 4 tests "
             f"{prange(PF, 'd_rmse_CF4', EX_CF4)}" + (f" ({prange(PT, 'd_rmse_RF4', EX_RF4)} and {prange(PT, 'd_rmse_CF4', EX_CF4)} when tuned)" if PT is not None else "") + ". "
             f"The same policies move {f(PF.loc[EX_RF4, 'pct_changed_factor2_category4'].min(), 0)}–{f(PF.loc[EX_RF4, 'pct_changed_factor2_category4'].max(), 0)} % of category-4 "
@@ -648,7 +658,8 @@ p(f"CCW-Net is less accurate than gradient boosting (pooled RMSE {f(P0.loc['CCW-
 h1("11. Discussion")
 h2("11.1 What the data demonstrate")
 p("The policy experiments answer the engineering question on identical held-out tests, with fixed and with re-tuned learners. Conventional "
-  "exclusion and weighting rules do not make the remaining predictions more accurate. They make predictions for the excluded tests much worse, "
+  "exclusion and weighting rules do not make the remaining predictions measurably more accurate; at best a re-tuned learner gains about 0.01 log10 units, "
+  "within the uncertainty. They make predictions for the excluded tests much worse, "
   "intervals for those tests over-confident, and safety decisions for them less conservative. Category-4 tests occupy regimes the other tests do "
   "not cover, and their value lies in that coverage.")
 h2("11.2 What is supported by predictive association only")
@@ -679,7 +690,7 @@ h1("13. Conclusions")
 bl([f"RF = 4 identifies tests with about {f(vr4.variance_ratio, 1)} times the residual dispersion of RF = 1 tests. RF 1–3 are not ordered, and repeatability evidence is inconclusive. RF is a coarse flag, not a graded uncertainty measure.",
     "CF shows no ordered relation to geometry-level error or generalisation, and varies within reconstructed geometries. CF = 3 is the hardest class, driven by a few series.",
     f"Most residual variance lies within geometries ({pct(q_w.share)}), and only about half of it can be matched by near-replicate variance.",
-    "Excluding or zero-weighting category-4 tests gives no measurable benefit to the remaining predictions, even with re-tuned learners. It degrades predictions, interval coverage and safety decisions for the excluded tests and removes depth-limited and low-freeboard regimes.",
+    "Excluding or zero-weighting category-4 tests gives no significant benefit to the remaining predictions; with re-tuned learners a gain of about 1–3 % of the RMSE is possible but not significant. It degrades predictions, interval coverage and safety decisions for the excluded tests and removes depth-limited and low-freeboard regimes.",
     "Retaining all tests and using RF and CF to scale prediction intervals is the more defensible practice for using the database. CF = 3 under-coverage and the unavailability of RF for new structures remain open.",
     "Data-quality ratings should be evaluated empirically before they are used to discard experimental information."])
 
