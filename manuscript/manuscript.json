@@ -415,11 +415,11 @@
 ],
 [
 "CCW-Net (3 seeds)",
-"0.590 [0.534, 0.647]",
-"0.409",
-"0.745",
-"−0.006",
-"3.89"
+"0.601 [0.542, 0.664]",
+"0.415",
+"0.736",
+"−0.020",
+"3.99"
 ]
 ],
 "widths": [
@@ -435,7 +435,7 @@
 },
 {
 "t": "p",
-"text": "The boosted trees are the most accurate models (Table 4, Fig. 2), and the networks are 0.07–0.09 worse. The validation unit dominates: the reference model reaches RMSE 0.354 with random records, 0.501 with held-out geometries and 0.749 with held-out test series. The inner Optuna objective agrees with the outer test error for every model. Residuals show no trend over most of the range; the smallest discharges (Y < −6) are under-predicted."
+"text": "The boosted trees are the most accurate models (Table 4, Fig. 2), and the networks are 0.07–0.10 worse. The validation unit dominates: the reference model reaches RMSE 0.354 with random records, 0.501 with held-out geometries and 0.749 with held-out test series. The inner Optuna objective agrees with the outer test error for every model. Residuals show no trend over most of the range; the smallest discharges (Y < −6) are under-predicted."
 },
 {
 "t": "figure",
@@ -804,81 +804,81 @@
 "rows": [
 [
 "CCW-Net",
-"0.587",
-"0.024",
-"0.060",
-"0.028",
-"2.5 %",
-"0.135",
-"–"
+"0.597",
+"0.038",
+"0.108",
+"0.062",
+"3.4 %",
+"0.171",
+"0.038"
 ],
 [
 "Unaligned wrapper",
-"0.597",
-"0.053",
-"0.216",
-"0.077",
-"3.8 %",
-"0.140",
-"–"
+"0.592",
+"0.055",
+"0.273",
+"0.049",
+"4.5 %",
+"0.169",
+"0.052"
 ],
 [
 "without necessity",
-"0.595",
-"0.039",
-"0.081",
-"0.022",
-"3.1 %",
-"0.135",
-"–"
+"0.593",
+"0.045",
+"0.117",
+"0.053",
+"3.6 %",
+"0.176",
+"0.044"
 ],
 [
 "without sufficiency",
-"0.593",
-"0.030",
-"0.151",
-"0.023",
-"3.4 %",
-"0.130",
-"–"
+"0.605",
+"0.043",
+"0.209",
+"0.052",
+"4.3 %",
+"0.168",
+"0.050"
 ],
 [
 "without independence",
-"0.593",
-"0.023",
-"0.065",
-"0.084",
-"2.6 %",
-"0.130",
-"–"
+"0.605",
+"0.035",
+"0.118",
+"0.128",
+"3.4 %",
+"0.166",
+"0.038"
 ],
 [
 "without interaction term",
-"0.598",
-"0.030",
-"0.077",
-"0.040",
-"3.3 %",
-"0.127",
-"–"
+"0.607",
+"0.037",
+"0.107",
+"0.059",
+"3.9 %",
+"0.152",
+"0.042"
 ],
 [
 "without conditional counterfactual",
-"0.594",
-"0.019",
-"0.058",
-"0.029",
-"2.1 %",
-"0.131",
-"–"
+"0.600",
+"0.030",
+"0.103",
+"0.056",
+"3.2 %",
+"0.162",
+"0.032"
 ],
 [
 "Concept bottleneck",
-"0.600",
+"0.599",
 "–",
 "–",
 "–",
-"9.4 %",
+"9.6 %",
 "–",
 "–"
 ]
@@ -898,15 +898,15 @@
 },
 {
 "t": "p",
-"text": "The alignment losses do what they are designed to do (Table 9). Relative to the unaligned wrapper the necessity effect falls from 0.053 to 0.024, the sufficiency gap from 0.216 to 0.060 and the additivity residual from 0.077 to 0.028, at equal accuracy. Removing a loss term degrades mainly the criterion it targets. The concept-bottleneck model routes 9.4 % of its effect through each absent concept, against 2.5 % for CCW-Net, at similar concept accuracy."
+"text": "The alignment losses do what they are designed to do for necessity and sufficiency (Table 9). Relative to the unaligned wrapper the necessity effect falls from 0.055 to 0.038 and the sufficiency gap from 0.273 to 0.108, at equal accuracy. Removing a loss term degrades mainly the criterion it targets. The additivity residual, however, is not lower than for the unaligned wrapper (0.062 against 0.049); the independence loss only prevents the deterioration seen without it (0.128). The conditional flow brings no benefit: drawing counterfactuals from other batch rows gives equal or lower necessity effects. The concept-bottleneck model routes 9.6 % of its effect through each absent concept, against 3.4 % for CCW-Net, at similar concept accuracy."
 },
 {
 "t": "p",
-"text": "The matched estimator measures whether a change in one concept is carried by that concept's slot. For CCW-Net the changed concept carries a share of 0.135, and each held absent concept –; for the unaligned wrapper the figures are 0.140 and – (1/10 would be indiscriminate). The rank agreement between CCW-Net concept importance and grouped TreeSHAP of XGBoost is 0.03 over ten concepts. CCW-Net ranks depth and steepness first, while SHAP ranks freeboard and roughness first, consistent with established overtopping formulae. CCW-Net attributes less effect to absent concepts than SHAP (2.5 % against 6.4 %). This is partly by construction: smooth surfaces or normal incidence do affect overtopping, and SHAP rightly gives them weight."
+"text": "The matched estimator measures whether a change in one concept is carried by that concept's slot. For CCW-Net the changed concept carries a share of 0.171, and each held absent concept 0.038; for the unaligned wrapper the figures are 0.169 and 0.052 (0.10 would be indiscriminate). Routing is therefore better than indiscriminate but is not improved by alignment: the slots remain entangled because all are computed from one shared latent representation. The rank agreement between CCW-Net concept importance and grouped TreeSHAP of XGBoost is 0.07 over ten concepts. CCW-Net spreads importance almost evenly over profile type, relative depth, wave steepness and relative freeboard, while SHAP ranks relative freeboard and roughness first, consistent with established overtopping formulae. CCW-Net attributes less effect to absent concepts than SHAP (3.4 % against 6.4 %). This is partly by construction: smooth surfaces or normal incidence do affect overtopping, and SHAP rightly gives them weight."
 },
 {
 "t": "p",
-"text": "Explanation quality does not depend on CF. Its relation to RF is weak and does not survive multiple-comparison correction: the interaction magnitude correlates with RF at 0.14 [0.03, 0.24]. A linear probe recovers RF = 4 from the learned concept vectors better than from the raw predictors (AUC 0.70 against 0.59). CF ≥ 3 is not recoverable across test series (AUC 0.46). The quality categories therefore mark particular regions of the input space and particular investigations, not a property of the physics."
+"text": "Explanation quality does not depend on CF. Necessity, sufficiency and additivity do not change with RF either. The absolute error rises with RF (0.12 [0.02, 0.21]) and the share of absent concepts falls (−0.15 [−0.31, −0.01]), but no trend survives Holm correction. A linear probe recovers RF = 4 from the learned concept vectors better than from the raw predictors (AUC 0.73 against 0.59). CF ≥ 3 is not recoverable across test series (AUC 0.48). The quality categories therefore mark particular regions of the input space and particular investigations, not a property of the physics."
 },
 {
 "t": "figure",
@@ -942,7 +942,7 @@
 },
 {
 "t": "p",
-"text": "Causal alignment makes concept explanations testable: necessity, sufficiency and additivity can be measured and enforced, which conventional feature attribution does not allow. However, the explanations describe the network's representations. Their ranking of concepts disagrees with feature attribution and with established formulae, and the network is less accurate than gradient boosting. For engineering use, the value of the method lies in auditing explanations, not in producing physical effect estimates."
+"text": "Causal alignment makes concept explanations testable: necessity, sufficiency and additivity can be measured and enforced, which conventional feature attribution does not allow. However, alignment does not make a change in one concept travel through that concept's slot more often than in an unaligned network, and the explanations describe the network's representations. Their ranking of concepts disagrees with feature attribution and with established formulae, and the network is less accurate than gradient boosting. For engineering use, the value of the method lies in auditing explanations, not in producing physical effect estimates."
 },
 {
 "t": "h2",

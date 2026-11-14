@@ -441,27 +441,34 @@ T_("Causal alignment of concept explanations on held-out geometries (means over 
    ["Variant", "RMSE", "Necessity effect", "Sufficiency gap", "Additivity residual", "Zero-ablation share per absent concept", "Matched: changed concept", "Matched: per held absent concept"],
    rows, [1.7, 0.7, 0.9, 0.9, 0.9, 1.1, 0.9, 1.0], fs=16,
    note="Necessity: |Δŷ| when an absent concept's slot is replaced by a counterfactual draw. Sufficiency: RMSE between the active-only reconstruction and the output. Matched shares: interventional-effect estimator with independent covariate matches per concept slot; 0.10 would be indiscriminate routing.")
-p(f"The alignment losses do what they are designed to do (Table 9). Relative to the unaligned wrapper the necessity effect falls from "
-  f"{f(un.nec_abs_effect)} to {f(full.nec_abs_effect)}, the sufficiency gap from {f(un.suf_rmse_vs_output)} to {f(full.suf_rmse_vs_output)} "
-  f"and the additivity residual from {f(un.ind_rmse)} to {f(full.ind_rmse)}, at equal accuracy. Removing a loss term degrades mainly "
-  f"the criterion it targets. The concept-bottleneck model routes {pct(cbm.rho_inactive_per_null_slot,1)} of its effect through each "
-  f"absent concept, against {pct(full.rho_inactive_per_null_slot,1)} for CCW-Net, at similar concept accuracy.")
+p(f"The alignment losses do what they are designed to do for necessity and sufficiency (Table 9). Relative to the unaligned "
+  f"wrapper the necessity effect falls from {f(un.nec_abs_effect)} to {f(full.nec_abs_effect)} and the sufficiency gap from "
+  f"{f(un.suf_rmse_vs_output)} to {f(full.suf_rmse_vs_output)}, at equal accuracy. Removing a loss term degrades mainly the criterion "
+  f"it targets. The additivity residual, however, is not lower than for the unaligned wrapper ({f(full.ind_rmse)} against "
+  f"{f(un.ind_rmse)}); the independence loss only prevents the deterioration seen without it ({f(ccw.loc['ccw_no_ind','ind_rmse'])}). "
+  f"The conditional flow brings no benefit: drawing counterfactuals from other batch rows gives equal or lower necessity effects. "
+  f"The concept-bottleneck model routes {pct(cbm.rho_inactive_per_null_slot,1)} of its effect through each absent concept, against "
+  f"{pct(full.rho_inactive_per_null_slot,1)} for CCW-Net, at similar concept accuracy.")
 p(f"The matched estimator measures whether a change in one concept is carried by that concept's slot. For CCW-Net the changed "
   f"concept carries a share of {f(full.rho_changed_matched,3)}, and each held absent concept {f(full.rho_per_held_null_slot_matched,3)}; "
   f"for the unaligned wrapper the figures are {f(un.rho_changed_matched,3)} and {f(un.rho_per_held_null_slot_matched,3)} "
-  f"(1/10 would be indiscriminate). The rank agreement between CCW-Net concept importance and grouped TreeSHAP of XGBoost is "
-  f"{f(cv('rank agreement'),2)} over ten concepts. CCW-Net ranks depth and steepness first, while SHAP ranks freeboard and roughness "
-  f"first, consistent with established overtopping formulae. CCW-Net attributes less effect to absent concepts than SHAP "
+  f"(0.10 would be indiscriminate). Routing is therefore better than indiscriminate but is not improved by alignment: the slots "
+  f"remain entangled because all are computed from one shared latent representation. The rank agreement between CCW-Net concept "
+  f"importance and grouped TreeSHAP of XGBoost is {f(cv('rank agreement'),2)} over ten concepts. CCW-Net spreads importance almost "
+  f"evenly over profile type, relative depth, wave steepness and relative freeboard, while SHAP ranks relative freeboard and "
+  f"roughness first, consistent with established overtopping formulae. CCW-Net attributes less effect to absent concepts than SHAP "
   f"({pct(cv('absent (null-state) concept: CCW-Net'),1)} against {pct(cv('absent (null-state) concept: grouped TreeSHAP'),1)}). "
   f"This is partly by construction: smooth surfaces or normal incidence do affect overtopping, and SHAP rightly gives them weight.")
 rfq = eqt[(eqt.model == "CCW-Net") & (eqt.factor == "RF")].set_index("quantity")
 pr_rf4 = probe[(probe.target == "RF=4") & (probe.probe_validation_grouped_by == "geometry")].set_index("probe_input")["auc_mean_over_folds"]
 pr_cf3s = probe[(probe.target == "CF>=3") & (probe.probe_validation_grouped_by == "series")].set_index("probe_input")["auc_mean_over_folds"]
-p(f"Explanation quality does not depend on CF. Its relation to RF is weak and does not survive multiple-comparison correction: the "
-  f"interaction magnitude correlates with RF at {f(rfq.loc['interaction_abs','spearman'],2)} {ci(rfq.loc['interaction_abs','lo'], rfq.loc['interaction_abs','hi'],2)}. "
-  f"A linear probe recovers RF = 4 from the learned concept vectors better than from the raw predictors (AUC "
-  f"{f(pr_rf4.iloc[0],2)} against {f(pr_rf4.iloc[1],2)}). CF ≥ 3 is not recoverable across test series (AUC {f(pr_cf3s.iloc[0],2)}). The quality "
-  f"categories therefore mark particular regions of the input space and particular investigations, not a property of the physics.")
+p(f"Explanation quality does not depend on CF. Necessity, sufficiency and additivity do not change with RF either. The absolute "
+  f"error rises with RF ({f(rfq.loc['abs_error','spearman'],2)} {ci(rfq.loc['abs_error','lo'], rfq.loc['abs_error','hi'],2)}) and the "
+  f"share of absent concepts falls ({f(rfq.loc['null_slot_effect_share','spearman'],2)} {ci(rfq.loc['null_slot_effect_share','lo'], rfq.loc['null_slot_effect_share','hi'],2)}), "
+  f"but no trend survives Holm correction. A linear probe recovers RF = 4 from the learned concept vectors better than from the "
+  f"raw predictors (AUC {f(pr_rf4.iloc[0],2)} against {f(pr_rf4.iloc[1],2)}). CF ≥ 3 is not recoverable across test series (AUC "
+  f"{f(pr_cf3s.iloc[0],2)}). The quality categories therefore mark particular regions of the input space and particular "
+  f"investigations, not a property of the physics.")
 F_("fig12_concept_attribution_and_alignment", "Concept explanations: (a) slot-ablation effects of CCW-Net and the unaligned wrapper; (b) necessity and (c) sufficiency across variants; (d) CCW-Net concept effects against grouped TreeSHAP; (e, f) explanation quality by RF and CF.")
 
 # =========================================================================================== 5 Discussion
@@ -479,7 +486,8 @@ p("The RF = 4 versus RF = 1 contrast in residual variance and the absence of an 
   "not CF = 4, marks the tests that are hardest to predict.")
 h2("5.3 What concerns model-internal explanation")
 p("Causal alignment makes concept explanations testable: necessity, sufficiency and additivity can be measured and "
-  "enforced, which conventional feature attribution does not allow. However, the explanations describe the network's "
+  "enforced, which conventional feature attribution does not allow. However, alignment does not make a change in one concept "
+  "travel through that concept's slot more often than in an unaligned network, and the explanations describe the network's "
   "representations. Their ranking of concepts disagrees with feature attribution and with established formulae, and the "
   "network is less accurate than gradient boosting. For engineering use, the value of the method lies in auditing "
   "explanations, not in producing physical effect estimates.")
