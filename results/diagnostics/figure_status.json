@@ -9,23 +9,13 @@
   "fig07",
   "fig08",
   "fig09",
+  "fig10",
   "fig11",
+  "fig12",
   "fig13",
+  "fig14",
   "fig15",
   "figS1"
  ],
- "failed": [
-  [
-   "fig10",
-   "FileNotFoundError(2, 'No such file or directory')"
-  ],
-  [
-   "fig12",
-   "FileNotFoundError(2, 'No such file or directory')"
-  ],
-  [
-   "fig14",
-   "ValueError('x and y must have same first dimension, but have shapes (4,) and (5,)')"
-  ]
- ]
+ "failed": []
 }

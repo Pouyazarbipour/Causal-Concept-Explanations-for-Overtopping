@@ -155,7 +155,7 @@ def fig03(D):
     cb = fig.colorbar(hb, ax=ax, fraction=0.5, orientation="horizontal", pad=0.0)
     cb.set_label("Number of tests per hexagon")
     ax.text(0.5, 0.75, "Held-out geometries only (5-fold geometry-grouped\nnested cross-validation; hyper-parameters by Optuna\n"
-            "on training folds). Solid line: 1:1. Dashed lines:\nfactor 10. All 9 333 positive-discharge tests,\nRF and CF 1–4.",
+            "on training folds). Solid line: 1:1. Dashed lines:\nfactor 10. All 9 333 positive-discharge tests,\nRF and CF 1–4. MLP and CCW-Net: mean of\nthree seeds (seed ensemble); Table 3 reports\nthe mean of per-seed metrics.",
             ha="center", va="center", transform=ax.transAxes, fontsize=9)
     fig.tight_layout()
     save(fig, "fig03_measured_vs_predicted_all_models")
@@ -388,7 +388,7 @@ def fig12():
     ax.scatter(full.ccw_effect_when_null[nc], yy[nc] - 0.2, marker="D", s=14, color=INK, zorder=3, label="concept in null state")
     ax.scatter(un.ccw_effect_when_null[nc], yy[nc] + 0.2, marker="D", s=14, color=INK, zorder=3)
     ax.set_yticks(yy, [c.replace("_", " ") for c in full.concept]); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
-    ax.set_xlabel(r"Mean $|\Delta\hat{Y}|$ when slot is zeroed"); ax.legend(loc="lower right", fontsize=7.5)
+    ax.set_xlabel(r"Mean $|\Delta\hat{Y}|$ when slot is zeroed"); ax.legend(loc="upper center", bbox_to_anchor=(0.35, -0.16), ncol=1, fontsize=7.5)
     panel(ax, "a", "Slot-ablation effect")
     order = [v for v in ["ccw_full", "ccw_unaligned", "ccw_no_nec", "ccw_no_suf", "ccw_no_ind", "ccw_no_interaction", "ccw_no_cond_cf", "cbm"] if v in a5.index]
     nm = [v.replace("ccw_", "").replace("_", " ").replace("cbm", "concept bottleneck") for v in order]
@@ -402,8 +402,11 @@ def fig12():
         panel(ax, letter, ttl)
     ax = axs[1, 0]
     ax.scatter(full.xgb_mean_abs_shap_log10, full.ccw_slot_ablation_effect_log10, s=28, color=CAT[0], zorder=3)
+    off = {"relative_depth": (4, -10), "wave_steepness": (4, 4), "wave_obliquity": (4, -11), "berm": (6, 2), "toe_berm": (4, 4),
+           "foreshore": (-4, 6), "crest_configuration": (4, 4), "roughness_permeability": (-30, 6), "profile_type": (4, 3), "relative_freeboard": (-40, 7)}
     for _, rw in full.iterrows():
-        ax.annotate(rw.concept.replace("_", " ").replace("permeability", "").strip(), (rw.xgb_mean_abs_shap_log10, rw.ccw_slot_ablation_effect_log10), xytext=(4, 3), textcoords="offset points", fontsize=7.5, color=INK2)
+        ax.annotate(rw.concept.replace("_", " ").replace("permeability", "").strip(), (rw.xgb_mean_abs_shap_log10, rw.ccw_slot_ablation_effect_log10),
+                    xytext=off.get(rw.concept, (4, 3)), textcoords="offset points", fontsize=7.5, color=INK2)
     ax.set_xlabel("XGBoost grouped mean |SHAP|"); ax.set_ylabel("CCW-Net slot-ablation effect"); panel(ax, "d", "Concept vs feature attribution")
     for ax, qn, lab, letter in ((axs[1, 1], "necessity_effect", "Effect of absent-concept swap", "e"), (axs[1, 2], "sufficiency_gap", "Sufficiency gap", "f")):
         for fac, col, off in (("RF", CAT[0], -0.08), ("CF", CAT[1], 0.08)):
