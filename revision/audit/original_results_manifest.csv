@@ -1,0 +1,126 @@
+file,sha256_16,size_bytes,shape,generated_by,content
+original/original_results/optuna/geometry__catboost__best.csv,b510fbd7480a27de,740,5 rows x 10 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__catboost__trials.csv,3b1a957511ea2098,9821,75 rows x 10 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__ccw__best.csv,dd2333948c8ed3c7,459,5 rows x 8 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__ccw__trials.csv,653664ae03fa5239,2966,30 rows x 9 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__mlp__best.csv,12e0ea644ef8d513,632,5 rows x 9 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__mlp__trials.csv,7001a674c76de4a7,4709,40 rows x 9 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__rf__best.csv,7308ca527e62c331,452,5 rows x 8 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__rf__trials.csv,2e8eafc99c3304b2,4298,60 rows x 7 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__xgb__best.csv,2e23d9de1cb44236,965,5 rows x 12 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/geometry__xgb__trials.csv,ded7759107ad6193,25388,150 rows x 12 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/random__xgb__best.csv,a3db31813bd65577,985,5 rows x 12 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/random__xgb__trials.csv,44273ea96ae8d688,25589,150 rows x 12 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/series__xgb__best.csv,3f8a19465553207a,953,5 rows x 12 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/optuna/series__xgb__trials.csv,aa4df513a3216b7b,25263,150 rows x 12 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/conformal_intervals_alpha0.1.npz,0696db33f4d96266,2154955,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__backbone.npz,bf0c486e987b6e62,93670,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__catboost.npz,ce33269ca889572f,31286,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__cbm.npz,8adfe7d3b8676bff,93635,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__ccw_full.npz,fa2b36070af118ee,93709,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__ccw_no_cond_cf.npz,8c16490251d2c16d,62549,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__ccw_no_ind.npz,3b4c1aeeb7b8dd93,62545,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__ccw_no_interaction.npz,b3d4984b58449c94,62532,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__ccw_no_nec.npz,57f04bff060a8908,62470,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__ccw_no_suf.npz,ca0e7e61c44c57a9,62500,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__ccw_unaligned.npz,35bba188c14c41ad,93608,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__mlp.npz,490534e6ba2b65ad,93642,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__rf.npz,79512f2424a70633,31313,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/geometry__xgb.npz,5c8430d184629ac5,31293,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/policy__rf.npz,45f0700a2a6c9104,1825887,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/policy__xgb.npz,7f77b11067a25f0a,1078227,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/random__xgb.npz,b0d46219989d43c3,32298,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/series__xgb.npz,1c8db7b313b28e1c,30757,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/predictions/wetdry__xgb_geometry.csv,deaa4f7843da700e,1111677,10389 rows x 8 cols,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/reports/01_data_audit_report.md,985cef13aa2de956,7530,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/reports/02_methods.md,f88cf2a9e7992ceb,7935,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/reports/03_scientific_interpretation.md,9630648d49de246e,19746,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/reports/04_manuscript_outline_ocean_engineering.md,5638208614e35c2f,5208,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/reports/05_supplementary_material_outline.md,ac1a94299fbdc4fe,2472,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/reports/06_originality_and_overlap_assessment.md,97133e1b91d63a9c,7946,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/reports/07_limitations.md,ec9993f7bd6b29c0,3874,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/reports/08_reference_implementation_check.md,b6694930c7aa2085,5760,,experiments/run_models.py / run_ccw.py / run_policies.py,model predictions or Optuna output
+original/original_results/tables/table01_variable_dictionary.csv,b60fad7adb65c1db,5419,33 rows x 16 cols,src/data_audit.py,variable dictionary and file inventory
+original/original_results/tables/table01_variable_dictionary.md,44edc800217164f2,14245,,src/data_audit.py,variable dictionary and file inventory
+original/original_results/tables/table01a_file_inventory.csv,3864307903367498,400,4 rows x 5 cols,src/data_audit.py,variable dictionary and file inventory
+original/original_results/tables/table01a_file_inventory.md,b0a29707e2242b72,1122,,src/data_audit.py,variable dictionary and file inventory
+original/original_results/tables/table01b_identifiers_and_groups.csv,34632b7222229b41,612,7 rows x 6 cols,src/data_audit.py,variable dictionary and file inventory
+original/original_results/tables/table01b_identifiers_and_groups.md,667dd2de8d4365c2,1674,,src/data_audit.py,variable dictionary and file inventory
+original/original_results/tables/table02_rf_cf_distribution.csv,e3b8223e4890e5b4,2169,12 rows x 15 cols,src/data_audit.py,"RF/CF distributions, joint tables, flag counts"
+original/original_results/tables/table02_rf_cf_distribution.md,b198ebb9e5c065d2,4942,,src/data_audit.py,"RF/CF distributions, joint tables, flag counts"
+original/original_results/tables/table02b_rf_cf_joint_all.csv,c5d7eeb4ae59ad3c,132,5 rows x 6 cols,src/data_audit.py,"RF/CF distributions, joint tables, flag counts"
+original/original_results/tables/table02c_rf_cf_joint_regression.csv,fbf16163a2136cab,130,5 rows x 6 cols,src/data_audit.py,"RF/CF distributions, joint tables, flag counts"
+original/original_results/tables/table02d_rf_cf_within_group_consistency.csv,ed5f017626f0fa52,315,5 rows x 7 cols,src/data_audit.py,"RF/CF distributions, joint tables, flag counts"
+original/original_results/tables/table02d_rf_cf_within_group_consistency.md,78fd0100ec9ee072,1253,,src/data_audit.py,"RF/CF distributions, joint tables, flag counts"
+original/original_results/tables/table02e_flag_counts.csv,77b4a25e34096ed8,1024,22 rows x 5 cols,src/data_audit.py,"RF/CF distributions, joint tables, flag counts"
+original/original_results/tables/table02e_flag_counts.md,7e822c4bf703103e,1560,,src/data_audit.py,"RF/CF distributions, joint tables, flag counts"
+original/original_results/tables/table03_model_performance.csv,1ab3b59450c1ae7c,2445,10 rows x 15 cols,experiments/run_analysis.py::exp_perf,"out-of-fold accuracy (pooled), by RF/CF"
+original/original_results/tables/table03_model_performance.md,47ce2990d417e6fb,2136,,experiments/run_analysis.py::exp_perf,"out-of-fold accuracy (pooled), by RF/CF"
+original/original_results/tables/table03b_performance_by_rf_cf.csv,30c8e0837100e0e4,14935,64 rows x 15 cols,experiments/run_analysis.py::exp_perf,"out-of-fold accuracy (pooled), by RF/CF"
+original/original_results/tables/table03b_performance_by_rf_cf.md,eb14e205d3b83d72,11880,,experiments/run_analysis.py::exp_perf,"out-of-fold accuracy (pooled), by RF/CF"
+original/original_results/tables/table04_optuna_best_hyperparameters.csv,77d47636e762be63,7221,35 rows x 32 cols,experiments/run_analysis.py::exp_perf,Optuna best hyper-parameters; inner CV and fold-mean outer RMSE
+original/original_results/tables/table04_optuna_best_hyperparameters.md,6c8f56b4eb901957,19721,,experiments/run_analysis.py::exp_perf,Optuna best hyper-parameters; inner CV and fold-mean outer RMSE
+original/original_results/tables/table05a_residuals_by_rf_cf.csv,bed361799647bddd,2326,8 rows x 18 cols,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05a_residuals_by_rf_cf.md,7629f5d682d55aff,2350,,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05b_ordinal_trend_tests.csv,f2a1c4c88dded19a,3338,12 rows x 15 cols,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05b_ordinal_trend_tests.md,07cb7de04a618d59,3738,,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05c_ordinal_validation_models.csv,d722c94fc9aeacbc,1445,11 rows x 9 cols,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05c_ordinal_validation_models.md,ac2e37ca6c2315ff,2158,,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05d_variance_model_main_effects.csv,951a67d6d130165c,516,7 rows x 5 cols,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05d_variance_model_main_effects.md,bdbafb9b303b70a8,603,,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05e_variance_model_with_interaction.csv,d4ec3f6ef8285d75,614,8 rows x 5 cols,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05e_variance_model_with_interaction.md,10e0a657be8f6e59,1000,,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05f_rf_cf_vs_completeness_indicators.csv,d282ce11e035a261,2598,16 rows x 9 cols,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05f_rf_cf_vs_completeness_indicators.md,3c90fc2cf3012f39,2358,,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05g_zero_share_by_rf_cf.csv,1b243d8a916b18c4,251,8 rows x 4 cols,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05g_zero_share_by_rf_cf.md,016210dd36026617,460,,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05h_repeatability_near_replicates.csv,efe68aa1703de256,879,9 rows x 8 cols,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table05h_repeatability_near_replicates.md,8487ef4137c2c811,1287,,experiments/run_analysis.py::exp_rfcf,"RF/CF residual strata, trends, ordinal models, Gamma GLM, repeatability"
+original/original_results/tables/table06a_cf_geometry_level.csv,803748d4257251d7,1257,4 rows x 17 cols,experiments/run_analysis.py::exp_rfcf,geometry-level CF analysis
+original/original_results/tables/table06a_cf_geometry_level.md,f5ff6b026aa92abb,1896,,experiments/run_analysis.py::exp_rfcf,geometry-level CF analysis
+original/original_results/tables/table06b_cf_geometry_level_trends.csv,9e033e31b18d6a94,333,3 rows x 6 cols,experiments/run_analysis.py::exp_rfcf,geometry-level CF analysis
+original/original_results/tables/table06b_cf_geometry_level_trends.md,72304038a24a1123,500,,experiments/run_analysis.py::exp_rfcf,geometry-level CF analysis
+original/original_results/tables/table07_rf_cf_joint.csv,7092c6d728c1c39c,2741,16 rows x 13 cols,experiments/run_analysis.py::exp_rfcf,RF x CF joint table
+original/original_results/tables/table07_rf_cf_joint.md,20555a38bbf8c5ba,2934,,experiments/run_analysis.py::exp_rfcf,RF x CF joint table
+original/original_results/tables/table08_hierarchical_error_decomposition.csv,2a95aec33afa94ea,8968,59 rows x 11 cols,experiments/run_analysis.py::exp_decomp,REML decomposition; replicate comparison
+original/original_results/tables/table08_hierarchical_error_decomposition.md,5c532f30383b17ea,13298,,experiments/run_analysis.py::exp_decomp,REML decomposition; replicate comparison
+original/original_results/tables/table08b_repeatability_vs_residual.csv,169fd0ea336419af,399,6 rows x 2 cols,experiments/run_analysis.py::exp_decomp,REML decomposition; replicate comparison
+original/original_results/tables/table08b_repeatability_vs_residual.md,53979e16fd00fa34,672,,experiments/run_analysis.py::exp_decomp,REML decomposition; replicate comparison
+original/original_results/tables/table09_ccw_alignment_and_ablation.csv,da5cda79eca974a4,8176,8 rows x 52 cols,experiments/run_analysis.py::exp_ccw,CCW-Net alignment and ablation
+original/original_results/tables/table09_ccw_alignment_and_ablation.md,73e230d21d93035c,13030,,experiments/run_analysis.py::exp_ccw,CCW-Net alignment and ablation
+original/original_results/tables/table10_concept_attribution_ccw_full.csv,620397552abb7da4,2426,10 rows x 14 cols,experiments/run_analysis.py::exp_ccw,CCW-Net concept attribution
+original/original_results/tables/table10_concept_attribution_ccw_full.md,03a3bbad0296ab73,3696,,experiments/run_analysis.py::exp_ccw,CCW-Net concept attribution
+original/original_results/tables/table10_concept_attribution_ccw_unaligned.csv,1b215041726f5d59,2418,10 rows x 14 cols,experiments/run_analysis.py::exp_ccw,CCW-Net concept attribution
+original/original_results/tables/table10_concept_attribution_ccw_unaligned.md,4cd037fad2c876ab,3696,,experiments/run_analysis.py::exp_ccw,CCW-Net concept attribution
+original/original_results/tables/table11_concept_vs_feature_attribution.csv,64d8d884e0211c1f,1176,13 rows x 2 cols,experiments/run_analysis.py::exp_ccw,concept vs feature attribution
+original/original_results/tables/table11_concept_vs_feature_attribution.md,7ffa5c98a97961ca,1680,,experiments/run_analysis.py::exp_ccw,concept vs feature attribution
+original/original_results/tables/table12a_explanation_quality_by_rf_cf.csv,170ca2b5bc50fcae,11797,112 rows x 8 cols,experiments/run_analysis.py::exp_ccw,explanation quality vs data quality
+original/original_results/tables/table12a_explanation_quality_by_rf_cf.md,c16f060ffe359fc2,13680,,experiments/run_analysis.py::exp_ccw,explanation quality vs data quality
+original/original_results/tables/table12b_explanation_quality_trends.csv,8465ae39d693f0cc,3172,28 rows x 8 cols,experiments/run_analysis.py::exp_ccw,explanation quality vs data quality
+original/original_results/tables/table12b_explanation_quality_trends.md,baa39bdc67ccd341,4050,,experiments/run_analysis.py::exp_ccw,explanation quality vs data quality
+original/original_results/tables/table12c_quality_probe_from_concepts.csv,e72456a19eea5a03,1645,16 rows x 6 cols,experiments/run_analysis.py::exp_ccw,explanation quality vs data quality
+original/original_results/tables/table12c_quality_probe_from_concepts.md,686bcb2ea28fa849,2214,,experiments/run_analysis.py::exp_ccw,explanation quality vs data quality
+original/original_results/tables/table13_data_selection_policies.csv,8568b9bdecb08b2d,11398,18 rows x 34 cols,experiments/run_analysis.py::exp_policy,data-selection policies
+original/original_results/tables/table13_data_selection_policies.md,9dd92c73192eb56b,16500,,experiments/run_analysis.py::exp_policy,data-selection policies
+original/original_results/tables/table14_policy_calibration_by_quality.csv,84c3803d6a371a4a,28409,216 rows x 11 cols,experiments/run_analysis.py::exp_policy,policy calibration by quality category
+original/original_results/tables/table14_policy_calibration_by_quality.md,baaf5874079ed0f6,37932,,experiments/run_analysis.py::exp_policy,policy calibration by quality category
+original/original_results/tables/table15_policy_bias_by_structure_family.csv,ee120b6fc40a94c2,11176,108 rows x 7 cols,experiments/run_analysis.py::exp_policy,policy bias by structure family
+original/original_results/tables/table15_policy_bias_by_structure_family.md,c805ddaad1fa0d72,13640,,experiments/run_analysis.py::exp_policy,policy bias by structure family
+original/original_results/tables/tableS_ccw_quality_layer.csv,e57d650d800b1742,629,4 rows x 7 cols,experiments/run_analysis.py::exp_ccw,CCW-Net supplementary
+original/original_results/tables/tableS_ccw_quality_layer.md,12f7932bd2022422,780,,experiments/run_analysis.py::exp_ccw,CCW-Net supplementary
+original/original_results/tables/tableS_concept_ontology.csv,cd81ad749727e45e,4169,10 rows x 10 cols,src/data_audit.py,concept ontology
+original/original_results/tables/tableS_concept_ontology.md,0497a3081c601363,8904,,src/data_audit.py,concept ontology
+original/original_results/tables/tableS_conformal_methods_by_quality.csv,589dd5e17a93e287,5183,10 rows x 28 cols,experiments/run_analysis.py::exp_unc,conformal methods by quality
+original/original_results/tables/tableS_conformal_methods_by_quality.md,910b8568afaf0c44,5928,,experiments/run_analysis.py::exp_unc,conformal methods by quality
+original/original_results/tables/tableS_coverage_by_rf_cf_cell.csv,73305bdbb6844ed0,9818,160 rows x 6 cols,experiments/run_analysis.py::exp_unc,coverage by RF x CF cell
+original/original_results/tables/tableS_coverage_by_rf_cf_cell.md,9dcde7e3ef16b1ca,13608,,experiments/run_analysis.py::exp_unc,coverage by RF x CF cell
+original/original_results/tables/tableS_interaction_pairs_ccw_full.csv,9745b893e431bb78,2294,45 rows x 3 cols,experiments/run_analysis.py::exp_ccw,CCW-Net interaction pairs
+original/original_results/tables/tableS_interaction_pairs_ccw_full.md,843144c32fdb0098,3807,,experiments/run_analysis.py::exp_ccw,CCW-Net interaction pairs
+original/original_results/tables/tableS_interaction_pairs_ccw_unaligned.csv,ce11d89a4f9274aa,2276,45 rows x 3 cols,experiments/run_analysis.py::exp_ccw,CCW-Net interaction pairs
+original/original_results/tables/tableS_interaction_pairs_ccw_unaligned.md,d43a3d397553f4a5,3807,,experiments/run_analysis.py::exp_ccw,CCW-Net interaction pairs
+original/original_results/tables/tableS_interval_width_by_rf_cf.csv,61ee85b34a9af26a,2864,48 rows x 5 cols,experiments/run_analysis.py::exp_unc,interval width by RF/CF
+original/original_results/tables/tableS_interval_width_by_rf_cf.md,2e001ce2b61b9581,3900,,experiments/run_analysis.py::exp_unc,interval width by RF/CF
+original/original_results/tables/tableS_policy_training_variance_model.csv,7128d22fa871c34d,1423,10 rows x 9 cols,experiments/run_analysis.py::exp_policy,policy training variance model
+original/original_results/tables/tableS_policy_training_variance_model.md,9d154f51e83b52fc,1044,,experiments/run_analysis.py::exp_policy,policy training variance model
+original/original_results/tables/tableS_wet_dry_model.csv,cdf0f77a88f2e1cf,502,9 rows x 5 cols,experiments/run_analysis.py::exp_perf + experiments/run_models.py::wet_dry,wet/dry model AUC/Brier
+original/original_results/tables/tableS_wet_dry_model.md,764aa65aa36d7d9a,561,,experiments/run_analysis.py::exp_perf + experiments/run_models.py::wet_dry,wet/dry model AUC/Brier

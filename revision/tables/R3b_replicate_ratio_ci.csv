@@ -1,0 +1,4 @@
+quantity,value,lo,hi
+replicate variance / within-geometry variance (pooled within-geometry estimator),0.5625159588251745,0.3053623349129676,0.9299660328154117
+pooled within-geometry residual variance (method of moments),0.14177220582968433,,
+"within-geometry residual variance (REML, original Table 8)",0.1384,,

@@ -1,0 +1,22 @@
+reference,status_in_original_draft,verified_details,doi_or_identifier,publication_status,verification_source,action
+"Van der Meer, Verhaeghe, Steendam 2009",listed,"Title, authors, journal (Coastal Engineering 56) confirmed; pages 108-120 and DOI NOT confirmed by search",not confirmed,peer-reviewed journal,marineinfo.org record 210728,keep; authors must confirm pages/DOI
+"Van Gent, van den Boogaard, Pozueta, Medina 2007",listed,"Coastal Engineering 54(8), 586-593 confirmed",10.1016/j.coastaleng.2006.12.001,peer-reviewed journal,riunet.upv.es; TU Delft repository,DOI added
+"Zanuttigh, Formentin, Van der Meer 2016",listed,"Ocean Engineering 127, 7-22 confirmed",10.1016/j.oceaneng.2016.09.032,peer-reviewed journal,cris.unibo.it 11585/566757,DOI added
+"den Bieman, van Gent, van den Boogaard 2021",listed,"Coastal Engineering 166, 103830 confirmed; XGBoost; RF=4 or CF=4 records excluded from training / weighting by WF",10.1016/j.coastaleng.2020.103830,peer-reviewed journal,research.tudelft.nl,DOI added; use as the gradient-boosting precedent for RF/CF exclusion
+"Steendam et al. 2004",listed,"Proc. 29th ICCE, World Scientific, 4301-4313 confirmed (TU Delft lists 2005 for the printed volume); 10 532 tests, 163 series",ICCE 2004 proceedings,peer-reviewed conference,TU Delft repository uuid:ed419cc4,keep
+"EurOtop 2018",listed,"Second edition; authors confirmed (Van der Meer, Allsop, Bruce, De Rouck, Kortenhaus, Pullen, Schuttrumpf, Troch, Zanuttigh); tolerable limits coupled to wave height (Ch. 3)",www.overtopping-manual.com,manual,ICCE paper on the update; overtopping-manual.com,keep; formula coefficients checked against secondary implementations (breakwater package; Deltares toolbox) - verify against manual and 2019 errata
+"Lee, Barber, Willett 2023",listed,"arXiv:2306.06342 (math.ST), v4; no journal version found",arXiv:2306.06342,PREPRINT,arxiv.org,cite explicitly as preprint
+"Rountree, Verma, So, Fan, Shah 2026",listed as arXiv:2611.14407,"Title and authors confirmed by the reference repository's BibTeX (NeurIPS 2026, inproceedings) and a NeurIPS 2026 poster page; the arXiv identifier 2611.14407 could NOT be verified",NeurIPS 2026 (proceedings details to be completed),accepted conference paper (poster),neurips.cc poster 149967; reference repository README,replace arXiv id by NeurIPS 2026 citation; mark details to verify
+"Gaussian-process study using CLASH with RF/CF exclusion (requested by the revision brief)",absent,"No such study found by search; the gradient-boosting precedent (den Bieman et al. 2021) is the verified example of RF/CF-based exclusion",-,not found,web search,not cited; authors to supply the reference if they have it
+"Akiba et al. 2019 (Optuna)",listed,not re-verified (standard reference),10.1145/3292500.3330701,peer-reviewed conference,-,authors to confirm
+"Chen and Guestrin 2016 (XGBoost)",listed,not re-verified (standard reference),10.1145/2939672.2939785,peer-reviewed conference,-,authors to confirm
+"Breiman 2001",listed,not re-verified (standard reference),10.1023/A:1010933404324,peer-reviewed journal,-,authors to confirm
+"Prokhorenkova et al. 2018 (CatBoost)",listed,not re-verified,NeurIPS 2018,peer-reviewed conference,-,authors to confirm
+"Koh et al. 2020",listed,not re-verified,ICML 2020 (PMLR 119),peer-reviewed conference,-,authors to confirm
+"Lundberg et al. 2020",listed,not re-verified,10.1038/s42256-019-0138-9,peer-reviewed journal,-,authors to confirm
+"Vansteelandt and Daniel 2017",listed,not re-verified,10.1097/EDE.0000000000000596,peer-reviewed journal,-,authors to confirm
+"Loh et al. 2022",listed,not re-verified,10.1037/met0000314,peer-reviewed journal,-,authors to confirm
+"Dinh et al. 2017 (Real NVP); Sabour et al. 2017",listed,not re-verified,ICLR 2017; NeurIPS 2017,peer-reviewed conference,-,authors to confirm
+"Verhaeghe et al. 2004 CLASH WP2 report",listed with [verify title],NOT verified,-,technical report,-,authors must supply the exact report title and number
+"Paper 1 and Paper 2 (authors' previous studies)",placeholders,full texts not available in this environment,-,unknown,-,authors to complete
+"Nested CV / clustered bootstrap / repeatability methods",not cited in draft,"suggested: Varma and Simon 2006 (nested CV); Field and Welsh 2007 (cluster bootstrap); Bland and Altman 1996 (repeatability SD)",-,-,not verified here,authors to verify before adding

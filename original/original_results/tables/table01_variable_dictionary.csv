@@ -1,0 +1,34 @@
+raw_variable,column,engineering_meaning,unit,physical_role,data_type,missing_pct,transformation,eligible_physical_predictor,quality_evaluation_only,min,median,max,n_text_cells,n_zero,n_negative
+Name,name,"Test identifier 'SSS-TTT': SSS = test-series number, TTT = test number within the series",-,identifier,text,0.0,split into series,False,False,,,,,,
+Hm0 deep,hm0_deep,Spectral significant wave height at deep water,m,hydraulic (offshore),numeric,4.13,none (not used: 4.1 % missing; toe conditions are used),False,True,0.0,0.1247,9.8,0.0,1.0,0.0
+Tp deep,tp_deep,"Peak wave period, deep water",s,hydraulic (offshore),numeric,3.6,none,False,True,0.0,1.68,15.756521739130436,0.0,1.0,0.0
+Tm deep,tm_deep,"Mean wave period, deep water",s,hydraulic (offshore),numeric,3.6,none,False,True,0.0,1.4,13.130434782608697,0.0,1.0,0.0
+"Tm-1,0 deep",tm10_deep,"Spectral wave period Tm-1,0, deep water",s,hydraulic (offshore),numeric,3.6,none,False,True,0.0,1.536544347987826,14.32411067193676,1.0,1.0,0.0
+h deep,h_deep,Water depth at deep water,m,hydraulic (offshore),numeric,0.01,none,False,False,0.0,0.6364224,100.0,0.0,14.0,0.0
+m,m,Foreshore slope 1:m (cotangent); 1000 is the conventional code for a (near-)horizontal foreshore,-,foreshore geometry,numeric,0.51,fs = 1/m,True,False,0.0,100.0,1000.0,0.0,1.0,0.0
+b,beta_deg,Angle of wave attack relative to the structure normal (beta),deg,hydraulic,numeric,0.23,none,True,False,0.0,0.0,80.0,0.0,9200.0,0.0
+h,h,Water depth at the toe of the structure,m,hydraulic,numeric,0.02,h_l = h/L0,True,False,-2.28,0.36,9.32,0.0,62.0,49.0
+Hm0 toe,hm0_toe,Spectral significant wave height at the toe,m,hydraulic / scaling,numeric,0.33,"scales q, Rc, Ac, ht, hb; s0 = Hm0/L0",True,False,0.0,0.1115324559446799,3.765,0.0,85.0,0.0
+Tp toe,tp_toe,Peak period at the toe,s,hydraulic,numeric,0.56,"none (collinear with Tm-1,0)",False,True,0.0,1.68,16.4,0.0,85.0,0.0
+Tm toe,tm_toe,Mean period at the toe,s,hydraulic,numeric,0.56,"none (collinear with Tm-1,0)",False,True,0.0,1.388888888888889,11.781,1.0,85.0,0.0
+"Tm-1,0 toe",tm10_toe,"Spectral period Tm-1,0 at the toe",s,hydraulic / scaling,numeric,0.24,L0 = g T^2 / (2 pi),True,False,0.0,1.5272727272727271,10.64,1.0,85.0,0.0
+ht,ht,Water depth on the toe berm,m,structural,numeric,0.01,ht_h = ht/Hm0,True,False,-2.28,0.3,7.78,0.0,71.0,49.0
+Bt,bt,Width of the toe berm,m,structural,numeric,0.0,bt_l = Bt/L0,True,False,0.0,0.0,10.0,0.0,6826.0,0.0
+gf,gf,Roughness/permeability factor gamma_f of the armour (1 = smooth impermeable),-,structural,numeric,0.15,none,True,False,0.33,0.7,1.0,0.0,0.0,0.0
+cotad,cotad,Cotangent of the slope below the berm (down slope),-,structural,numeric,0.0,none,True,False,0.0,2.0,7.073170731707318,0.0,2074.0,0.0
+cotau,cotau,Cotangent of the slope above the berm (upper slope); negative = overhanging,-,structural,numeric,0.0,none,True,False,-5.0,1.7179487179487183,9.705882352941176,0.0,1947.0,393.0
+cotaexcl,cotaexcl,Mean cotangent excluding the berm (derived from the other geometry and the water level),-,structural (derived),numeric,0.25,not used: deterministic function of other predictors and of Rc,False,False,-1.5325670498084292,1.772,8.144490644490645,0.0,1339.0,380.0
+cotaincl,cotaincl,Mean cotangent including the berm (derived),-,structural (derived),numeric,0.25,not used (as above),False,False,-1.5325670498084292,2.0,12.820512820512821,0.0,1305.0,374.0
+Rc,rc,Crest freeboard relative to still water level,m,structural / hydraulic,numeric,0.01,rc_h = Rc/Hm0,True,False,0.0,0.1476,9.78,0.0,85.0,0.0
+B,b_berm,Berm width,m,structural,numeric,0.0,b_l = B/L0,True,False,0.0,0.0,8.0,0.0,8823.0,0.0
+hb,hb,Water depth on the berm (negative = berm above still water),m,structural,numeric,0.0,hb_h = hb/Hm0,True,False,-0.20833333333333326,0.0,1.175,0.0,8300.0,989.0
+tanaB,tanab,Tangent of the berm slope,-,structural,numeric,0.0,none,True,False,0.0,0.0,0.10093457943925234,0.0,10179.0,0.0
+Bh,bh,Horizontal berm width (derived from B and tanaB),m,structural (derived),numeric,0.0,not used (duplicate of B),False,False,0.0,0.0,8.0,0.0,8823.0,0.0
+Ac,ac,Armour crest freeboard relative to still water level,m,structural,numeric,0.0,ac_h = Ac/Hm0,True,False,0.0,0.132,9.78,0.0,96.0,0.0
+Gc,gc,Crest (armour) width,m,structural,numeric,0.0,gc_l = Gc/L0,True,False,0.0,0.03208421052631579,5.6,0.0,5129.0,0.0
+RF,RF,"Reliability Factor of the test, ordinal 1 (very reliable) ... 4 (not reliable)",ordinal,quality metadata,ordinal,0.0,none; never imputed,False,True,1.0,2.0,4.0,0.0,0.0,0.0
+CF,CF,"Complexity Factor of the structure section, ordinal 1 (simple) ... 4 (very complex)",ordinal,quality metadata,ordinal,0.0,none; never imputed,False,True,1.0,1.0,4.0,0.0,0.0,0.0
+q,q,Mean overtopping discharge per metre crest width,m3/s/m,response,numeric,0.19,q* = q/sqrt(g Hm0^3); Y = log10 q* (positive q only),False,False,-1.596771e-05,2.5951980478900858e-05,0.165313016894277,13.0,1069.0,1.0
+Pow,pow,Percentage of waves overtopping,%,secondary response,numeric,92.97,"not used (93 % missing; a response, not a predictor)",False,False,0.0,5.2,81.0,0.0,39.0,0.0
+Remark,remark,"Free-text remark (wind speed, prototype, chute, 'do not use for neural network')",text,quality metadata,text,95.17,parsed into flags,False,True,,,,,,
+Reference,reference,Literature/report reference of the test series (blank for confidential data),text,source metadata,text,26.74,source id; laboratory inferred by keyword (approximate),False,True,,,,,,

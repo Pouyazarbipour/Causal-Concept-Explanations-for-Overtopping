@@ -1,0 +1,7 @@
+reason,n,resp_missing_marker,resp_negative,hm0_toe_missing_or_nonpos,tm10_toe_missing_or_nonpos,h_missing,rc_missing
+resp_missing_marker,20,20,0,0,0,1,1
+resp_negative,1,0,1,0,0,0,0
+hm0_toe_missing_or_nonpos,120,0,0,120,109,0,0
+tm10_toe_missing_or_nonpos,110,0,0,109,110,0,0
+h_missing,2,1,0,0,0,2,1
+rc_missing,1,1,0,0,0,1,1

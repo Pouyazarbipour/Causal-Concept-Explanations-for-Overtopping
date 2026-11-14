@@ -1,0 +1,243 @@
+{
+"title": "Manuscript outline",
+"blocks": [
+{
+"t": "title",
+"text": "Manuscript and supplementary-material outline"
+},
+{
+"t": "subtitle",
+"text": "Should category-4 tests be removed? Predictive validation of the CLASH reliability and complexity ratings and counterfactual assessment of data-selection policies for wave-overtopping prediction",
+"italic": true
+},
+{
+"t": "note",
+"text": "Prepared for Ocean Engineering. Numbers are in the manuscript draft and in results/reports/03_scientific_interpretation.md."
+},
+{
+"t": "h1",
+"text": "4. Manuscript outline (Ocean Engineering)"
+},
+{
+"t": "p",
+"text": "*Typeface for the manuscript, tables and figures: Times New Roman.*"
+},
+{
+"t": "p",
+"text": "**Working title.** Should category-4 tests be removed? Predictive validation of the CLASH reliability and complexity ratings and counterfactual assessment of data-selection policies for wave-overtopping models"
+},
+{
+"t": "p",
+"text": "**Central contribution.** A validation of the CLASH data-quality ratings as decision tools, not a new predictor. (i) Do RF and CF measure what they are used for? (ii) What do the conventional exclusion and weighting policies actually change on the same held-out tests? (iii) Can test-level and geometry-level error be separated, and do RF and CF map onto them? (iv) Are concept-based explanations of the learned representations faithful, and do they depend on data quality?"
+},
+{
+"t": "h2",
+"text": "Highlights (draft, ≤ 85 characters each)"
+},
+{
+"t": "bullets",
+"items": [
+"All 10 532 CLASH tests, RF and CF 1–4, audited and retained."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"RF = 4 tests carry 2.3 times the residual variance of RF = 1; RF 2–3 do not differ."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"CF shows no ordered link to geometry-level error or generalisation."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Excluding category 4 leaves other tests unchanged and degrades category-4 predictions by 0.22–0.31."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Keeping all tests and widening intervals by RF/CF equalises coverage."
+],
+"level": 0
+},
+{
+"t": "h2",
+"text": "Abstract (structure, ~250 words)"
+},
+{
+"t": "p",
+"text": "Problem (ratings used as filters and weights without validation); data (original database, all categories); approach (leakage-free out-of-fold residuals, ordinal and hierarchical statistics, nine counterfactual training policies, regression CCW-Net as an explanation audit); main numbers (Section 3 of the interpretation report); conclusion (retain, do not exclude; use RF for uncertainty, not for the mean). Define \"counterfactual\" as an alternative training-data policy in the first use."
+},
+{
+"t": "h2",
+"text": "1 Introduction"
+},
+{
+"t": "p",
+"text": "1.1 The CLASH database and its two ratings; their role in neural-network training (weights (4−RF)(4−CF), removal of category 4 and of remarked tests) and in later data-driven models. 1.2 The gap: the ratings are used, not tested (Section 6 report). Why it matters: removing tests removes coverage of conditions (depth-limited waves, unusual sections). 1.3 Scope relative to previous work. Grouped validation, monotonic constraints, conformal intervals and physical causal-effect estimation are not contributions here (cite Paper 1 and Paper 2). 1.4 Research questions RQ1–RQ6."
+},
+{
+"t": "h2",
+"text": "2 Data"
+},
+{
+"t": "p",
+"text": "2.1 Database, variables, response classes (Table 1). 2.2 RF and CF: documented meaning, direction, 4 × 4 matrix (Table 2, Figure 2). 2.3 Internal consistency: CF varying within reconstructed structures; indicators of estimated parameters. 2.4 Identifiers available, reconstructed, inferred."
+},
+{
+"t": "h2",
+"text": "3 Methods"
+},
+{
+"t": "p",
+"text": "3.1 Leakage-free out-of-fold residuals: geometry-grouped nested CV, Optuna, five diagnostic models (Table 4). 3.2 Ordinal validation of RF and CF, repeatability from near-replicates, geometry-level analysis. 3.3 Hierarchical decomposition. 3.4 Counterfactual data-selection policies P1–P6 with a fixed evaluation design. 3.5 Regression CCW-Net and explanation-quality measures; comparison with grouped TreeSHAP. 3.6 Statistics."
+},
+{
+"t": "h2",
+"text": "4 Results"
+},
+{
+"t": "p",
+"text": "4.1 Diagnostic models (Table 3; Figures 3–7) – brief. 4.2 RF validity (Tables 5a–h; Figures 8, 9). 4.3 CF validity (Tables 6a–b). 4.4 Error decomposition and the levels of RF and CF (Table 8; Figure 10). 4.5 Data-selection policies (Tables 13–15; Figures 13–15) – main result. 4.6 Concept explanations and data quality (Tables 9–12; Figures 11, 12)."
+},
+{
+"t": "h2",
+"text": "5 Discussion – by evidential status"
+},
+{
+"t": "p",
+"text": "**5.1 Demonstrated by the data.** Effect of each policy on identical held-out tests; repeatability of near-replicates; variance shares; CF inconsistency; thin support of CF = 4. **5.2 Predictive association only.** RF 4 vs 1 variance ratio; no ordered CF effect; CF = 3 excess; coverage equalisation. These describe how the ratings relate to error, not whether they are correct. **5.3 Model-internal explanations.** Alignment criteria, entanglement, disagreement with SHAP, explanation quality by RF. Statements concern network representations only. **5.4 Not identifiable without independent evidence.** Correctness of individual ratings; pure measurement error; laboratory effects; inter-rater agreement. Proposed re-rating design. **5.5 Engineering recommendations.**"
+},
+{
+"t": "bullets",
+"items": [
+"Retain category-4 tests in the mean model."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Do not use (4−RF)(4−CF) weights."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Use RF (and CF = 3) to widen prediction intervals."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Report errors for RF = 4 and CF = 3 separately."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Treat CF as a flag, not as an ordered weight."
+],
+"level": 1
+},
+{
+"t": "h2",
+"text": "6 Limitations (from 07_limitations.md)"
+},
+{
+"t": "h2",
+"text": "7 Conclusions – one paragraph per RQ, with the numbers and the acceptance-criteria table."
+},
+{
+"t": "h2",
+"text": "Main-text tables and figures"
+},
+{
+"t": "p",
+"text": "Tables 2, 3, 5a, 6a, 8, 9, 13 (with Table 4 as optimisation summary). Figures 1, 2, 3, 8 or 9, 10, 12, 13, 14. The remaining tables and figures go to the supplementary material (05_supplementary_material_outline.md)."
+},
+{
+"t": "h2",
+"text": "Before submission"
+},
+{
+"t": "bullets",
+"items": [
+"Verify the RF/CF category wording against the CLASH WP2 report."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Compare against the full texts of Paper 1 and Paper 2 (Section 6 report, 6.7)."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Complete a systematic literature search."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Consider the blinded re-rating study (L2)."
+],
+"level": 0
+},
+{
+"t": "pagebreak"
+},
+{
+"t": "h1",
+"text": "5. Supplementary-material outline"
+},
+{
+"t": "p",
+"text": "**S1 Data audit.** File inventory; variable dictionary with ranges and missingness (Table 1); response classes and unusable records with reasons; duplicate analysis; flag definitions and counts; RF × CF matrix for all records and for the regression set; within-group consistency of RF and CF at five grouping levels; list of geometries with more than one CF value; identifiers available, reconstructed and inferred. Files: table01*, table02*, diagnostics/data_audit_summary.json, cf_discrepancies_within_geometry.csv."
+},
+{
+"t": "p",
+"text": "**S2 Models and optimisation.** Search spaces and their justification; nested design diagram; per-fold best hyper-parameters, inner objective and outer error (Table 4); Optuna histories (Figure S1); early-stopping rules; performance on the sensitivity schemes (random records, series held out); wet/dry model (Table S)."
+},
+{
+"t": "p",
+"text": "**S3 Regression CCW-Net.** Mapping to the original method and list of adaptations; concept ontology with thresholds and counts (Table S, tableS_concept_ontology); head equations and the zero-reference property; derivation of each loss term; mediator model; training schedule; evaluation estimators (necessity, sufficiency, independence, zero-ablation shares, matched label-swap Shapley estimator); interaction pairs (Table S); variance branch (Table S); convergence diagnostics."
+},
+{
+"t": "p",
+"text": "**S4 Additional RF/CF validity results.** Trend statistics for every model and validation scheme (Table 5b); ordinal models (5c); variance model with interaction (5e); completeness indicators (5f); zero-overtopping share (5g); repeatability by RF and CF (5h); geometry-level CF results (6a, 6b); RF × CF cells with support flags (7); scatter plots stratified by RF and CF for all models (Figures 4, 5)."
+},
+{
+"t": "p",
+"text": "**S5 Error-decomposition robustness.** Grouping definitions; source and inferred-laboratory levels; other models; random and series-held-out residuals; strata of RF and CF (Table 8, 8b)."
+},
+{
+"t": "p",
+"text": "**S6 Data-selection policies.** Full policy table for both learners (Table 13); calibration by category (14); bias, RMSE and coverage by structural family (15); training variance model per fold (Table S); alternative conformal constructions by quality category (Tables S: scale models, Mondrian, CQR)."
+},
+{
+"t": "p",
+"text": "**S7 Reproducibility.** Software versions, seeds, fold assignments, checksum of the raw workbook, unit tests, execution guide."
+},
+{
+"t": "p",
+"text": "**S8 Originality statement** (from 06_originality_and_overlap_assessment.md)."
+}
+]
+}

@@ -1,0 +1,17 @@
+seed: 20261112
+n_outer_folds: 5
+n_inner_folds: 3
+primary_scheme: geometry
+# every model on the primary scheme; the reference model also on two sensitivity schemes
+models: [rf, xgb, catboost, mlp]
+sensitivity_schemes: [random, series]
+reference_model: xgb
+nn_seeds: [0, 1, 2]
+n_boot: 1000
+# near-replicate (repeatability) pairs ----------------------------------------
+replicates:
+  rel_tol: 0.01
+# conformal -------------------------------------------------------------------
+uncertainty:
+  alpha: 0.1
+  calib_fraction: 0.25

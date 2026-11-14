@@ -1,0 +1,8 @@
+category,n,n_series,RF4,CF4,in_wetdry,in_regression
+invalid response AND unusable inputs,1,1,1,0,0,0
+invalid response only (missing marker or negative q),20,7,20,0,0,0
+"positive discharge, unusable inputs",109,9,109,17,0,0
+"positive discharge, usable (wet/dry + regression)",9333,162,637,212,9333,9333
+"zero discharge, unusable inputs",13,4,13,4,0,0
+"zero discharge, usable (wet/dry only)",1056,83,126,21,1056,0
+TOTAL,10532,163,906,254,10389,9333

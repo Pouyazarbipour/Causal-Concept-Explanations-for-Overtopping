@@ -1,0 +1,15 @@
+# Revised (v2) model optimisation: src/model_optimization.py, experiments/run_optimized.py
+data: all 9 333 positive-discharge records; RF and CF 1-4 retained; equal weights; no record removed
+folds: pre-specified outer geometry folds (data/processed/fold_assignments.csv), identical to the baseline
+inner_cv: grouped 3-fold on the outer-training partition (geometry groups)
+sampler: Optuna TPE (multivariate), seed = 20261112 + fold
+pruner: MedianPruner(n_startup_trials=10), reported after each inner fold
+budgets: {xgb: 100, xgb_phys: 100, catboost: 40, lgbm: 80, hgb: 40, et: 30, rf: 40, mlp: 24}
+budget_sensitivity: refit of the best configuration found within the first 10/20/30/50 trials (XGBoost)
+early_stopping_rounds: 100
+max_trees: {xgb: 4000, catboost: 3000, lgbm: 4000}
+refit_seeds: [0, 1, 2]
+xgb_objectives: [reg:squarederror, reg:pseudohubererror]
+phys_features: [log xi0, Rc/(Hm0 gf), Rc/(Hm0 xi0 gf), gamma_beta, Rc/(Hm0 gf gamma_beta)]
+sensitivity_partitions: two further geometry partitions (seeds 20261112 + 1000, + 2000) with baseline and v2 XGBoost
+series_held_out: v2 XGBoost on the series folds
