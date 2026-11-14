@@ -1,0 +1,101 @@
+/home/user/Causal-Concept-Explanations-for-Overtopping/src/engineering_impact.py:53: RuntimeWarning: invalid value encountered in multiply
+  gfs = np.where((gf < 0.9) & (xi > 1.8), gf + (xi - 1.8) * (1 - gf) / 8.2, gf)
+outside                  5250
+S rough single slope     2697
+S smooth single slope    1278
+V plain vertical wall     108
+Name: count, dtype: int64
+                   domain     subset                              model     n  n_series      rmse      bias       mae  pct_within_factor10
+0          all applicable  all RF/CF          EurOtop 2018 (mean value)  4083        90  0.968825  0.000628  0.672123            76.683811
+1          all applicable  all RF/CF    XGBoost baseline (original OOF)  4083        90  0.525735 -0.039870  0.373625            92.750429
+2          all applicable  all RF/CF  XGBoost v2 (optimised, seed mean)  4083        90  0.513453 -0.049126  0.359616            92.872888
+3          all applicable  all RF/CF                  CatBoost baseline  4083        90  0.550774 -0.051492  0.384960            91.354396
+4          all applicable  all RF/CF             Random Forest baseline  4083        90  0.555717 -0.051848  0.399632            91.795249
+15   S rough single slope  all RF/CF          EurOtop 2018 (mean value)  2697        63  1.132478  0.036691  0.847819            67.741935
+16   S rough single slope  all RF/CF    XGBoost baseline (original OOF)  2697        63  0.588113 -0.011592  0.423771            89.988877
+17   S rough single slope  all RF/CF  XGBoost v2 (optimised, seed mean)  2697        63  0.574508 -0.025978  0.406768            90.211346
+18   S rough single slope  all RF/CF                  CatBoost baseline  2697        63  0.618978 -0.027870  0.439995            88.209121
+19   S rough single slope  all RF/CF             Random Forest baseline  2697        63  0.612112 -0.024764  0.440320            88.876529
+30  S smooth single slope  all RF/CF          EurOtop 2018 (mean value)  1278        26  0.429833 -0.020268  0.294649            95.852895
+31  S smooth single slope  all RF/CF    XGBoost baseline (original OOF)  1278        26  0.370951 -0.095587  0.273822            98.278560
+32  S smooth single slope  all RF/CF  XGBoost v2 (optimised, seed mean)  1278        26  0.362967 -0.094256  0.265818            98.278560
+33  S smooth single slope  all RF/CF                  CatBoost baseline  1278        26  0.382196 -0.098364  0.276818            97.730829
+34  S smooth single slope  all RF/CF             Random Forest baseline  1278        26  0.427898 -0.108036  0.322900            97.417840
+45  V plain vertical wall  all RF/CF          EurOtop 2018 (mean value)   108         5  1.127737 -0.652689  0.751402            73.148148
+46  V plain vertical wall  all RF/CF    XGBoost baseline (original OOF)   108         5  0.428608 -0.086742  0.302365            96.296296
+47  V plain vertical wall  all RF/CF  XGBoost v2 (optimised, seed mean)   108         5  0.406862 -0.093133  0.292091            95.370370
+48  V plain vertical wall  all RF/CF                  CatBoost baseline   108         5  0.414917 -0.086758  0.290307            94.444444
+49  V plain vertical wall  all RF/CF             Random Forest baseline   108         5  0.389758 -0.063302  0.291541            98.148148
+     q_allow_l_per_s_per_m                        policy subset  pct_false_safe  pct_decision_changed_vs_P1
+30                     0.1                 P1_retain_all    RF4        2.982732                    0.000000
+31                     0.1                 P1_retain_all    CF4        0.000000                    0.000000
+34                     0.1                   P2_excl_RF4    RF4        5.337520                    7.064364
+35                     0.1                   P2_excl_RF4    CF4        1.415094                    2.358491
+38                     0.1                   P3_excl_CF4    RF4        2.982732                    1.412873
+39                     0.1                   P3_excl_CF4    CF4        0.000000                    1.415094
+42                     0.1            P4_excl_RF4_or_CF4    RF4        4.081633                    7.064364
+43                     0.1            P4_excl_RF4_or_CF4    CF4        0.000000                    0.943396
+46                     0.1              P5_CLASH_weights    RF4        5.651491                    7.692308
+47                     0.1              P5_CLASH_weights    CF4        0.000000                    3.773585
+50                     0.1  P6a_inverse_variance_weights    RF4        3.139717                    1.569859
+51                     0.1  P6a_inverse_variance_weights    CF4        0.471698                    0.471698
+54                     0.1   P6b_quality_aware_intervals    RF4        2.982732                    0.000000
+55                     0.1   P6b_quality_aware_intervals    CF4        0.000000                    0.000000
+114                    1.0                 P1_retain_all    RF4        5.337520                    0.000000
+115                    1.0                 P1_retain_all    CF4        1.886792                    0.000000
+118                    1.0                   P2_excl_RF4    RF4       12.558870                   17.111460
+119                    1.0                   P2_excl_RF4    CF4        1.886792                    2.830189
+122                    1.0                   P3_excl_CF4    RF4        5.494505                    2.825746
+123                    1.0                   P3_excl_CF4    CF4        2.358491                    8.490566
+126                    1.0            P4_excl_RF4_or_CF4    RF4       11.145997                   15.227630
+127                    1.0            P4_excl_RF4_or_CF4    CF4        1.415094                    9.433962
+130                    1.0              P5_CLASH_weights    RF4       12.715856                   17.268446
+131                    1.0              P5_CLASH_weights    CF4        1.415094                    7.547170
+134                    1.0  P6a_inverse_variance_weights    RF4        5.180534                    3.296703
+135                    1.0  P6a_inverse_variance_weights    CF4        1.886792                    3.773585
+138                    1.0   P6b_quality_aware_intervals    RF4        5.337520                    0.000000
+139                    1.0   P6b_quality_aware_intervals    CF4        1.886792                    0.000000
+198                   10.0                 P1_retain_all    RF4        8.320251                    0.000000
+199                   10.0                 P1_retain_all    CF4        3.301887                    0.000000
+202                   10.0                   P2_excl_RF4    RF4       14.756672                   10.361068
+203                   10.0                   P2_excl_RF4    CF4        3.773585                    2.358491
+206                   10.0                   P3_excl_CF4    RF4        9.890110                    2.668760
+207                   10.0                   P3_excl_CF4    CF4        4.716981                    4.716981
+210                   10.0            P4_excl_RF4_or_CF4    RF4       13.814757                   10.675039
+211                   10.0            P4_excl_RF4_or_CF4    CF4        3.773585                    4.245283
+214                   10.0              P5_CLASH_weights    RF4       14.599686                   11.459969
+215                   10.0              P5_CLASH_weights    CF4        4.245283                    4.245283
+218                   10.0  P6a_inverse_variance_weights    RF4        9.733124                    2.825746
+219                   10.0  P6a_inverse_variance_weights    CF4        4.245283                    0.943396
+222                   10.0   P6b_quality_aware_intervals    RF4        8.320251                    0.000000
+223                   10.0   P6b_quality_aware_intervals    CF4        3.301887                    0.000000
+282                   50.0                 P1_retain_all    RF4        4.866562                    0.000000
+283                   50.0                 P1_retain_all    CF4        2.358491                    0.000000
+286                   50.0                   P2_excl_RF4    RF4        5.965463                    4.238619
+287                   50.0                   P2_excl_RF4    CF4        1.415094                    5.660377
+290                   50.0                   P3_excl_CF4    RF4        5.337520                    1.569859
+291                   50.0                   P3_excl_CF4    CF4        3.773585                    1.415094
+294                   50.0            P4_excl_RF4_or_CF4    RF4        5.337520                    4.238619
+295                   50.0            P4_excl_RF4_or_CF4    CF4        2.358491                    4.716981
+298                   50.0              P5_CLASH_weights    RF4        6.279435                    4.395604
+299                   50.0              P5_CLASH_weights    CF4        2.358491                    6.603774
+302                   50.0  P6a_inverse_variance_weights    RF4        4.552590                    0.941915
+303                   50.0  P6a_inverse_variance_weights    CF4        1.886792                    1.415094
+306                   50.0   P6b_quality_aware_intervals    RF4        4.866562                    0.000000
+307                   50.0   P6b_quality_aware_intervals    CF4        2.358491                    0.000000
+                           regime  n_tests  pct_RF4_in_regime  pct_CF4_in_regime  pct_regime_lost_by_P4  pct_of_RF4_tests_in_regime  pct_of_common_tests_in_regime
+0   depth-limited (Hm0,toe/h > 1)      145          98.620690           6.206897              98.620690                   22.448980                       0.023546
+1       shallow (Hm0,toe/h > 0.6)     1527          14.276359           1.178782              14.865750                   34.222920                      15.304921
+2   vertical or steep wall family     2597           8.432807           1.848286               9.896034                   34.379906                      27.548858
+3                    bermed slope      726           3.030303           0.413223               3.443526                    3.453689                       8.252884
+4  oblique attack (beta > 30 deg)      506          20.948617           0.000000              20.948617                   16.640502                       4.709206
+5    low freeboard (Rc/Hm0 < 0.5)      306          30.718954           0.000000              30.718954                   14.756672                       2.495879
+6   steep foreshore (1/m >= 1/20)     1450          10.689655           0.275862              10.896552                   24.332810                      15.210737
+7       chute structures (remark)      152           0.000000         100.000000             100.000000                    0.000000                       0.000000
+                  reference pool  subset  median_nn_distance_other_series  p90_nn_distance
+0                      all tests     RF4                         1.377706         2.399671
+1                      all tests     CF4                         1.337980         2.009529
+2                      all tests  common                         1.026451         2.364856
+3  tests kept by P4 (RF<4, CF<4)     RF4                         1.520139         2.478886
+4  tests kept by P4 (RF<4, CF<4)     CF4                         1.432960         2.031087
+5  tests kept by P4 (RF<4, CF<4)  common                         1.042239         2.394291
