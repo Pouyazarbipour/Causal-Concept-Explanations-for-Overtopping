@@ -293,7 +293,8 @@ def exp_ccw(D, nb, seed):
     m = m.merge(pd.DataFrame(rm), on=["variant", "seed", "fold"], how="left")
     cols = [c for c in ["rmse", "concept_acc", "concept_macro_f1", "concept_ordinal_mae", "concept_ece", "nec_abs_effect", "suf_rmse_vs_target",
                         "suf_rmse_vs_output", "ind_rmse", "interaction_share", "rho_inactive", "rho_inactive_per_null_slot",
-                        "rho_active_per_active_slot", "rho_changed_matched", "epochs_run"] if c in m]
+                        "rho_active_per_active_slot", "rho_changed_matched", "rho_held_null_matched", "rho_per_held_null_slot_matched",
+                        "n_matched_comparisons", "epochs_run"] if c in m]
     g = m.groupby("variant")[cols]
     t = g.mean()
     t.insert(0, "n_runs(fold x seed)", g.size())
@@ -303,7 +304,8 @@ def exp_ccw(D, nb, seed):
     for v in t.index:   # paired differences over identical fold-seed runs (runs are not independent: descriptive)
         o = m[m.variant == v].set_index(["fold", "seed"])
         j = full.index.intersection(o.index)
-        for c in ("rmse", "rho_inactive_per_null_slot", "nec_abs_effect", "suf_rmse_vs_output", "ind_rmse", "rho_changed_matched"):
+        for c in ("rmse", "rho_inactive_per_null_slot", "nec_abs_effect", "suf_rmse_vs_output", "ind_rmse", "rho_changed_matched",
+                  "rho_per_held_null_slot_matched"):
             if c in o and len(j) > 1 and o.loc[j, c].notna().all():
                 d = (o.loc[j, c] - full.loc[j, c]).to_numpy()
                 t.loc[v, f"d_{c}_vs_full"] = d.mean()
@@ -351,7 +353,10 @@ def exp_ccw(D, nb, seed):
         {"quantity": "attribution share per absent (null-state) concept: concept bottleneck", "value": tb.loc["cbm", "rho_inactive_per_null_slot"]},
         {"quantity": "attribution share per active concept: grouped TreeSHAP, XGBoost", "value": shap_active_share},
         {"quantity": "attribution share per active concept: CCW-Net", "value": tb.loc["ccw_full", "rho_active_per_active_slot"]},
-        {"quantity": "share routed through the concept whose label changed (matched estimator): CCW-Net (0.10 = indiscriminate)", "value": tb.loc["ccw_full", "rho_changed_matched"]},
+        {"quantity": "matched estimator, share of the changed concept: CCW-Net (0.10 = indiscriminate)", "value": tb.loc["ccw_full", "rho_changed_matched"]},
+        {"quantity": "matched estimator, share of the changed concept: unaligned wrapper", "value": tb.loc["ccw_unaligned", "rho_changed_matched"]},
+        {"quantity": "matched estimator, share per held absent concept: CCW-Net (0.10 = indiscriminate)", "value": tb.loc["ccw_full", "rho_per_held_null_slot_matched"]},
+        {"quantity": "matched estimator, share per held absent concept: unaligned wrapper", "value": tb.loc["ccw_unaligned", "rho_per_held_null_slot_matched"]},
         {"quantity": "out-of-geometry RMSE: XGBoost (explained by SHAP)", "value": float(np.sqrt(np.mean((load_pred(f"{scheme}__xgb")[0] - y) ** 2)))},
         {"quantity": "out-of-geometry RMSE: CCW-Net (explained by concept slots)", "value": float(np.sqrt(np.mean((load_pred(f"{scheme}__ccw_full") - y) ** 2)))}])
     save_table(cmp_, "table11_concept_vs_feature_attribution")

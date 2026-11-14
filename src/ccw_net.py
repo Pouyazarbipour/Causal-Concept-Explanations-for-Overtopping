@@ -142,33 +142,43 @@ def alt_states(labels, support, generator):
 
 
 def losses(model, z, x, y, labels, flow, support, w, generator, draws=4, cf_mode="flow"):
+    """Task, concept and alignment losses.  Conventions follow the reference implementation
+    (squarebush/ccw-net-neurips2026, losses/causal_alignment.py): the zero reference h(0) and the factual
+    output in the counterfactual contrast are detached, and the alignment terms use fully labelled rows only."""
     M = squash(model.pre(z))
     yhat, add, P = model.head(M)
     out = {"task": ((yhat - y) ** 2).mean(), "cls": concept_loss(model, M, labels)}
-    d0 = model.single(M)
-    act = active_mask(labels)
-    I_act = (P * act.unsqueeze(1) * act.unsqueeze(2)).sum((1, 2))
-    out["suf"] = ((model.b + (d0 * act).sum(1) + I_act - y) ** 2).mean()
-    out["ind"] = ((add - d0.sum(1)) ** 2).mean()
-    out["int"] = P.abs().sum((1, 2)).mean()
-    out["nec"] = yhat.new_zeros(())
-    if w.get("pres", 0) > 0:  # optional presence term of the original paper (off by default)
-        beta = 1.0 / act.sum(1, keepdim=True).clamp_min(1)
-        out["pres"] = (act * F.relu(beta * (yhat - model.b).abs().unsqueeze(1) - d0.abs()) ** 2).sum(1).mean()
+    zero = yhat.new_zeros(())
+    full = (labels >= 0).all(1)                                 # rows with every concept label defined
+    if full.sum() < 4:
+        out.update({"suf": zero, "ind": zero, "int": zero, "nec": zero, "pres": zero})
+        return out, M
+    Mf, yf, yhf, addf, Pf, Lf, xf = M[full], y[full], yhat[full], add[full], P[full], labels[full], x[full]
+    y0 = model.b.detach()                                       # h(0), detached as y_zero in the reference
+    d0 = model.single(Mf)                                       # PE+ : slot j alone, measured from zero
+    act = active_mask(Lf)
+    I_act = (Pf * act.unsqueeze(1) * act.unsqueeze(2)).sum((1, 2))
+    out["suf"] = ((y0 + (d0 * act).sum(1) + I_act - yf) ** 2).mean()
+    out["ind"] = ((addf - d0.sum(1)) ** 2).mean()           # total additive effect vs sum of PE+
+    out["int"] = Pf.abs().sum((1, 2)).mean()
+    beta = 1.0 / act.sum(1, keepdim=True).clamp_min(1)          # presence: each active slot >= beta * |total|
+    out["pres"] = (act * F.relu(beta * (yhf - y0).abs().unsqueeze(1) - d0.abs()) ** 2).sum(1).mean()
+    out["nec"] = zero
     if w["nec"] > 0 and cf_mode != "none":
-        null = ((labels == 0) & NULLCAP)                       # [B, J] slots whose concept is absent
+        null = ((Lf == 0) & NULLCAP)                            # [B, J] slots whose concept is absent
         jn = torch.nonzero(NULLCAP).squeeze(1)
+        y_ref = yhf.detach()                                    # PE- is measured against the detached factual output
         tot = 0.0
         for _ in range(draws):
             if cf_mode == "flow":
-                alt = alt_states(labels, support, generator)
-                Mt = squash(flow.sample(make_cond(alt, x, KMAX), generator))
+                alt = alt_states(Lf, support, generator)
+                Mt = squash(flow.sample(make_cond(alt, xf, KMAX), generator))
             else:  # "permute": unconditional draw from other rows of the batch (no mediator model)
-                Mt = M.detach()[torch.randperm(len(M), generator=generator)]
-            Mrep = M.unsqueeze(1).repeat(1, len(jn), 1, 1)       # [B, Jn, J, D]
+                Mt = Mf.detach()[torch.randperm(len(Mf), generator=generator)]
+            Mrep = Mf.unsqueeze(1).repeat(1, len(jn), 1, 1)     # [B, Jn, J, D]
             Mrep[:, torch.arange(len(jn)), jn] = Mt[:, jn]
-            ycf = model.head(Mrep.view(-1, J, model.D))[0].view(len(M), len(jn))
-            tot = tot + (((ycf - yhat.unsqueeze(1)) ** 2) * null[:, jn]).sum(1).mean()
+            ycf = model.head(Mrep.view(-1, J, model.D))[0].view(len(Mf), len(jn))
+            tot = tot + (((ycf - y_ref.unsqueeze(1)) ** 2) * null[:, jn]).sum(1).mean()
         out["nec"] = tot / draws
     return out, M
 
@@ -177,8 +187,7 @@ def total(l, w, align=True):
     t = l["task"] + w["cls"] * l["cls"]
     if align:
         t = t + w["nec"] * l["nec"] + w["suf"] * l["suf"] + w["ind"] * l["ind"] + w["int"] * l["int"]
-        if "pres" in l:
-            t = t + w["pres"] * l["pres"]
+        t = t + w.get("pres", 0.0) * l["pres"]
     return t
 
 
@@ -344,64 +353,71 @@ def evaluate(model, flow, support, Z, X, y_std, L, ysd, seed):
 
 
 @torch.no_grad()
-def matched_shapley(model, M, Xs, L, seed, n_perm=16, min_n=30, tau=0.25, eps=1.5, max_inputs=300):
-    """Mediator-free interventional-effect estimator (adapted from Sec. 5.4 / App. F of the paper).
+def matched_shapley(model, M, Xs, L, seed, n_draws=32, min_n=30, max_subjects=300, tau=0.25, eps=1.5):
+    """Interventional-effect estimator of the reference implementation (scoring/independent.py), adapted to
+    multi-state concept groups.
 
-    For concept j and two of its states (a -> b; adjacent states for ordinal groups) every test input i
-    in state a is paired with an A-match (state a) and a B-match (state b) that share ALL other concept
-    labels with i, drawn with a Gaussian kernel on z-scored inputs.  Hybrid concept vectors take each
-    slot from the A- or the B-match; the Shapley value of slot k is the share of the output change that
-    passes through slot k.  A faithful model routes the change through the slot whose label changed.
-    Returns rows: concept, a, b, n, rho_changed, mean |total effect| (standardised units)."""
+    A comparison changes concept j from state a to state b (adjacent states for ordinal groups, every pair for
+    nominal ones) within ONE active/absent pattern of the other nine concepts (the reference scores each
+    binary label combination separately; with multi-state concepts the active/absent pattern is the analogue,
+    and the remaining state differences are absorbed by matching on the inputs); both arms must hold
+    >= min_n held-out inputs.  Subjects come from both arms.  Every
+    concept slot is its own mediator group.  For every subject, group and draw, an a-arm and a b-arm match are
+    drawn INDEPENDENTLY (Gaussian kernel, bandwidth tau, caliper eps on z-scored inputs, self excluded, nearest
+    row if none is in the caliper).  Hybrid concept vectors take each group's slot from its a- or b-match; each
+    draw uses a random group ordering, so the average over draws is a sampled Shapley value.  |IE_g| is the
+    absolute value of the subject-averaged effect (norm of the mean, as in the reference).
+    Returned per comparison: shares of the changed slot, of the held active slots and of the held absent
+    (null-state) slots, and the mean share per held absent slot (1/J = 0.10 would be indiscriminate)."""
     rng = np.random.RandomState(seed)
-    Xz = (Xs - Xs.mean(0)) / (Xs.std(0) + 1e-9)
+    Xz = (Xs - Xs.mean(0)) / (Xs.std(0) + 1e-8)
     Ln = L.numpy()
+    active = np.where(np.array(HAS_NULL)[None, :], (Ln != 0).astype(int), 1)   # active/absent pattern per concept
     rows = []
     for j in range(J):
         others = np.delete(np.arange(J), j)
-        key = np.array(["_".join(map(str, r)) for r in Ln[:, others]])
+        key = np.array(["".join(map(str, r)) for r in active[:, others]])
         states = range(N_STATES[j])
         pairs = [(a, a + 1) for a in range(N_STATES[j] - 1)] if IS_ORDINAL[j] else [(a, b) for a in states for b in states if a < b]
         for a, b in pairs:
-            ia, ib = np.flatnonzero(Ln[:, j] == a), np.flatnonzero(Ln[:, j] == b)
-            if len(ia) < min_n or len(ib) < min_n:
-                continue
-            trip = []
-            for i in rng.permutation(ia):
-                cb = ib[key[ib] == key[i]]
-                if len(cb) == 0:
+            for kv in np.unique(key[(Ln[:, j] == a) | (Ln[:, j] == b)]):
+                ia = np.flatnonzero((Ln[:, j] == a) & (key == kv))
+                ib = np.flatnonzero((Ln[:, j] == b) & (key == kv))
+                if len(ia) < min_n or len(ib) < min_n:
                     continue
-                ca = ia[(key[ia] == key[i]) & (ia != i)]
-                ca = ca if len(ca) else np.array([i])
+                subj = np.concatenate([ia, ib])
+                subj = rng.choice(subj, min(max_subjects, len(subj)), replace=False)
 
-                def draw(c):
-                    d = np.sqrt(((Xz[c] - Xz[i]) ** 2).mean(1))
-                    inr = d <= eps
-                    if not inr.any():
-                        return c[np.argmin(d)]
-                    pw = np.exp(-d[inr] ** 2 / (2 * tau ** 2)) + 1e-300
-                    return rng.choice(c[inr], p=pw / pw.sum())
-                trip.append((draw(ca), draw(cb)))
-                if len(trip) >= max_inputs:
-                    break
-            if len(trip) < min_n:
-                continue
-            A = M[[t[0] for t in trip]]
-            Bm = M[[t[1] for t in trip]]
-            phi = torch.zeros(len(trip), J)
-            for _ in range(n_perm):
-                order = rng.permutation(J)
-                cur = A.clone()
-                prev = model.head(cur)[0]
-                for k in order:
-                    cur[:, k] = Bm[:, k]
-                    nxt = model.head(cur)[0]
-                    phi[:, k] += nxt - prev
-                    prev = nxt
-            phi /= n_perm
-            mag = phi.abs().mean(0)
-            rows.append({"concept": j, "a": a, "b": b, "n": len(trip), "rho_changed": float(mag[j] / mag.sum().clamp_min(1e-12)),
-                         "total_abs": float(phi.sum(1).abs().mean())})
+                def draws_for(i, pool):
+                    pool = pool[pool != i]
+                    d2 = ((Xz[pool] - Xz[i]) ** 2).mean(1)
+                    w = np.where(d2 <= eps ** 2, np.exp(-d2 / (2 * tau ** 2)), 0.0)
+                    if w.sum() <= 1e-12:
+                        return np.full((J, n_draws), pool[np.argmin(d2)])
+                    return rng.choice(pool, size=(J, n_draws), p=w / w.sum())     # independent per group and draw
+                A_idx = np.stack([draws_for(i, ia) for i in subj])                 # [S, J, draws]
+                B_idx = np.stack([draws_for(i, ib) for i in subj])
+                S = len(subj)
+                phi = np.zeros((S, J))
+                for d in range(n_draws):
+                    MA = M[A_idx[:, :, d]][:, np.arange(J), np.arange(J)]          # slot g from its own a-match
+                    MB = M[B_idx[:, :, d]][:, np.arange(J), np.arange(J)]
+                    cur = MA.clone()
+                    prev = model.head(cur)[0]
+                    for g in rng.permutation(J):
+                        cur[:, g] = MB[:, g]
+                        nxt = model.head(cur)[0]
+                        phi[:, g] += (nxt - prev).numpy()
+                        prev = nxt
+                phi /= n_draws
+                ie = np.abs(phi.mean(0))                                           # norm of the subject-averaged effect
+                share = ie / max(ie.sum(), 1e-12)
+                held_null = active[ia[0]][others] == 0
+                rows.append({"concept": j, "a": a, "b": b, "n": S, "label_combination": kv, "rho_changed": float(share[j]),
+                             "rho_held_active": float(share[others][~held_null].sum()),
+                             "rho_held_null": float(share[others][held_null].sum()),
+                             "rho_per_held_null_slot": float(share[others][held_null].mean()) if held_null.any() else np.nan,
+                             "n_held_null": int(held_null.sum()), "total_abs": float(np.abs(phi.sum(1).mean()))})
     return rows
 
 
@@ -472,7 +488,7 @@ def tune_ccw(Ztr, Xt, yt, Lt, groups, C, n_trials, seed):
         c = copy.deepcopy(C)
         c.update({"concept_dim": params["concept_dim"], "encoder_hidden": params["encoder_hidden"], "lr": params["lr"],
                   "interaction_rank": params["interaction_rank"]})
-        for k in ("nec", "suf", "ind"):
+        for k in ("nec", "suf", "ind", "pres"):
             c["weights"][k] = C["weights"][k] * params["align_mult"]
         return c
 
@@ -546,12 +562,16 @@ def run_fold(k, seed, tr, te, X, y, labels, groups, rfcf, mcfg, variants, base_s
         sh = matched_shapley(model, Mte, Xte.numpy(), Lte, s)
         tot_n = sum(r["n"] for r in sh)
         res["rho_changed_matched"] = float(sum(r["n"] * r["rho_changed"] for r in sh) / tot_n) if tot_n else np.nan
+        hn = [r for r in sh if r["n_held_null"] > 0]
+        res["rho_held_null_matched"] = float(sum(r["n"] * r["rho_held_null"] for r in hn) / sum(r["n"] for r in hn)) if hn else np.nan
+        res["rho_per_held_null_slot_matched"] = float(sum(r["n"] * r["rho_per_held_null_slot"] for r in hn) / sum(r["n"] for r in hn)) if hn else np.nan
         res["n_matched_comparisons"] = len(sh)
         res.update({"variant": name, "fold": k, "seed": seed, "epochs_run": extra["epochs_run"], "flow_nll": extra["flow_nll_final"]})
         outp["metrics"].append(res)
         outp["per_concept"].append({"variant": name, "fold": k, "seed": seed, **per})
         outp["shapley"] += [{"variant": name, "fold": k, "seed": seed, **r} for r in sh]
         outp["history"][name] = hist
+        outp.setdefault("states", {})[name] = {k: v.detach().cpu() for k, v in model.state_dict().items()}
         if name in ("ccw_full", "ccw_unaligned"):
             outp["records"][name] = rec
             outp["reps"][name] = Mte.flatten(1).numpy()

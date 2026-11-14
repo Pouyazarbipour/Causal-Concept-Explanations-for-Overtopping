@@ -76,25 +76,30 @@ and width by category; bias by structural family; share of predictions changed b
 
 ## 2.6 Regression CCW-Net
 
-Adaptation of Rountree et al. (2026, arXiv:2611.14407); details and derivation in the supplementary
-outline (S3). Frozen tabular backbone; encoder producing one squashed vector per concept group (ten groups,
-Table S); bias-free attention read-out A(M) plus explicit low-rank pairwise interaction I(M); linear
-output on the standardised target. Loss
+Adaptation of Rountree et al. (2026, arXiv:2611.14407), checked line by line against the authors' reference
+implementation (`squarebush/ccw-net-neurips2026`; report 08). Frozen tabular backbone; encoder producing one
+squashed vector per concept group (ten groups, Table S); bias-free attention read-out A(M) plus an explicit
+low-rank pairwise interaction I(M); linear output on the standardised target. Loss
 
-    L = L_task + l_cls L_concept + l_nec L_nec + l_suf L_suf + l_ind L_ind + l_int L_int
+    L = L_task + l_cls L_concept + l_nec L_nec + l_suf L_suf + l_ind L_ind + l_pres L_pres + l_int L_int
 
-with necessity applied to the six concept groups that have a physical null state, sufficiency to the
-active slots including their mutual interactions, and independence to the additive read-out only.
-Counterfactual slot values come from a per-concept conditional RealNVP. Comparators: unaligned wrapper
-(same architecture, task + concept loss), loss ablations (no necessity / sufficiency / independence /
-interaction / conditional counterfactual), concept-bottleneck regression.
+with the conventions of the reference: the zero reference h(0) and the factual output in the necessity
+contrast are detached, the alignment terms use fully labelled rows only, and the effective weights are 0.1
+for necessity, sufficiency, independence and presence (Optuna scales them jointly by 0.1–10). Necessity is
+applied to the six concept groups that have a physical null state; sufficiency to the active slots including
+their mutual interactions; independence to the additive read-out. Counterfactual slot values come from a
+per-concept conditional RealNVP. Comparators: unaligned wrapper (task and concept losses only), loss ablations
+(no necessity / sufficiency / independence / interaction / conditional counterfactual), concept-bottleneck
+regression.
 
-Evaluation on held-out geometries: necessity effect, sufficiency error, additivity residual, effect share
-through absent concepts, matched label-swap routing share, concept read-out accuracy. New in this study:
-(i) the per-record explanation-quality quantities are stratified by RF and CF; (ii) a linear probe tests
-whether RF/CF categories can be recovered from the learned physical concept vectors; (iii) concept
-attribution is compared with grouped TreeSHAP of the reference model (rank agreement, attribution assigned
-to physically absent concepts). All effects are effects of model representations on model output.
+Evaluation on held-out geometries: necessity effect, sufficiency gap, additivity residual, zero-ablation
+effect share through absent concepts, concept read-out accuracy, and the matched interventional-effect
+estimator of the reference implementation (independent covariate matches for every concept slot, 32 draws
+with random group orderings, norm of the subject-averaged effect, scored within each active/absent pattern of
+the held concepts). New in this study: (i) per-record explanation-quality quantities are stratified by RF
+and CF; (ii) a linear probe tests whether RF/CF can be recovered from the learned physical concept vectors;
+(iii) concept attribution is compared with grouped TreeSHAP of the reference model. All effects are effects of
+model representations on model output.
 
 ## 2.7 Statistics
 
