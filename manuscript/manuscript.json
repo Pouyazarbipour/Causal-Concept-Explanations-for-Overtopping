@@ -1,0 +1,1110 @@
+{
+"title": "Should category-4 tests be removed? Predictive validation of the CLASH reliability and complexity ratings and counterfactual assessment of data-selection policies for wave-overtopping prediction",
+"blocks": [
+{
+"t": "title",
+"text": "Should category-4 tests be removed? Predictive validation of the CLASH reliability and complexity ratings and counterfactual assessment of data-selection policies for wave-overtopping prediction"
+},
+{
+"t": "subtitle",
+"text": "[Author names and affiliations]"
+},
+{
+"t": "subtitle",
+"text": "Manuscript draft prepared for *Ocean Engineering*",
+"italic": true
+},
+{
+"t": "note",
+"text": "Draft generated from the analysis repository. Items in square brackets, the RF/CF category wording and the reference details must be verified by the authors before submission (see the outline document)."
+},
+{
+"t": "h1",
+"text": "Highlights"
+},
+{
+"t": "bullets",
+"items": [
+"All 10 532 CLASH tests, reliability and complexity factors 1–4, audited and retained.",
+"RF = 4 tests carry 2.3 times the residual variance of RF = 1 tests; RF 2 and 3 do not differ.",
+"The complexity factor shows no ordered link to geometry-level error or generalisation.",
+"Excluding category-4 tests leaves other tests unchanged but degrades category-4 predictions by 0.22–0.31.",
+"Keeping all tests and widening prediction intervals by RF/CF equalises coverage."
+],
+"level": 0
+},
+{
+"t": "h1",
+"text": "Abstract"
+},
+{
+"t": "p",
+"text": "The CLASH wave-overtopping database assigns each test a Reliability Factor (RF) and a Complexity Factor (CF) on ordinal scales from 1 to 4. These ratings are widely used to weight or exclude tests when data-driven overtopping models are trained, but whether they measure what they are used for has not been tested. This study audits the original, unfiltered database (10 532 tests, all RF and CF categories) and evaluates the ratings against leakage-free out-of-fold residuals of five diagnostic regression models tuned by nested, geometry-grouped cross-validation. RF = 4 tests show 2.34 times [1.41, 3.81] the residual variance of RF = 1 tests, but RF 2 and RF 3 are not distinguishable, and CF shows no ordered relation to geometry-level error or generalisation. A hierarchical decomposition attributes 58 % of the residual variance to within-geometry variation and 29 % to geometry-level discrepancy; replicate tests account for only 58 % of the former, and RF and CF do not map onto these levels as their definitions imply. A counterfactual comparison of nine training-data policies on identical held-out tests shows that excluding or zero-weighting category-4 tests changes the error on the remaining tests by at most 0.007 (log₁₀ units), while it increases the error on category-4 tests by 0.22–0.31 and reduces the coverage of 90 % prediction intervals for RF = 4 tests to 63 %–64 %. Retaining all tests and using RF and CF only to scale prediction intervals restores 89 % coverage for RF = 4 tests. A regression adaptation of the Causal Concept Wrapper Network is used to test whether concept-based explanations of the learned representations are faithful and whether they depend on data quality. The results support retaining category-4 tests and using the ratings for uncertainty rather than for data selection."
+},
+{
+"t": "p",
+"text": "*Keywords:* wave overtopping; CLASH database; data quality; reliability factor; complexity factor; data selection; machine learning; concept-based explanation"
+},
+{
+"t": "h1",
+"text": "1. Introduction"
+},
+{
+"t": "p",
+"text": "Data-driven prediction of mean wave-overtopping discharge rests on the CLASH database and its extended successors (Steendam et al., 2004; Van der Meer et al., 2009; EurOtop, 2018). Every test in the database carries two ordinal ratings: a Reliability Factor (RF), describing how reliable the measurement and its documentation are, and a Complexity Factor (CF), describing how well the standard CLASH parameters represent the tested cross-section. Both run from 1 (very reliable / simple) to 4 (unreliable / very complex)."
+},
+{
+"t": "p",
+"text": "The ratings were designed to support the development of prediction tools, and they are used in that role. In the CLASH neural network each test was weighted by (4 − RF)(4 − CF), which gives zero weight to every test with RF = 4 or CF = 4, and tests remarked \"do not use for neural network\" were removed (Van Gent et al., 2007). Later neural-network and gradient-boosting predictors used the ratings to select or resample training data (Zanuttigh et al., 2016; den Bieman et al., 2021). In these studies the ratings are inputs to a data-selection decision; their validity for that decision is assumed rather than tested."
+},
+{
+"t": "p",
+"text": "Whether a test should be retained depends on two questions that the ratings are meant to answer: does the test carry more measurement-associated uncertainty than others (RF), and is its structure poorly represented by the standard parameters (CF)? If the ratings do not separate tests in these respects, excluding category-4 tests removes information without reducing noise. Category-4 tests are also not a random sample; they include depth-limited conditions and unusual sections that the remaining tests cover poorly."
+},
+{
+"t": "p",
+"text": "This study asks whether the CLASH ratings are valid and useful for deciding which observations to retain, down-weight or exclude. Out-of-fold residuals from tuned regression models serve as the instrument; the models themselves are not the contribution. Geometry-grouped cross-validation is used only to obtain leakage-free residuals (see the companion study [Paper 1] for its role in generalisation). No physical causal effects of hydraulic or structural parameters are estimated (cf. [Paper 2]). The research questions are:"
+},
+{
+"t": "numbered",
+"items": [
+"RQ1. Does RF distinguish tests with different residual dispersion, repeatability and measurement-associated uncertainty?",
+"RQ2. Does CF identify geometries that are difficult to represent and generalise?",
+"RQ3. Can test-level variation, geometry-level discrepancy and source effects be separated, and do RF and CF map onto them?",
+"RQ4. How do retaining, excluding or re-weighting tests by RF and CF change accuracy, calibration and stability on identical held-out tests?",
+"RQ5. Do concept-based explanations of a regression-adapted Causal Concept Wrapper Network (CCW-Net; Rountree et al., 2026) faithfully describe the learned representations, and do they depend on data quality?",
+"RQ6. Is there a defensible alternative to automatic exclusion of category-4 tests?"
+]
+},
+{
+"t": "h1",
+"text": "2. Data"
+},
+{
+"t": "h2",
+"text": "2.1 Database and response"
+},
+{
+"t": "p",
+"text": "The workbook holds 10 532 tests from 163 test series with 33 variables (Table 1). The response is the dimensionless discharge q^{*} = q / (g H_{m0}^{3})^{1/2}, with q in m³/s per metre and the spectral wave height H_{m0} at the toe, and Y = log₁₀ q^{*}. Of all tests, 9 442 report positive discharge, 1 069 zero discharge and 21 a missing or invalid value. No test is removed: zero discharges enter a separate wet/dry model, no detection limit is recorded and no epsilon is added before the logarithm. After input checks, 9333 positive-discharge tests enter the regression and 10 389 the wet/dry model; all 143 tests with unusable inputs have RF = 4."
+},
+{
+"t": "p",
+"text": "Fifteen dimensionless predictors are formed with Froude scaling at the toe: R_{c}/H_{m0}, A_{c}/H_{m0}, G_{c}/L_{0}, H_{m0}/L_{0}, h/L_{0}, h_{t}/H_{m0}, B_{t}/L_{0}, B/L_{0}, h_{b}/H_{m0}, tan α_{B}, cot α_{d}, cot α_{u}, γ_{f}, β and the foreshore slope 1/m, with L_{0} = gT_{m−1,0}²/2π. RF and CF are never predictors of the mean."
+},
+{
+"t": "h2",
+"text": "2.2 The quality ratings"
+},
+{
+"t": "table",
+"caption": "**Table 1.** Distribution of the CLASH reliability (RF) and complexity (CF) factors, all 10 532 tests.",
+"header": [
+"Factor",
+"1",
+"2",
+"3",
+"4"
+],
+"rows": [
+[
+"RF",
+"3386 (32.1 %)",
+"3598 (34.2 %)",
+"2642 (25.1 %)",
+"906 (8.6 %)"
+],
+[
+"CF",
+"7989 (75.9 %)",
+"1405 (13.3 %)",
+"884 (8.4 %)",
+"254 (2.4 %)"
+]
+],
+"widths": [
+1,
+2,
+2,
+2,
+2
+],
+"note": "RF: 1 very reliable … 4 not reliable. CF: 1 simple … 4 very complex (category wording to be verified against the CLASH documentation). No value is missing or out of range.",
+"font_size": 18
+},
+{
+"t": "p",
+"text": "Both factors are fully populated with values 1–4 (Fig. 1). CF = 4 comprises 254 tests from only nine series (212 usable tests from seven series in the regression set), dominated by one investigation of chute structures. Six of the sixteen RF × CF cells contain too few tests or series to support any conclusion. CF is not constant within reconstructed structures: 32 geometries (311 tests) carry more than one CF value, and RF varies within 166 geometries, as expected for a test-level rating."
+},
+{
+"t": "figure",
+"path": "figs/fig02_rf_cf_distribution.png",
+"caption": "**Fig. 1.** Distribution of (a) RF and (b) CF and (c) the joint RF × CF frequency for all 10 532 tests.",
+"width_in": 6.3,
+"aspect": 0.3095833333333333,
+"alt": "**Fig. 1.** Distribution of (a) RF and (b) CF and (c) the joint RF × CF frequency for all 10 532 tests."
+},
+{
+"t": "h2",
+"text": "2.3 Identifiers"
+},
+{
+"t": "p",
+"text": "The test-series number (162 series in the regression set) and the literature reference are genuine identifiers. No structure or laboratory identifier exists. Geometries were reconstructed within each series from water-level-invariant descriptors (crest, armour-crest, toe and berm levels relative to the bed, widths, slopes, roughness and foreshore), giving 2 046 geometries. Laboratories could be inferred from the references for 70 % of tests only."
+},
+{
+"t": "h1",
+"text": "3. Methods"
+},
+{
+"t": "h2",
+"text": "3.1 Leakage-free out-of-fold residuals"
+},
+{
+"t": "p",
+"text": "Five diagnostic regression models are used: Random Forest, XGBoost, CatBoost, a multilayer perceptron and the CCW-Net of Section 3.5. All share five outer folds in which every reconstructed geometry is held out once. Inside each outer-training partition, hyper-parameters are selected by Optuna with the TPE sampler (Akiba et al., 2019), minimising the RMSE of a grouped inner three-fold cross-validation. Boosted trees use early stopping on the inner folds, and networks use a grouped validation split. Imputation, scaling and target standardisation are fitted on training rows only, and test folds are never used for selection (Table 2). The pre-specified reference model for residual analyses is XGBoost. Every analysis is repeated with the other models and with random-record and series-held-out residuals."
+},
+{
+"t": "table",
+"caption": "**Table 2.** Hyper-parameter optimisation (Optuna, TPE; grouped inner three-fold cross-validation inside each of five outer folds).",
+"header": [
+"Model",
+"Trials per fold",
+"Inner CV RMSE (mean)",
+"Outer test RMSE (mean)"
+],
+"rows": [
+[
+"Random Forest",
+12,
+"0.593",
+"0.535"
+],
+[
+"XGBoost",
+30,
+"0.544",
+"0.500"
+],
+[
+"CatBoost",
+15,
+"0.539",
+"0.509"
+],
+[
+"MLP",
+8,
+"0.622",
+"0.547"
+],
+[
+"CCW-Net",
+6,
+"–",
+"–"
+]
+],
+"widths": [
+2,
+1,
+1.4,
+1.4
+],
+"note": "Search spaces and per-fold selections are given in the supplementary material. CCW-Net was tuned on a shortened schedule with the objective in standardised units.",
+"font_size": 18
+},
+{
+"t": "h2",
+"text": "3.2 Validity of RF and CF"
+},
+{
+"t": "p",
+"text": "RF and CF are treated as ordinal and are never given equal spacing. Per category we report residual statistics with test-series cluster-bootstrap intervals (1 000 resamples). The analyses comprise:"
+},
+{
+"t": "bullets",
+"items": [
+"rank trends of the absolute residual with Holm correction;",
+"proportional-odds models of the rating on the residual and on indicators of estimated parameters;",
+"a multiplicative variance model, a Gamma GLM of squared residuals on the RF and CF categories, with and without an RF × CF term;",
+"geometry-level analyses of CF, with the maximum CF within a geometry;",
+"a model-free repeatability estimate from 1 136 near-replicate pairs (same geometry, H_{m0}, T_{m−1,0}, h and R_{c} within 1 %), with repeat SD = (mean d²/2)^{1/2}."
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "No laboratory reports or second ratings exist, so these analyses establish predictive validity and internal consistency, not the correctness of the ratings."
+},
+{
+"t": "h2",
+"text": "3.3 Hierarchical error decomposition"
+},
+{
+"t": "p",
+"text": "Out-of-fold residuals are decomposed with exact restricted maximum likelihood into nested random intercepts for test series and geometry and a within-geometry residual, with series-cluster bootstrap intervals. The within-geometry component is compared with the near-replicate variance and is not labelled measurement error."
+},
+{
+"t": "h2",
+"text": "3.4 Counterfactual data-selection policies"
+},
+{
+"t": "p",
+"text": "A policy is a rule that decides which training tests are kept and how they are weighted. Nine policies are compared (Table 3). For each outer fold, only the policy changes; folds, learner, hyper-parameters (tuned on the full training partition), seeds and calibration geometries stay fixed. The counterfactual is therefore one of training data, not a change of a physical input. Accuracy is evaluated on identical held-out tests, split into common tests (RF < 4 and CF < 4), RF = 4 tests and CF = 4 tests, with paired geometry-cluster bootstrap differences to retaining all tests (P1). Intervals use group-weighted split conformal prediction with 25 % of the training geometries for calibration (Lee et al., 2023). The empirical variance model σ²(RF, CF) used by P6 is fitted to grouped inner out-of-fold residuals of each training partition."
+},
+{
+"t": "table",
+"caption": "**Table 3.** Data-selection policies.",
+"header": [
+"Policy",
+"Training tests",
+"Weights",
+"Interval width"
+],
+"rows": [
+[
+"P1 retain all",
+"all",
+"equal",
+"constant"
+],
+[
+"P2",
+"excl. RF = 4",
+"equal",
+"constant"
+],
+[
+"P3",
+"excl. CF = 4",
+"equal",
+"constant"
+],
+[
+"P4",
+"excl. RF = 4 or CF = 4",
+"equal",
+"constant"
+],
+[
+"P5 conventional",
+"RF < 4 and CF < 4",
+"(4 − RF)(4 − CF)",
+"constant"
+],
+[
+"P5b conventional",
+"as P5, 'do not use' tests removed",
+"(4 − RF)(4 − CF)",
+"constant"
+],
+[
+"P6a empirical weights",
+"all",
+"1/σ²(RF, CF)",
+"constant"
+],
+[
+"P6b quality-aware intervals",
+"all",
+"equal",
+"∝ σ(RF, CF)"
+],
+[
+"P6c",
+"all",
+"1/σ²(RF, CF)",
+"∝ σ(RF, CF)"
+]
+],
+"widths": [
+1.6,
+1.8,
+1.3,
+1.1
+],
+"note": null,
+"font_size": 18
+},
+{
+"t": "h2",
+"text": "3.5 Regression Causal Concept Wrapper Network"
+},
+{
+"t": "p",
+"text": "The CCW-Net (Rountree et al., 2026) wraps a frozen backbone with a concept encoder that produces one squashed vector per concept and a bias-free attention head, so that a zero concept vector contributes nothing to the output. Training adds three alignment criteria evaluated by interventional mediation analysis: necessity, sufficiency and independence. Counterfactual concept representations are drawn from a conditional normalising flow. The implementation follows the authors' reference code. It was adapted to continuous tabular regression as follows:"
+},
+{
+"t": "bullets",
+"items": [
+"linear output for the standardised Y;",
+"a tabular backbone trained per outer fold;",
+"ten concept groups with ordinal or nominal states instead of binary concepts (supplementary Table S1), with presence encoded by slot length only for the six groups that have a physical null state (no berm, no toe, normal incidence, smooth surface, plain crest, flat foreshore);",
+"an explicit pairwise interaction term, so that physically interacting concepts are not forced to be additive."
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "The loss is"
+},
+{
+"t": "eq",
+"text": "L = L_{task} + λ_{cls} L_{concept} + λ_{nec} L_{nec} + λ_{suf} L_{suf} + λ_{ind} L_{ind} + λ_{pres} L_{pres} + λ_{int} L_{int}"
+},
+{
+"t": "p",
+"text": "Here L_{nec} penalises output changes when the slot of an absent concept is replaced by a counterfactual draw. L_{suf} requires the active slots, measured from the zero reference, to reproduce the target. L_{ind} requires the attention read-out to be additive in single-slot contributions. L_{int} sparsifies the interaction term. Alignment strength, concept dimension, width and learning rate were tuned by Optuna inside each outer fold."
+},
+{
+"t": "p",
+"text": "Evaluation on held-out geometries uses two kinds of quantity. Mediator-free zero-ablation shares measure how much of the output effect passes through absent concepts. The matched interventional-effect estimator of the reference implementation compares held-out tests that differ in one concept and have independent covariate matches for every concept slot. CCW-Net is compared with its unaligned version, loss ablations and a concept-bottleneck model (Koh et al., 2020), and its concept attribution with grouped TreeSHAP of the reference model (Lundberg et al., 2020). All such effects are properties of the network's representations, not physical causal effects."
+},
+{
+"t": "h1",
+"text": "4. Results"
+},
+{
+"t": "h2",
+"text": "4.1 Diagnostic models"
+},
+{
+"t": "table",
+"caption": "**Table 4.** Out-of-fold accuracy on held-out geometries (n = 9 333; Y = log₁₀ q^{*}).",
+"header": [
+"Model",
+"RMSE [95 % CI]",
+"MAE",
+"R²",
+"Bias",
+"F10"
+],
+"rows": [
+[
+"Random Forest",
+"0.539 [0.489, 0.590]",
+"0.375",
+"0.787",
+"+0.002",
+"3.46"
+],
+[
+"XGBoost",
+"0.501 [0.458, 0.547]",
+"0.348",
+"0.816",
+"−0.010",
+"3.17"
+],
+[
+"CatBoost",
+"0.513 [0.462, 0.567]",
+"0.347",
+"0.808",
+"−0.011",
+"3.26"
+],
+[
+"MLP (3 seeds)",
+"0.576 [0.522, 0.636]",
+"0.403",
+"0.757",
+"−0.003",
+"3.77"
+],
+[
+"CCW-Net (3 seeds)",
+"0.590 [0.534, 0.647]",
+"0.409",
+"0.745",
+"−0.006",
+"3.89"
+]
+],
+"widths": [
+1.6,
+2.0,
+0.8,
+0.8,
+0.9,
+0.8
+],
+"note": "Bias = predicted − measured. F10 = 10^RMSE. Intervals: geometry-cluster bootstrap. Seed-averaged metrics for the networks.",
+"font_size": 18
+},
+{
+"t": "p",
+"text": "The boosted trees are the most accurate models (Table 4, Fig. 2), and the networks are 0.07–0.09 worse. The validation unit dominates: the reference model reaches RMSE 0.354 with random records, 0.501 with held-out geometries and 0.749 with held-out test series. The inner Optuna objective agrees with the outer test error for every model. Residuals show no trend over most of the range; the smallest discharges (Y < −6) are under-predicted."
+},
+{
+"t": "figure",
+"path": "figs/fig03_measured_vs_predicted_all_models.png",
+"caption": "**Fig. 2.** Measured versus out-of-fold predicted log₁₀ q^{*} on held-out geometries for all models. Solid line: 1:1; dashed: factor 10. MLP and CCW-Net panels show the three-seed ensemble.",
+"width_in": 6.3,
+"aspect": 0.6975,
+"alt": "**Fig. 2.** Measured versus out-of-fold predicted log₁₀ q^{*} on held-out geometries for all models. Solid line: 1:1; dashe"
+},
+{
+"t": "h2",
+"text": "4.2 Validity of the reliability factor"
+},
+{
+"t": "table",
+"caption": "**Table 5.** Residuals, repeatability and variance ratios by RF (XGBoost, held-out geometries).",
+"header": [
+"RF",
+"n",
+"Series",
+"MAE [95 % CI]",
+"Within-geometry SD",
+"Repeat SD (pairs)",
+"Variance ratio vs RF 1"
+],
+"rows": [
+[
+"1",
+3189,
+54,
+"0.306 [0.262, 0.357]",
+"0.340 [0.298, 0.384]",
+"0.19 (130)",
+"1"
+],
+[
+"2",
+3174,
+71,
+"0.363 [0.298, 0.455]",
+"0.395 [0.318, 0.492]",
+"0.23 (483)",
+"1.38 [0.90, 2.15]"
+],
+[
+"3",
+2333,
+76,
+"0.357 [0.294, 0.442]",
+"0.350 [0.309, 0.394]",
+"0.36 (457)",
+"1.49 [0.86, 2.34]"
+],
+[
+"4",
+637,
+41,
+"0.451 [0.373, 0.545]",
+"0.470 [0.378, 0.570]",
+"0.22 (66)",
+"2.34 [1.41, 3.81]"
+]
+],
+"widths": [
+0.5,
+0.7,
+0.7,
+1.6,
+1.6,
+1.2,
+1.6
+],
+"note": "Repeat SD from near-replicate pairs by the larger RF of the pair (model-free). Variance ratios from a Gamma GLM with RF and CF categories, test-series cluster bootstrap.",
+"font_size": 17
+},
+{
+"t": "p",
+"text": "Tests with RF = 4 have larger errors than RF = 1 tests by every measure (Table 5, Fig. 3). Their residual variance, adjusted for CF, is 2.34 [1.41, 3.81] times that of RF = 1, and every learner gives an RMSE ratio above one. The scale is not ordered in between: RF = 2 and RF = 3 have the same error, their variance ratios include one, and the rank correlation of the absolute residual with RF is 0.07 [−0.01, 0.15]. Model-free repeatability increases from RF = 1 (0.19) to RF = 3 (0.36) but not to RF = 4 (0.22, only 66 pairs). RF rises with indicators of estimated parameters, and an estimated spectral period predicts a higher RF more strongly than the prediction error does. RF = 4 tests also contain more zero-discharge tests (16.5 % against 5.8 % for RF = 1). The wet/dry model separates them less well (AUC 0.81 against 0.92)."
+},
+{
+"t": "figure",
+"path": "figs/fig08_residuals_by_rf_cf.png",
+"caption": "**Fig. 3.** Out-of-fold residuals by RF (top) and CF (bottom): distributions, mean absolute residual and within-geometry SD with test-series cluster-bootstrap 95 % intervals.",
+"width_in": 6.3,
+"aspect": 0.53,
+"alt": "**Fig. 3.** Out-of-fold residuals by RF (top) and CF (bottom): distributions, mean absolute residual and within-geometry"
+},
+{
+"t": "h2",
+"text": "4.3 Validity of the complexity factor"
+},
+{
+"t": "table",
+"caption": "**Table 6.** Geometry-level errors by CF (maximum CF within the geometry).",
+"header": [
+"CF",
+"Geometries",
+"Series",
+"|Mean residual|",
+"Geometry RMSE",
+"Grouped − random RMSE"
+],
+"rows": [
+[
+"1",
+1367,
+120,
+"0.259 [0.232, 0.297]",
+"0.316 [0.279, 0.377]",
+"0.046 [0.033, 0.066]"
+],
+[
+"2",
+363,
+48,
+"0.239 [0.201, 0.282]",
+"0.303 [0.250, 0.372]",
+"0.043 [0.023, 0.065]"
+],
+[
+"3",
+263,
+27,
+"0.319 [0.261, 0.399]",
+"0.391 [0.323, 0.489]",
+"0.024 [0.003, 0.055]"
+],
+[
+"4",
+53,
+7,
+"0.255 [0.147, 0.380]",
+"0.326 [0.238, 0.533]",
+"0.087 [0.041, 0.189]"
+]
+],
+"widths": [
+0.5,
+0.9,
+0.7,
+1.6,
+1.6,
+1.6
+],
+"note": null,
+"font_size": 17
+},
+{
+"t": "p",
+"text": "No geometry-level quantity is rank-correlated with CF (Table 6). The absolute geometry mean residual gives 0.03 [−0.06, 0.10], and the generalisation gap gives −0.00 [−0.07, 0.06]. CF = 3 is the difficult class, with record-level RMSE 0.71 [0.47, 0.98] and variance ratio 2.18 [1.01, 3.87]. CF = 4 tests are predicted well (RMSE 0.36); this reflects the internal consistency of a few series, not easy representation of complex sections. When whole series are held out, a weak positive trend appears (0.11 [0.01, 0.22]). RF and CF do not interact: the RF × CF term of the variance model is 1.06 [0.83, 1.29]."
+},
+{
+"t": "figure",
+"path": "figs/fig09_rf_cf_ordinal_validation.png",
+"caption": "**Fig. 4.** Validity of RF and CF: (a) residual-variance ratios; (b) ordinal trends across models and validation schemes; (c) near-replicate repeatability by RF; (d) geometry-level error by CF; (e) mean absolute residual by RF × CF (cells with fewer than 50 tests or three series not interpreted).",
+"width_in": 6.3,
+"aspect": 0.2325,
+"alt": "**Fig. 4.** Validity of RF and CF: (a) residual-variance ratios; (b) ordinal trends across models and validation schemes"
+},
+{
+"t": "h2",
+"text": "4.4 Test-level and geometry-level error"
+},
+{
+"t": "table",
+"caption": "**Table 7.** REML decomposition of out-of-fold residuals (XGBoost, held-out geometries).",
+"header": [
+"Component",
+"Units",
+"SD",
+"Share of variance [95 % CI]"
+],
+"rows": [
+[
+"series",
+162,
+"0.177",
+"13 % [2 %, 29 %]"
+],
+[
+"geometry",
+2046,
+"0.262",
+"29 % [19 %, 40 %]"
+],
+[
+"within-geometry residual",
+9333,
+"0.372",
+"58 % [48 %, 63 %]"
+]
+],
+"widths": [
+2,
+1,
+1,
+2
+],
+"note": null,
+"font_size": 18
+},
+{
+"t": "p",
+"text": "Within-geometry variation accounts for 58 % of the residual variance, the geometry level for 29 % and the test series for 13 % (Table 7, Fig. 4). The shares are stable across geometry definitions and depend on the validation unit: with random records the geometry share falls to 11 % because the model memorises geometry offsets. The near-replicate variance is 58 % of the within-geometry variance, so the within-geometry residual is not pure measurement error. A laboratory component is not identifiable. RF and CF do not map onto the levels as intended. RF = 4 is elevated at both the within-geometry level (0.42 against 0.33) and the geometry level (0.36 against 0.26). The geometry-level SD is the same in every CF class; CF = 3 differs in its within-geometry residual instead."
+},
+{
+"t": "figure",
+"path": "figs/fig10_error_decomposition.png",
+"caption": "**Fig. 5.** Hierarchical decomposition of out-of-fold residuals: (a) variance shares under alternative groupings and validation units; (b) component SDs; (c) geometry mean residuals; (d, e) components within CF and RF strata; (f) residual SD compared with near-replicate repeatability.",
+"width_in": 6.3,
+"aspect": 0.5866666666666667,
+"alt": "**Fig. 5.** Hierarchical decomposition of out-of-fold residuals: (a) variance shares under alternative groupings and val"
+},
+{
+"t": "h2",
+"text": "4.5 Counterfactual data-selection policies"
+},
+{
+"t": "table",
+"caption": "**Table 8.** Effect of the training-data policy on identical held-out tests (XGBoost). ΔRMSE relative to P1.",
+"header": [
+"Policy",
+"Training tests",
+"ΔRMSE common (n = 8 494)",
+"ΔRMSE RF = 4",
+"ΔRMSE CF = 4",
+"Coverage RF = 4 / CF = 4",
+"Max coverage deviation over RF (pts)"
+],
+"rows": [
+[
+"P1 retain all",
+"9333",
+"0",
+"0",
+"0",
+"81 % / 94 %",
+"8.7"
+],
+[
+"P2 excl. RF = 4",
+"8696",
+"+0.001 [−0.007, 0.009]",
+"+0.28",
+"−0.02",
+"64 % / 93 %",
+"25.6"
+],
+[
+"P3 excl. CF = 4",
+"9121",
+"−0.000 [−0.006, 0.006]",
+"−0.01",
+"+0.22",
+"81 % / 77 %",
+"9.5"
+],
+[
+"P4 excl. RF/CF = 4",
+"8494",
+"−0.005 [−0.012, 0.002]",
+"+0.27",
+"+0.22",
+"64 % / 74 %",
+"25.6"
+],
+[
+"P5 (4−RF)(4−CF)",
+"8494",
+"−0.003 [−0.013, 0.008]",
+"+0.30",
+"+0.27",
+"63 % / 75 %",
+"27.0"
+],
+[
+"P5b P5 + remarks",
+"8195",
+"−0.007 [−0.028, 0.011]",
+"+0.31",
+"+0.26",
+"64 % / 76 %",
+"26.3"
+],
+[
+"P6a 1/σ² weights",
+"9333",
+"−0.001 [−0.010, 0.011]",
+"+0.01",
+"+0.01",
+"78 % / 94 %",
+"12.1"
+],
+[
+"P6b RF/CF intervals",
+"9333",
+"0",
+"0",
+"0",
+"89 % / 90 %",
+"4.3"
+],
+[
+"P6c P6a + P6b",
+"9333",
+"−0.001 [−0.010, 0.011]",
+"+0.01",
+"+0.01",
+"87 % / 90 %",
+"3.6"
+]
+],
+"widths": [
+1.5,
+0.8,
+1.7,
+0.8,
+0.8,
+1.2,
+1.1
+],
+"note": "P1 RMSE: common 0.499, RF = 4 0.641, CF = 4 0.360. Coverage of 90 % group-calibrated conformal intervals. Random Forest results in the supplementary material.",
+"font_size": 16
+},
+{
+"t": "p",
+"text": "No exclusion or conventional weighting policy improves prediction for the tests it keeps (Table 8, Fig. 5). On the 8 494 common tests every difference lies between −0.007 and +0.001, with intervals spanning zero. Random Forest gives −0.002 to +0.009. Every policy that removes or zero-weights a category degrades the predictions for that category: RF = 4 tests gain +0.27 to +0.31 RMSE and CF = 4 tests +0.22 to +0.27. The same policies move 26–41 % of category-4 predictions by more than a factor 2, and the coverage of 90 % intervals for RF = 4 tests drops to 63 %–64 %. The loss is specific to the removed category: excluding RF = 4 does not harm CF = 4 predictions and vice versa. Geometry-level bias rises under every exclusion policy (0.251 → 0.261–0.287)."
+},
+{
+"t": "p",
+"text": "Empirical down-weighting by 1/σ²(RF, CF) (P6a) is neutral (−0.001 on common tests, +0.01 on RF = 4 tests). Retaining all tests with equal weight and letting RF and CF scale the interval (P6b) leaves every prediction unchanged. It raises RF = 4 coverage from 81 % to 89 % and reduces the largest coverage deviation across RF categories from 8.7 to 4.3 points at a similar mean width (1.55 against 1.54; Fig. 6). CF = 3 tests remain under-covered."
+},
+{
+"t": "figure",
+"path": "figs/fig13_data_selection_policies.png",
+"caption": "**Fig. 6.** Counterfactual data-selection policies (XGBoost): change in RMSE relative to retaining all tests for (a) common tests, (b) RF = 4 and (c) CF = 4 tests with paired geometry-cluster bootstrap 95 % intervals; (d) share of predictions changed by more than a factor 2.",
+"width_in": 6.3,
+"aspect": 0.30875,
+"alt": "**Fig. 6.** Counterfactual data-selection policies (XGBoost): change in RMSE relative to retaining all tests for (a) com"
+},
+{
+"t": "figure",
+"path": "figs/fig14_calibration_by_quality_category.png",
+"caption": "**Fig. 7.** Coverage of 90 % prediction intervals and mean interval width by RF and CF under four policies.",
+"width_in": 6.3,
+"aspect": 0.29833333333333334,
+"alt": "**Fig. 7.** Coverage of 90 % prediction intervals and mean interval width by RF and CF under four policies."
+},
+{
+"t": "h2",
+"text": "4.6 Concept explanations and data quality"
+},
+{
+"t": "table",
+"caption": "**Table 9.** Causal alignment of concept explanations on held-out geometries (means over fold × seed runs).",
+"header": [
+"Variant",
+"RMSE",
+"Necessity effect",
+"Sufficiency gap",
+"Additivity residual",
+"Zero-ablation share per absent concept",
+"Matched: changed concept",
+"Matched: per held absent concept"
+],
+"rows": [
+[
+"CCW-Net",
+"0.587",
+"0.024",
+"0.060",
+"0.028",
+"2.5 %",
+"0.135",
+"–"
+],
+[
+"Unaligned wrapper",
+"0.597",
+"0.053",
+"0.216",
+"0.077",
+"3.8 %",
+"0.140",
+"–"
+],
+[
+"without necessity",
+"0.595",
+"0.039",
+"0.081",
+"0.022",
+"3.1 %",
+"0.135",
+"–"
+],
+[
+"without sufficiency",
+"0.593",
+"0.030",
+"0.151",
+"0.023",
+"3.4 %",
+"0.130",
+"–"
+],
+[
+"without independence",
+"0.593",
+"0.023",
+"0.065",
+"0.084",
+"2.6 %",
+"0.130",
+"–"
+],
+[
+"without interaction term",
+"0.598",
+"0.030",
+"0.077",
+"0.040",
+"3.3 %",
+"0.127",
+"–"
+],
+[
+"without conditional counterfactual",
+"0.594",
+"0.019",
+"0.058",
+"0.029",
+"2.1 %",
+"0.131",
+"–"
+],
+[
+"Concept bottleneck",
+"0.600",
+"–",
+"–",
+"–",
+"9.4 %",
+"–",
+"–"
+]
+],
+"widths": [
+1.7,
+0.7,
+0.9,
+0.9,
+0.9,
+1.1,
+0.9,
+1.0
+],
+"note": "Necessity: |Δŷ| when an absent concept's slot is replaced by a counterfactual draw. Sufficiency: RMSE between the active-only reconstruction and the output. Matched shares: interventional-effect estimator with independent covariate matches per concept slot; 0.10 would be indiscriminate routing.",
+"font_size": 16
+},
+{
+"t": "p",
+"text": "The alignment losses do what they are designed to do (Table 9). Relative to the unaligned wrapper the necessity effect falls from 0.053 to 0.024, the sufficiency gap from 0.216 to 0.060 and the additivity residual from 0.077 to 0.028, at equal accuracy. Removing a loss term degrades mainly the criterion it targets. The concept-bottleneck model routes 9.4 % of its effect through each absent concept, against 2.5 % for CCW-Net, at similar concept accuracy."
+},
+{
+"t": "p",
+"text": "The matched estimator measures whether a change in one concept is carried by that concept's slot. For CCW-Net the changed concept carries a share of 0.135, and each held absent concept –; for the unaligned wrapper the figures are 0.140 and – (1/10 would be indiscriminate). The rank agreement between CCW-Net concept importance and grouped TreeSHAP of XGBoost is 0.03 over ten concepts. CCW-Net ranks depth and steepness first, while SHAP ranks freeboard and roughness first, consistent with established overtopping formulae. CCW-Net attributes less effect to absent concepts than SHAP (2.5 % against 6.4 %). This is partly by construction: smooth surfaces or normal incidence do affect overtopping, and SHAP rightly gives them weight."
+},
+{
+"t": "p",
+"text": "Explanation quality does not depend on CF. Its relation to RF is weak and does not survive multiple-comparison correction: the interaction magnitude correlates with RF at 0.14 [0.03, 0.24]. A linear probe recovers RF = 4 from the learned concept vectors better than from the raw predictors (AUC 0.70 against 0.59). CF ≥ 3 is not recoverable across test series (AUC 0.46). The quality categories therefore mark particular regions of the input space and particular investigations, not a property of the physics."
+},
+{
+"t": "figure",
+"path": "figs/fig12_concept_attribution_and_alignment.png",
+"caption": "**Fig. 8.** Concept explanations: (a) slot-ablation effects of CCW-Net and the unaligned wrapper; (b) necessity and (c) sufficiency across variants; (d) CCW-Net concept effects against grouped TreeSHAP; (e, f) explanation quality by RF and CF.",
+"width_in": 6.3,
+"aspect": 0.6258333333333334,
+"alt": "**Fig. 8.** Concept explanations: (a) slot-ablation effects of CCW-Net and the unaligned wrapper; (b) necessity and (c) "
+},
+{
+"t": "h1",
+"text": "5. Discussion"
+},
+{
+"t": "h2",
+"text": "5.1 What the data demonstrate"
+},
+{
+"t": "p",
+"text": "The policy comparison is the most direct evidence because it asks the engineering question itself on identical held-out tests. The answer is unambiguous: the conventional exclusion and weighting rules do not make predictions for the remaining tests more accurate. They make predictions for the excluded kind of test much worse and their uncertainty intervals over-confident. Category-4 tests occupy parts of the input space that the other tests do not cover, such as depth-limited conditions with H_{m0} > h, emergent toes and particular sections. Their value lies in that coverage."
+},
+{
+"t": "h2",
+"text": "5.2 What is supported by predictive association only"
+},
+{
+"t": "p",
+"text": "The RF = 4 versus RF = 1 contrast in residual variance and the absence of an ordered CF effect describe how the ratings relate to model error. They do not establish whether individual ratings are correct, and they do not imply that RF or CF cause anything. The RF scale behaves as a flag for an elevated-uncertainty group rather than as a graded measure. CF = 3, not CF = 4, marks the tests that are hardest to predict."
+},
+{
+"t": "h2",
+"text": "5.3 What concerns model-internal explanation"
+},
+{
+"t": "p",
+"text": "Causal alignment makes concept explanations testable: necessity, sufficiency and additivity can be measured and enforced, which conventional feature attribution does not allow. However, the explanations describe the network's representations. Their ranking of concepts disagrees with feature attribution and with established formulae, and the network is less accurate than gradient boosting. For engineering use, the value of the method lies in auditing explanations, not in producing physical effect estimates."
+},
+{
+"t": "h2",
+"text": "5.4 What cannot be identified without independent evidence"
+},
+{
+"t": "p",
+"text": "The correctness of individual ratings, a pure measurement-error component and laboratory effects require independent evidence. That means original laboratory reports, repeated measurements under controlled conditions or a blinded re-rating of a stratified sample of tests by several experts, analysed with weighted kappa or Krippendorff's alpha. None of these was available."
+},
+{
+"t": "h2",
+"text": "5.5 Recommendations"
+},
+{
+"t": "bullets",
+"items": [
+"Retain category-4 tests in the training of mean predictors; do not apply (4 − RF)(4 − CF) weights or remove 'do not use' tests without a specific reason.",
+"Use RF (and the CF = 3 flag) to scale prediction intervals, calibrated on held-out geometries.",
+"Report accuracy separately for RF = 4 and CF = 3 tests.",
+"Treat CF as a flag of unusual sections, not as an ordered weight."
+],
+"level": 0
+},
+{
+"t": "h1",
+"text": "6. Limitations"
+},
+{
+"t": "bullets",
+"items": [
+"No independent quality evidence exists; predictive validity and internal consistency are established, not the correctness of the ratings.",
+"Geometries are reconstructed and laboratories inferred; geometry-grouped folds share test series between training and test.",
+"CF = 4 comes from seven test series; six RF × CF cells cannot be interpreted.",
+"Near-replicate pairs give an upper bound on repeatability; only 66 involve RF = 4.",
+"Optuna budgets are modest; policies reuse hyper-parameters tuned on the full training partition.",
+"The CCW-Net adaptation differs from the reference in documented respects (multi-state concepts, interaction term, linear output) and uses smaller mediator flows."
+],
+"level": 0
+},
+{
+"t": "h1",
+"text": "7. Conclusions"
+},
+{
+"t": "p",
+"text": "The CLASH reliability factor distinguishes a group of RF = 4 tests with about 2.3 times the residual variance of RF = 1 tests but is not an ordered measure of uncertainty. The complexity factor does not predict geometry-level error or generalisation. Within-geometry variation dominates the residual and is not pure measurement error. Excluding or zero-weighting category-4 tests discards information without improving the remaining predictions. Retaining every test and using the ratings to scale prediction intervals is the more defensible practice."
+},
+{
+"t": "h1",
+"text": "Data and code availability"
+},
+{
+"t": "p",
+"text": "The analysis code, configuration, out-of-fold predictions and all tables and figures are available in the project repository [link]. The CLASH database is available from its maintainers."
+},
+{
+"t": "h1",
+"text": "CRediT authorship contribution statement"
+},
+{
+"t": "p",
+"text": "[To be completed by the authors.]"
+},
+{
+"t": "h1",
+"text": "Declaration of competing interest"
+},
+{
+"t": "p",
+"text": "[To be completed by the authors.]"
+},
+{
+"t": "h1",
+"text": "References"
+},
+{
+"t": "note",
+"text": "Reference details are given from memory and must be checked against the original publications before submission."
+},
+{
+"t": "ref",
+"text": "Akiba, T., Sano, S., Yanase, T., Ohta, T., Koyama, M., 2019. Optuna: a next-generation hyperparameter optimization framework. Proc. 25th ACM SIGKDD, 2623–2631."
+},
+{
+"t": "ref",
+"text": "Breiman, L., 2001. Random forests. Machine Learning 45, 5–32."
+},
+{
+"t": "ref",
+"text": "Chen, T., Guestrin, C., 2016. XGBoost: a scalable tree boosting system. Proc. 22nd ACM SIGKDD, 785–794."
+},
+{
+"t": "ref",
+"text": "den Bieman, J.P., van Gent, M.R.A., van den Boogaard, H.F.P., 2021. Wave overtopping predictions using an advanced machine learning technique. Coastal Engineering 166, 103830."
+},
+{
+"t": "ref",
+"text": "Dinh, L., Sohl-Dickstein, J., Bengio, S., 2017. Density estimation using Real NVP. ICLR."
+},
+{
+"t": "ref",
+"text": "EurOtop, 2018. Manual on wave overtopping of sea defences and related structures, second ed. Van der Meer, J.W., Allsop, N.W.H., Bruce, T., De Rouck, J., Kortenhaus, A., Pullen, T., Schüttrumpf, H., Troch, P., Zanuttigh, B. www.overtopping-manual.com."
+},
+{
+"t": "ref",
+"text": "Koh, P.W., Nguyen, T., Tang, Y.S., Mussmann, S., Pierson, E., Kim, B., Liang, P., 2020. Concept bottleneck models. ICML."
+},
+{
+"t": "ref",
+"text": "Lee, Y., Barber, R.F., Willett, R., 2023. Distribution-free inference with hierarchical data. arXiv:2306.06342."
+},
+{
+"t": "ref",
+"text": "Loh, W.W., Moerkerke, B., Loeys, T., Vansteelandt, S., 2022. Disentangling indirect effects through multiple mediators without assuming any causal structure among the mediators. Psychological Methods 27, 982–999."
+},
+{
+"t": "ref",
+"text": "Lundberg, S.M., Erion, G., Chen, H., et al., 2020. From local explanations to global understanding with explainable AI for trees. Nature Machine Intelligence 2, 56–67."
+},
+{
+"t": "ref",
+"text": "Prokhorenkova, L., Gusev, G., Vorobev, A., Dorogush, A.V., Gulin, A., 2018. CatBoost: unbiased boosting with categorical features. NeurIPS."
+},
+{
+"t": "ref",
+"text": "Rountree, J., Verma, P., So, O., Fan, C., Shah, J.A., 2026. Causal concept explanations for deep neural models. arXiv:2611.14407."
+},
+{
+"t": "ref",
+"text": "Sabour, S., Frosst, N., Hinton, G.E., 2017. Dynamic routing between capsules. NeurIPS."
+},
+{
+"t": "ref",
+"text": "Steendam, G.J., Van der Meer, J.W., Verhaeghe, H., Besley, P., Franco, L., Van Gent, M.R.A., 2004. The international database on wave overtopping. Proc. 29th ICCE, 4301–4313."
+},
+{
+"t": "ref",
+"text": "Van der Meer, J.W., Verhaeghe, H., Steendam, G.J., 2009. The new wave overtopping database for coastal structures. Coastal Engineering 56, 108–120."
+},
+{
+"t": "ref",
+"text": "Van Gent, M.R.A., van den Boogaard, H.F.P., Pozueta, B., Medina, J.R., 2007. Neural network modelling of wave overtopping at coastal structures. Coastal Engineering 54, 586–593."
+},
+{
+"t": "ref",
+"text": "Vansteelandt, S., Daniel, R.M., 2017. Interventional effects for mediation analysis with multiple mediators. Epidemiology 28, 258–265."
+},
+{
+"t": "ref",
+"text": "Verhaeghe, H., et al., 2004. CLASH WP2 report: database on wave overtopping. Ghent University. [verify title]"
+},
+{
+"t": "ref",
+"text": "Zanuttigh, B., Formentin, S.M., Van der Meer, J.W., 2016. Prediction of extreme and tolerable wave overtopping discharges through an advanced neural network. Ocean Engineering 127, 7–22."
+},
+{
+"t": "ref",
+"text": "[Paper 1] Machine-learning prediction of wave overtopping at untested structures: geometry-grouped validation, freeboard monotonicity and conformal coverage. [authors, status]"
+},
+{
+"t": "ref",
+"text": "[Paper 2] Quantum machine learning for wave overtopping estimation: integrating with causal inference and uncertainty quantification. Ocean Engineering [volume, article, year]."
+}
+]
+}
