@@ -22,6 +22,12 @@ Reports (`results/reports/`):
 | `05_supplementary_material_outline.md` | supplementary material structure |
 | `06_originality_and_overlap_assessment.md` | boundaries against the two previous papers |
 | `07_limitations.md` | unresolved methodological limitations |
+| `08_reference_implementation_check.md` | CCW-Net code compared with the authors' reference implementation |
+
+Word documents (Times New Roman): `manuscript/Manuscript_CLASH_data_quality.docx` (full draft) and
+`manuscript/Outline_CLASH_data_quality.docx` (manuscript and supplementary outline), rebuilt from the result
+tables with `python manuscript/build_content.py` followed by `node manuscript/build_docx.js manuscript/manuscript.json
+manuscript/Manuscript_CLASH_data_quality.docx` (and the same for `outline.json`).
 
 ## Layout
 
