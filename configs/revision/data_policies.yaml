@@ -1,0 +1,7 @@
+policies: [P1_retain_all, P2_excl_RF4, P3_excl_CF4, P4_excl_RF4_or_CF4, P5_CLASH_weights, P5b_CLASH_weights_and_remarks,
+           P6a_inverse_variance_weights, P6b_quality_aware_intervals, P6b_shrunk_cell_intervals, P6c_weights_and_intervals]
+experiments:
+  fixed: hyper-parameters tuned once on the full outer-training partition (as the original analysis)
+  tuned: policy-specific Optuna (XGBoost, 30 trials, original search space) on grouped inner folds with the policy applied
+variance_model: fitted on grouped inner OOF residuals of the proper-training geometries only (v2 correction)
+evaluation: identical held-out records in every policy; common = RF<4 and CF<4 (8 494 tests)

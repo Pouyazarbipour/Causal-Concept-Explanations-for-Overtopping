@@ -1,0 +1,8 @@
+# Baseline (original) configuration: reproduced exactly from configs/*_config.yaml (unchanged files).
+source_configs: [configs/data_config.yaml, configs/model_config.yaml, configs/experiment_config.yaml]
+original_commit: see original/ORIGINAL_COMMIT.txt
+reference_model: xgb
+optuna_trials: {rf: 12, xgb: 30, catboost: 15, mlp: 8, ccw: 6}
+early_stopping_rounds: 50
+max_trees: {xgb: 2000, catboost: 1500}
+seeds: {base: 20261112, nn_seeds: [0, 1, 2]}

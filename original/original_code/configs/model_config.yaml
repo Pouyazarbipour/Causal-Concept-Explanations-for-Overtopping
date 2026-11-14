@@ -1,0 +1,24 @@
+# Optuna trials per outer fold (TPE sampler, grouped inner 3-fold objective = RMSE)
+optuna_trials: {rf: 12, xgb: 30, catboost: 15, mlp: 8, ccw: 6}
+mlp:
+  epochs: 150
+  patience: 20
+  batch_size: 256
+ccw:
+  backbone: {width: 128, depth: 3, dropout: 0.05, lr: 2.0e-3, weight_decay: 1.0e-5, latent: 64}
+  concept_dim: 8
+  encoder_hidden: 128
+  interaction_rank: 4
+  lr: 1.0e-3
+  flow_lr: 1.0e-3
+  batch_size: 256
+  warmup_epochs: 30
+  tune_epochs: {warmup: 15, flow: 10, align: 25}
+  flow_epochs: 30
+  align_epochs: 60
+  refit_interval: 15
+  flow_refit_epochs: 8
+  cf_draws: 4
+  patience: 15
+  flow: {layers: 6, hidden: 64}
+  weights: {cls: 1.0, nec: 0.1, suf: 0.1, ind: 0.1, int: 0.01, pres: 0.1}

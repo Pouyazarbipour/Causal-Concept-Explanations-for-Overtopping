@@ -1,0 +1,8 @@
+schemes:
+  geometry: primary; reconstructed geometry (3 significant digits) never in both training and test
+  series: whole test series held out (stronger; no geometry or record of a held-out series in training)
+  random: leakage-sensitive reference only
+geometry_definition_sensitivity: [2 significant digits, 4 significant digits, coarse key]
+bootstrap: {cluster_rf_cf: series, cluster_prediction: geometry, n_boot: 500}
+conformal: {alpha: 0.1, calibration_fraction: [0.15, 0.25, 0.35], calibration_seeds: 5}
+wet_dry: {folds: regression geometry folds + seeded assignment of zero-only geometries, optuna_trials: 25, threshold: max balanced accuracy on inner OOF}

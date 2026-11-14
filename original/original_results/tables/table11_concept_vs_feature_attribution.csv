@@ -1,0 +1,14 @@
+quantity,value
+"rank agreement of concept importance: CCW slot ablation vs grouped |SHAP| (Spearman, 10 concepts)",0.06666666666666665
+"attribution share per absent (null-state) concept: grouped TreeSHAP, XGBoost",0.0644755043265516
+attribution share per absent (null-state) concept: CCW-Net,0.03406005936364328
+attribution share per absent (null-state) concept: unaligned wrapper,0.04537555612623686
+attribution share per absent (null-state) concept: concept bottleneck,0.09607357929150259
+"attribution share per active concept: grouped TreeSHAP, XGBoost",0.11464925933280559
+attribution share per active concept: CCW-Net,0.14185770352681476
+"matched estimator, share of the changed concept: CCW-Net (0.10 = indiscriminate)",0.17059863911854295
+"matched estimator, share of the changed concept: unaligned wrapper",0.16873503156681405
+"matched estimator, share per held absent concept: CCW-Net (0.10 = indiscriminate)",0.03752582738448112
+"matched estimator, share per held absent concept: unaligned wrapper",0.05237376294679335
+out-of-geometry RMSE: XGBoost (explained by SHAP),0.5014579222579204
+out-of-geometry RMSE: CCW-Net (explained by concept slots),0.6008416372835189

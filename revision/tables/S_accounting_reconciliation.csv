@@ -1,0 +1,32 @@
+quantity,manuscript_value,reproduced_value,status
+Total CLASH tests (rows of sheet 20050101),10532.0,10532.0,match
+Positive discharge,9442.0,9442.0,match
+Zero discharge,1069.0,1069.0,match
+Missing or invalid discharge (20 missing markers + 1 negative),21.0,21.0,match
+"Records with unusable required inputs (Hm0,toe, Tm-1,0,toe, h or Rc), any response",,123.0,not reported in manuscript
+  of which also invalid response,,1.0,not reported in manuscript
+  of which valid response (positive or zero),,122.0,not reported in manuscript
+Records excluded from wet/dry model (manuscript: '143 tests with unusable inputs'),143.0,143.0,match
+  of which RF = 4,143.0,143.0,match
+Wet/dry observations,10389.0,10389.0,match
+Positive-discharge regression observations,9333.0,9333.0,match
+Positive discharge excluded from regression (unusable inputs),109.0,109.0,match
+Test series (all),163.0,163.0,match
+Test series (regression),162.0,162.0,match
+Reconstructed geometries (regression),2046.0,2046.0,match
+Reconstructed geometries (all records),,2209.0,not reported in manuscript
+CF = 4 tests (all),254.0,254.0,match
+CF = 4 series (all),9.0,9.0,match
+CF = 4 tests (regression),212.0,212.0,match
+CF = 4 series (regression),7.0,7.0,match
+RF = 4 tests (regression),637.0,637.0,match
+Common tests RF < 4 and CF < 4 (regression),8494.0,8494.0,match
+Geometries with >1 CF value (all 10 532 records),32.0,32.0,match
+Tests in geometries with >1 CF value (all 10 532 records),311.0,311.0,match
+Geometries with >1 RF value (all 10 532 records),166.0,166.0,match
+Geometries with >1 CF value (regression set),,27.0,not reported in manuscript
+Tests in geometries with >1 CF value (regression set),,283.0,not reported in manuscript
+Geometries with >1 RF value (regression set),,140.0,not reported in manuscript
+Share of regression tests with an inferred laboratory,0.7,0.698,match
+Zero-discharge share among valid-response RF = 1 tests (wet/dry set),0.058,0.0582,match
+Zero-discharge share among valid-response RF = 4 tests (wet/dry set),0.165,0.1651,match

@@ -1,0 +1,28 @@
+   term  variance_ratio  ratio_lo  ratio_hi  boot_p                              residuals
+3  RF=4        2.336566  1.449091  3.675769   0.004       xgb, geometry-grouped (original)
+3  RF=4        2.127918  1.266873  3.301849   0.008        rf, geometry-grouped (original)
+3  RF=4        2.607922  1.593440  4.189120   0.002  catboost, geometry-grouped (original)
+3  RF=4        2.783217  1.676388  4.284160   0.002       mlp, geometry-grouped (original)
+3  RF=4        3.143363  1.869754  5.055757   0.002  ccw_full, geometry-grouped (original)
+3  RF=4        2.481671  1.549628  3.684385   0.002         xgb, random records (original)
+3  RF=4        2.245908  1.285165  3.682983   0.008        xgb, series held out (original)
+                         contrast  variance_ratio        lo        hi  boot_p
+0                       RF4 / RF3        1.563187  0.930739  2.706933   0.100
+1                       RF4 / RF2        1.696944  1.018666  2.829393   0.044
+2                       RF3 / RF2        1.085567  0.640184  1.822944   0.792
+3                       RF3 / RF1        1.494745  0.862256  2.333687   0.176
+4                       RF2 / RF1        1.376926  0.890700  2.121536   0.204
+5  Spearman(|r|, RF) among RF 1-3        0.046586 -0.042013  0.130552   0.304
+    rel_tol           pairs subset  n_pairs  n_records  n_series  repeat_sd        lo        hi
+0     0.005       all pairs    all      874       1031        73   0.299602  0.214592  0.386754
+5     0.005  disjoint pairs    all      486        972        73   0.271775  0.223392  0.320949
+10    0.010       all pairs    all     1136       1334        83   0.282399  0.207915  0.361759
+15    0.010  disjoint pairs    all      619       1238        83   0.260551  0.214612  0.304369
+20    0.020       all pairs    all     1678       1834        94   0.295279  0.226963  0.359494
+25    0.020  disjoint pairs    all      848       1696        94   0.278995  0.229511  0.320954
+30    0.050       all pairs    all     3908       3372       111   0.312109  0.259581  0.358867
+35    0.050  disjoint pairs    all     1527       3054       111   0.284249  0.243932  0.315219
+                                                                           quantity     value        lo        hi
+0  replicate variance / within-geometry variance (pooled within-geometry estimator)  0.562516  0.305362  0.929966
+1                      pooled within-geometry residual variance (method of moments)  0.141772       NaN       NaN
+2                        within-geometry residual variance (REML, original Table 8)  0.138400       NaN       NaN

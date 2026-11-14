@@ -1,0 +1,52 @@
+item,manuscript_value,recomputed_value,definition,verdict,note
+Table 4 RMSE Random Forest,0.539,0.539,"pooled OOF RMSE, mean over seeds",consistent,
+Table 2 outer RMSE Random Forest,0.535,0.5352,mean of 5 fold-wise RMSEs of the seed ensemble,consistent,Table 2 and Table 4 use different definitions (A1); the revision reports the pooled OOF RMSE everywhere
+Table 4 R2 Random Forest,0.787,0.7872,"1 - MSE/Var(y), per-seed mean",consistent,
+Table 4 RMSE XGBoost,0.501,0.5015,"pooled OOF RMSE, mean over seeds",consistent,
+Table 2 outer RMSE XGBoost,0.5,0.4996,mean of 5 fold-wise RMSEs of the seed ensemble,consistent,Table 2 and Table 4 use different definitions (A1); the revision reports the pooled OOF RMSE everywhere
+Table 4 R2 XGBoost,0.816,0.8159,"1 - MSE/Var(y), per-seed mean",consistent,
+Table 4 RMSE CatBoost,0.513,0.5126,"pooled OOF RMSE, mean over seeds",consistent,
+Table 2 outer RMSE CatBoost,0.509,0.5094,mean of 5 fold-wise RMSEs of the seed ensemble,consistent,Table 2 and Table 4 use different definitions (A1); the revision reports the pooled OOF RMSE everywhere
+Table 4 R2 CatBoost,0.808,0.8076,"1 - MSE/Var(y), per-seed mean",consistent,
+Table 4 RMSE MLP,0.576,0.5762,"pooled OOF RMSE, mean over seeds",consistent,
+Table 2 outer RMSE MLP,0.547,0.5472,mean of 5 fold-wise RMSEs of the seed ensemble,consistent,Table 2 and Table 4 use different definitions (A1); the revision reports the pooled OOF RMSE everywhere
+Table 4 R2 MLP,0.757,0.7565,"1 - MSE/Var(y), per-seed mean",consistent,
+XGBoost random RMSE,0.354,0.3544,pooled OOF RMSE,consistent,
+XGBoost series RMSE,0.749,0.7492,pooled OOF RMSE,consistent,
+n RF=1 (regression),3189,3189,count,consistent,
+n RF=2 (regression),3174,3174,count,consistent,
+n RF=3 (regression),2333,2333,count,consistent,
+n RF=4 (regression),637,637,count,consistent,
+variance ratio RF=2 vs RF=1,1.38,1.377,Gamma GLM (log link) of r^2 on RF and CF categories,consistent,
+variance ratio RF=3 vs RF=1,1.49,1.495,Gamma GLM (log link) of r^2 on RF and CF categories,consistent,
+variance ratio RF=4 vs RF=1,2.34,2.337,Gamma GLM (log link) of r^2 on RF and CF categories,consistent,
+CF=1 geometries (max CF),1367,1367,count of geometries with max CF,consistent,
+CF=1 series (max CF geometries),120,120,count,consistent,
+CF=2 geometries (max CF),363,363,count of geometries with max CF,consistent,
+CF=2 series (max CF geometries),48,48,count,consistent,
+CF=3 geometries (max CF),263,263,count of geometries with max CF,consistent,
+CF=3 series (max CF geometries),27,27,count,consistent,
+CF=4 geometries (max CF),53,53,count of geometries with max CF,consistent,
+CF=4 series (max CF geometries),7,7,count,consistent,
+CF=3 geometry RMSE,0.391,0.3915,"unweighted mean of per-geometry RMSE, geometries with max CF = 3 (935 tests)",consistent,A4: different aggregation from the record-level value
+CF=3 record-level RMSE,0.71,0.7104,pooled RMSE over 825 records with CF = 3,consistent,pooled RMSE over the 935 tests in max-CF=3 geometries = 0.683
+near-replicate pairs,1136,1136,"pairs within 1 % on Hm0, Tm-1,0, h, Rc, same geometry and beta",consistent,
+pairs with max RF=1,130,130,count,consistent,
+pairs with max RF=2,483,483,count,consistent,
+pairs with max RF=3,457,457,count,consistent,
+pairs with max RF=4,66,66,count,consistent,
+replicate variance / within-geometry variance,0.576,0.5762,mean(d^2)/2 divided by REML within variance,consistent,
+"Spearman(|r|, CF), series held out",0.11,0.1089,record-level Spearman correlation,consistent,
+"max |dRMSE| on common tests, exclusion policies",0.007,0.007,pooled RMSE difference to P1 on 8 494 common tests,consistent,
+"coverage RF=4, P1",0.81,0.8132,empirical coverage of 90 % intervals,consistent,
+"coverage RF=4, P6b",0.89,0.8885,empirical coverage,consistent,
+"coverage CF=4, P1",0.94,0.9434,empirical coverage,consistent,
+"coverage CF=4, P6b",0.9,0.9009,empirical coverage,consistent,
+"coverage CF=3, P6b",below nominal,0.8424,empirical coverage,consistent (under-covered),
+mean width P1,1.55,1.5486,log10 units,consistent,manuscript: P1 1.55 vs P6b 1.54; the revision brief lists them in reverse order
+mean width P6b,1.54,1.5361,log10 units,consistent,
+wet/dry AUC RF=1 (original model),0.92,0.924,"ROC AUC, original fixed-parameter classifier",consistent,
+wet/dry AUC RF=4 (original model),0.81,0.8075,"ROC AUC, original fixed-parameter classifier",consistent,
+Highlight: 'All 10 532 tests ... retained',all retained,10 532 audited; 10 389 in wet/dry model; 9 333 in regression,-,WORDING CORRECTED,database audit vs model eligibility must be distinguished
+Abstract/highlight: intervals 'equalise coverage',equalised,RF equalised (max deviation 4.3 pts); CF = 3 remains under-covered,-,WORDING CORRECTED,
+"Figure cross-references (REML, policies)","Fig. 4, Fig. 5, Fig. 6","Fig. 5, Fig. 6, Fig. 7",build order of figures,CORRECTED,

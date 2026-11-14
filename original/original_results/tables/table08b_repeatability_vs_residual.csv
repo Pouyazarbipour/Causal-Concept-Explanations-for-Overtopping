@@ -1,0 +1,7 @@
+quantity,value
+total OOF residual variance (geometry-grouped),0.2513617825126319
+total OOF residual variance (random CV),0.12559965624331376
+within-geometry residual variance (REML),0.13838780247479837
+"near-replicate repeatability variance (model-free, pooled)",0.07974912829704488
+n near-replicate pairs,1136.0
+ratio: near-replicate variance / within-geometry residual variance,0.5762728135781179
