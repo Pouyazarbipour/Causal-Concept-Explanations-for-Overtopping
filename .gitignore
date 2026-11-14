@@ -5,3 +5,4 @@ results/logs/
 data/interim/
 results/models/ccw_cache/
 results/models/fold_cache/
+revision/logs/
