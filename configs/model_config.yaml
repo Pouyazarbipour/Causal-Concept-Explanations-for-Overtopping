@@ -21,4 +21,4 @@ ccw:
   cf_draws: 4
   patience: 15
   flow: {layers: 6, hidden: 64}
-  weights: {cls: 1.0, nec: 0.1, suf: 0.1, ind: 0.1, int: 0.01, pres: 0.0}
+  weights: {cls: 1.0, nec: 0.1, suf: 0.1, ind: 0.1, int: 0.01, pres: 0.1}
