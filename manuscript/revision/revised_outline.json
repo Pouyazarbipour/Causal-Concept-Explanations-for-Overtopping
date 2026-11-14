@@ -1,0 +1,589 @@
+{
+"title": "Revised outline",
+"blocks": [
+{
+"t": "title",
+"text": "Revised manuscript and supplementary-material outline"
+},
+{
+"t": "subtitle",
+"text": "Do CLASH reliability and complexity ratings justify data exclusion? A residual-based audit and counterfactual assessment of wave-overtopping prediction policies",
+"italic": true
+},
+{
+"t": "h1",
+"text": "Revised manuscript structure"
+},
+{
+"t": "p",
+"text": "Main paper: 13 sections, about 11 figures and 9 tables. Every number comes from results/tables (original analyses, re-verified) or from revision/tables (new analyses)."
+},
+{
+"t": "h2",
+"text": "Main manuscript"
+},
+{
+"t": "bullets",
+"items": [
+"1. **Introduction.** How the ratings are used (CLASH NN weights, later exclusions), why that use is untested,"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "six research questions. RQ3 is reworded: laboratory effects are not identifiable."
+},
+{
+"t": "bullets",
+"items": [
+"2. **CLASH data and quality ratings.** Mutually exclusive record accounting (Table 1, Fig. 1). Input"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "unusability confined to RF = 4 (emergent toes). RF/CF distributions (Table 2). Identifiers, reconstructed geometries, CF variation within geometries."
+},
+{
+"t": "bullets",
+"items": [
+"3. **Methodology.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"3.1 Response and predictors."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"3.2 Validation and optimisation (baseline reproduced; v2 budgets and learners)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"3.3 Two-stage occurrence and discharge model."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"3.4 RF/CF validity."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"3.5 REML decomposition."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"3.6 Policies (Table 3; fixed and policy-specific tuned)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"3.7 Quality-aware conformal intervals."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"3.8 EurOtop and decision analysis."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"3.9 CCW-Net (short)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"4. **Predictive model diagnostics.** Baseline vs optimised learners (Table 4, Fig. 2). Budget and"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "partition sensitivity. Validation unit. Two-stage occurrence model (Fig. 3)."
+},
+{
+"t": "bullets",
+"items": [
+"5. **RF and CF validity.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"RF table (Table 5) and robustness across learners, schemes and contrasts (Fig. 4)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Repeatability tolerance sensitivity."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"CF geometry table (Table 6), power, leave-one-series-out, CF = 3 series concentration, series-held-out"
+],
+"level": 1
+},
+{
+"t": "p",
+"text": "trend."
+},
+{
+"t": "bullets",
+"items": [
+"Residual distributions (Fig. 5)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"6. **Hierarchical error decomposition.** REML table (Table 7, Fig. 6), geometry-definition sensitivity,"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "replicate ratio with CI, laboratory component not identifiable."
+},
+{
+"t": "bullets",
+"items": [
+"7. **Counterfactual data-selection policies.** Fixed vs tuned (Table 8, Fig. 7), ESS and weights,"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "stability, two-stage occurrence under exclusion."
+},
+{
+"t": "bullets",
+"items": [
+"8. **Quality-aware uncertainty quantification.** Six scale functions (Table 9, Fig. 8), calibration"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "sensitivity, CF = 3 under-coverage explained, retrospective vs prospective availability of RF and CF."
+},
+{
+"t": "bullets",
+"items": [
+"9. **Engineering decision implications.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"EurOtop benchmark within its domain (Table 10)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Exceedance decisions on the q_allow × Hm0 grid."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Safety-class changes."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Regimes removed by exclusion (Fig. 9)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"10. **CCW-Net concept-explanation assessment.** Summary of the negative results. Full analysis in the SI."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"11. **Discussion.** Demonstrated / predictive association / model-internal / not identifiable."
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"12. **Limitations.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"13. **Conclusions.**"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "Placement recommendation. Keep the full CCW-Net analysis (ablations, attribution, interaction terms, reference-code check) in the Supplementary Information. It answers RQ5, but it gives no engineering evidence about the ratings, and placing it there protects the main narrative. All results stay available and reproducible."
+},
+{
+"t": "h1",
+"text": "Supplementary Information outline"
+},
+{
+"t": "bullets",
+"items": [
+"**S1 Record accounting.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Overlapping exclusion reasons (S_accounting_overlap)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Reconciliation with the manuscript counts (S_accounting_reconciliation)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Missingness by RF, CF, series and response."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Representativeness of RF = 4 records with unusable inputs."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Deep-water substitution sensitivity (R7)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"**S2 Variable audit.** Source, unit, transformation, range, missingness. Recomputation checks of q*, Y,"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "L0 and s0. Physical flags (depth-limited, Ac > Rc, default period ratios)."
+},
+{
+"t": "bullets",
+"items": [
+"**S3 Models.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Search spaces and per-fold selections (baseline and v2)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Fold-mean vs pooled RMSE (explains the original Table 2 / Table 4 difference)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Budget sensitivity (M3)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Repeated partitions and series-held-out (M4)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"RMSE by RF/CF for every learner (M2)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"**S4 Two-stage model.** Stage-A metrics by RF/CF, confusion matrices, reliability (W1–W2). Combined"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "expected discharge (W3). Stage-B reproduction check (W5)."
+},
+{
+"t": "bullets",
+"items": [
+"**S5 RF/CF validity.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Ordinal models, trend tests, Gamma GLM with interaction (original tables 05b–05g)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Variance ratios for every learner and scheme (R1)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"RF contrasts (R2)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Repeatability tolerance and disjoint pairs (R3)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"CF leave-one-series-out (R4)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Minimum detectable ratios (R5)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"CF-inconsistent geometries (R6)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"RF × CF joint table."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"**S6 Decomposition.** Grouping and model sensitivity (original Table 8). Geometry-definition sensitivity"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "(G1). Replicate ratio CI (R3b)."
+},
+{
+"t": "bullets",
+"items": [
+"**S7 Policies.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Original fixed-parameter results (Tables 13–15, Random Forest)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"v2 fixed and tuned results (P1)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Coverage by category (P2)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Policy hyper-parameters, ESS, weights."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Occurrence model under exclusion (W4)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"**S8 CCW-Net.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"Architecture (fig11), ablations (Table 9), attribution (Tables 10–11, fig12)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Explanation quality vs RF/CF (Table 12)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Quality layer."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Interaction pairs."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Reference-implementation check (report 08)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"**S9 Conformal.** Ten original methods (tableS_conformal). Six v2 scales × three calibration fractions"
+],
+"level": 0
+},
+{
+"t": "p",
+"text": "(C1–C3). CF = 3 errors by series (C4). Coverage by geometry and series."
+},
+{
+"t": "bullets",
+"items": [
+"**S10 Engineering.**"
+],
+"level": 0
+},
+{
+"t": "bullets",
+"items": [
+"EurOtop domains and counts (E1, E1b)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Exceedance decisions on the full threshold grid (E2)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Risk ranking and safety classes (E3)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"Regimes and input-space coverage (E4–E5)."
+],
+"level": 1
+},
+{
+"t": "bullets",
+"items": [
+"**S11 Audit.** Repository audit, numerical-consistency audit, reference audit, overlap with previous papers."
+],
+"level": 0
+}
+]
+}

@@ -117,7 +117,7 @@ for k in EXCL + ["P6a_inverse_variance_weights"]:
     a(f"| {k} | {f(PF.loc[k, 'd_rmse_common'])} | {f(PF.loc[k, 'd_rmse_RF4'])} | {f(PF.loc[k, 'd_rmse_CF4'])} | {f(PT.loc[k, 'd_rmse_common'])} "
       f"[{f(PT.loc[k, 'd_rmse_common_lo'])}, {f(PT.loc[k, 'd_rmse_common_hi'])}] | {f(PT.loc[k, 'd_rmse_RF4'])} | {f(PT.loc[k, 'd_rmse_CF4'])} |")
 a(f"\nExclusions give no significant benefit on the identical common tests (fixed: |Δ| ≤ {f(PF.loc[EXCL, 'd_rmse_common'].abs().max())}; re-tuned: up to "
-  f"{f(-PT.loc[EXCL, 'd_rmse_common'].min())}, intervals including zero) and degrade the excluded categories by about 0.22–0.31 log10 units "
+  f"{f(-PT.loc[EXCL, 'd_rmse_common'].min())}, intervals including zero) and degrade the excluded categories by about 0.22–0.31 log10 units, "
   f"lower their interval coverage to {pc(PF.loc[EX4, 'coverage_RF4'].min(), 0)}–{pc(PF.loc[EX4, 'coverage_RF4'].max(), 0)} (RF = 4) "
   f"and lower occurrence AUC on RF = 4 tests from {f(W4.loc[('P1_retain_all', 'RF4'), 'auc'], 2)} to {f(W4.loc[('P2_excl_RF4', 'RF4'), 'auc'], 2)}. "
   "Neutrality on common tests is not evidence that exclusion is harmless to the database.\n")

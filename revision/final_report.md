@@ -60,7 +60,7 @@ XGBoost (baseline) remains the reference learner for the RF/CF analyses; the RF/
 | P5b_CLASH_weights_and_remarks | -0.007 | 0.310 | 0.262 | -0.014 [-0.029, 0.001] | 0.309 | 0.243 |
 | P6a_inverse_variance_weights | -0.009 | 0.021 | 0.016 | -0.004 [-0.015, 0.009] | 0.011 | -0.007 |
 
-Exclusions give no significant benefit on the identical common tests (fixed: |Δ| ≤ 0.007; re-tuned: up to 0.014, intervals including zero) and degrade the excluded categories by about 0.22–0.31 log10 units lower their interval coverage to 63 %–64 % (RF = 4) and lower occurrence AUC on RF = 4 tests from 0.80 to 0.74. Neutrality on common tests is not evidence that exclusion is harmless to the database.
+Exclusions give no significant benefit on the identical common tests (fixed: |Δ| ≤ 0.007; re-tuned: up to 0.014, intervals including zero) and degrade the excluded categories by about 0.22–0.31 log10 units, lower their interval coverage to 63 %–64 % (RF = 4) and lower occurrence AUC on RF = 4 tests from 0.80 to 0.74. Neutrality on common tests is not evidence that exclusion is harmless to the database.
 
 ## E. Uncertainty quantification
 
