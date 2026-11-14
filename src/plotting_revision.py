@@ -94,21 +94,29 @@ def fig_models():
 
 
 # --------------------------------------------------------------------------------------------- R3 robustness of RF/CF
+def _logx(ax, ticks=(0.25, 0.5, 1, 2, 4, 8)):
+    from matplotlib.ticker import FixedLocator, NullFormatter, FixedFormatter
+    ax.set_xscale("log")
+    ax.xaxis.set_major_locator(FixedLocator(ticks))
+    ax.xaxis.set_major_formatter(FixedFormatter([f"{t:g}" for t in ticks]))
+    ax.xaxis.set_minor_formatter(NullFormatter())
+
+
 def fig_robust():
     R1 = tab("R1_variance_ratios_by_learner_and_scheme")
     G1 = tab("G1_geometry_definition_sensitivity") if (T / "G1_geometry_definition_sensitivity.csv").exists() else None
     R3 = tab("R3_repeatability_tolerance_sensitivity")
     R4 = tab("R4_leave_one_series_out_CF")
-    fig, axs = plt.subplots(1, 3, figsize=(7.2, 3.0))
+    fig, axs = plt.subplots(1, 3, figsize=(7.4, 3.3))
     ax = axs[0]
     labs = list(R1.residuals.unique())
     for j, (term, col) in enumerate((("RF=4", CAT[1]), ("CF=3", CAT[0]), ("CF=4", CAT[2]))):
         d = R1[R1.term == term].set_index("residuals").reindex(labs)
         yy = np.arange(len(labs)) + (j - 1) * 0.22
         ax.errorbar(d.variance_ratio, yy, xerr=[d.variance_ratio - d.ratio_lo, d.ratio_hi - d.variance_ratio], fmt="o", ms=3.5, capsize=1.5, color=col, label=term)
-    ax.axvline(1, color=INK, lw=0.8); ax.set_xscale("log")
+    ax.axvline(1, color=INK, lw=0.8); _logx(ax)
     ax.set_yticks(range(len(labs))); ax.set_yticklabels([s.replace(" (original)", "").replace(", geometry-grouped", " (geom.)") for s in labs], fontsize=6.8)
-    ax.set_xlabel("Residual-variance ratio vs category 1"); ax.legend(fontsize=7, loc="lower right")
+    ax.set_xlabel("Residual-variance ratio vs category 1"); ax.legend(fontsize=7, loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=3)
     panel(ax, "a", "Learners and schemes")
     ax = axs[1]
     d = R3[(R3.pairs == "all pairs") & R3.subset.str.startswith("max RF")]
@@ -120,13 +128,32 @@ def fig_robust():
     ax.legend(title="tolerance", fontsize=7, title_fontsize=7)
     panel(ax, "b", "Repeatability vs tolerance")
     ax = axs[2]
-    for j, (cat, col) in enumerate(((4, CAT[2]), (3, CAT[0]))):
-        s = R4[R4.CF_category == cat].reset_index(drop=True)
-        ax.errorbar(s.variance_ratio_vs_CF1, np.arange(len(s)) + j * len(R4[R4.CF_category == 4]) + j, xerr=[s.variance_ratio_vs_CF1 - s.lo, s.hi - s.variance_ratio_vs_CF1],
-                    fmt="o", ms=3, capsize=1.5, color=col, label=f"CF={cat}")
-    lab = [f"CF4 − {s}" for s in R4[R4.CF_category == 4].left_out_series] + [""] + [f"CF3 − {s}" for s in R4[R4.CF_category == 3].left_out_series]
-    ax.set_yticks(range(len(lab))); ax.set_yticklabels(lab, fontsize=6)
-    ax.axvline(1, color=INK, lw=0.8); ax.set_xscale("log"); ax.set_xlabel("Variance ratio vs CF = 1")
+    rows = []
+    for cat in (4, 3):
+        s_ = R4[R4.CF_category == cat].copy()
+        base = s_[s_.left_out_series == "none"].variance_ratio_vs_CF1.iloc[0]
+        s_["infl"] = (np.log(s_.variance_ratio_vs_CF1) - np.log(base)).abs()
+        keep = pd.concat([s_[s_.left_out_series == "none"], s_[s_.left_out_series != "none"].nlargest(4, "infl")])
+        rows.append((cat, keep))
+    yy, lab = 0, []
+    for cat, keep in rows:
+        col = CAT[2] if cat == 4 else CAT[0]
+        for _, r in keep.iterrows():
+            ax.errorbar(r.variance_ratio_vs_CF1, yy, xerr=[[r.variance_ratio_vs_CF1 - r.lo], [r.hi - r.variance_ratio_vs_CF1]], fmt="o", ms=3.5, capsize=1.5, color=col)
+            lab.append(f"CF{cat}: " + ("all series" if r.left_out_series == "none" else f"without {r.left_out_series}"))
+            yy += 1
+        yy += 0.6
+        lab.append("")
+    ticks = [i for i, l in enumerate([x for x in lab]) if l]
+    pos, t = [], 0
+    for l in lab:
+        if l:
+            pos.append(t)
+            t += 1
+        else:
+            t += 0.6
+    ax.set_yticks(pos); ax.set_yticklabels([l for l in lab if l], fontsize=7); ax.invert_yaxis()
+    ax.axvline(1, color=INK, lw=0.8); _logx(ax); ax.set_xlabel("Variance ratio vs CF = 1")
     panel(ax, "c", "Leave one series out")
     fig.tight_layout()
     save(fig, "Fig05_rf_cf_robustness")
@@ -148,8 +175,9 @@ def fig_policies():
         ax.set_xlabel("ΔRMSE vs P1 [log10]")
         panel(ax, letter, title)
     axs[0].set_yticks(range(len(pols))); axs[0].set_yticklabels(labels, fontsize=7.5); axs[0].invert_yaxis()
-    axs[0].legend(fontsize=6.8, loc="lower left")
-    fig.tight_layout()
+    h, l_ = axs[0].get_legend_handles_labels()
+    fig.legend(h, l_, loc="lower center", ncol=2, fontsize=7.5, bbox_to_anchor=(0.5, -0.02))
+    fig.tight_layout(rect=(0, 0.06, 1, 1))
     save(fig, "Fig07_policies_fixed_vs_tuned")
 
 

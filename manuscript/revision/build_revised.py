@@ -228,7 +228,7 @@ abs_ = (f"Each test in the CLASH wave-overtopping database carries a Reliability
         f"The result holds for every learner and validation scheme, but RF 1–3 show no ordered trend and near-replicate repeatability does not rise systematically with RF. "
         f"CF shows no ordered relation to geometry-level error. "
         f"A nested decomposition attributes {pct(q_w.share)} of the residual variance to within-geometry variation, {pct(q_g.share)} to geometries and {pct(q_s.share)} to test series. "
-        f"Near-replicate variance accounts for {pct(rrat.value)} {ci(100*rrat.lo, 100*rrat.hi, 0).replace('[', '[').replace(']', ' %]')} of the within-geometry part, so that part is not pure measurement error. ")
+        f"Near-replicate variance accounts for {pct(rrat.value)} [{pct(rrat.lo)}, {pct(rrat.hi)}] of the within-geometry part, so that part is not pure measurement error. ")
 if PF is not None:
     abs_ += (f"On identical held-out tests, excluding or zero-weighting category-4 tests changes the error of the remaining tests by at most {f(PF.loc[EXCL, 'd_rmse_common'].abs().max(), 3)} log10 units. "
              + (f"With a learner re-tuned for each policy the retained tests gain at most {f(-PT.loc[EXCL, 'd_rmse_common'].min(), 3)} (not significant). " if PT is not None else "")
@@ -303,10 +303,12 @@ p(f"CF = 4 comprises {n_(rec['CF = 4 tests (all)'])} tests from {n_(rec['CF = 4 
   f"descriptors, giving {n_(rec['Reconstructed geometries (regression)'])} geometries in the regression set. A laboratory could be inferred from the "
   f"reference for {pct(rec['Share of regression tests with an inferred laboratory'])} of tests only, so a laboratory effect is not identifiable.")
 causes = R6b.set_index("difference")["n_geometries"] if R6b is not None else pd.Series(dtype=float)
+wl = int(causes.get('water level / freeboard differs', 0))
 p(f"CF is nominally a property of the cross-section, but it varies within {n_(rec['Geometries with >1 CF value (all 10 532 records)'])} reconstructed geometries "
   f"({n_(rec['Tests in geometries with >1 CF value (all 10 532 records)'])} tests; {n_(rec['Geometries with >1 CF value (regression set)'])} geometries "
-  f"in the regression set). Within these geometries the lowest- and highest-CF tests differ in water level or freeboard in "
-  f"{n_(causes.get('water level / freeboard differs', 0))} geometries, in wave conditions in {n_(causes.get('wave conditions differ', 0))} and in wave obliquity in "
+  f"in the regression set). Within these geometries the lowest- and highest-CF tests "
+  + (f"differ in water level or freeboard in {wl} geometries, " if wl else "never differ in water level or freeboard, but differ ")
+  + f"in wave conditions in {n_(causes.get('wave conditions differ', 0))} and in wave obliquity in "
   f"{n_(causes.get('obliquity differs', 0))}, which suggests that CF was sometimes assigned per test condition rather than per cross-section. "
   f"In {n_(causes.get('none in documented hydraulic variables', 0))} they differ in no documented variable. "
   f"The inconsistencies were retained, and CF is aggregated by its maximum where a geometry-level value is needed. This variation limits "
@@ -412,7 +414,7 @@ if best_v2 is not None:
            f"{f(best_v2.ensemble_rmse)} as a seed ensemble, a paired difference of {s(best_v2.d_rmse_vs_xgb_baseline)} {ci(best_v2.d_lo, best_v2.d_hi)}. ")
     if any_sig:
         sigm = v2_rows[v2_rows.improvement_significant].sort_values("d_rmse_vs_xgb_baseline")
-        txt += (f"{len(sigm)} optimised learner(s) improve significantly on the baseline, by at most {f(-sigm.d_rmse_vs_xgb_baseline.min(), 3)} log10 units "
+        txt += (f"{'One optimised learner improves' if len(sigm) == 1 else str(len(sigm)) + ' optimised learners improve'} significantly on the baseline, by at most {f(-sigm.d_rmse_vs_xgb_baseline.min(), 3)} log10 units "
                 f"(a factor {f(10 ** -sigm.d_rmse_vs_xgb_baseline.min(), 3)} in discharge). This is small against the {f(x_rmse, 2)} residual SD and does not alter any RF/CF conclusion (Section 5). ")
     else:
         txt += "No optimised learner improves significantly on the baseline. "
@@ -467,7 +469,7 @@ p(f"Tests with RF = 4 have a residual variance {f(vr4.variance_ratio, 2)} {ci(vr
 r3a = R3[(R3.pairs == "all pairs") & (R3.subset == "max RF=4")].set_index("rel_tol")
 r31 = R3[(R3.pairs == "all pairs") & (R3.subset == "max RF=1")].set_index("rel_tol")
 p(f"Near-replicate repeatability does not reproduce the RF = 4 effect at the primary 1 % tolerance: the repeat SD is {f(r31.loc[0.01, 'repeat_sd'], 2)} for "
-  f"pairs with RF ≤ 1 and {f(r3a.loc[0.01, 'repeat_sd'], 2)} with RF = 4, from only {n_(r3a.loc[0.01, 'n_pairs'])} RF = 4 pairs in {n_(r3a.loc[0.01, 'n_series'])} series. "
+  f"pairs with RF = 1 and {f(r3a.loc[0.01, 'repeat_sd'], 2)} with RF = 4, from only {n_(r3a.loc[0.01, 'n_pairs'])} RF = 4 pairs in {n_(r3a.loc[0.01, 'n_series'])} series. "
   f"With a 5 % tolerance the RF = 4 value rises to {f(r3a.loc[0.05, 'repeat_sd'], 2)} {ci(r3a.loc[0.05, 'lo'], r3a.loc[0.05, 'hi'], 2)}. Wider tolerances, however, admit "
   f"genuine hydraulic differences. Repeatability evidence on RF is therefore inconclusive, and the elevated residual dispersion of RF = 4 cannot be "
   f"attributed to measurement uncertainty alone. RF rises with indicators of estimated parameters, so RF partly records documentation "
@@ -499,7 +501,7 @@ p(f"No geometry-level quantity is rank-correlated with CF ({tref('cf')}). The ab
   f"which reflects the internal consistency of a few series, not easy representation of complex sections. When whole series are held out, a "
   f"weak positive CF trend appears ({f(trs.loc['CF', 'spearman_absres'], 2)} {ci(trs.loc['CF', 'spearman_lo'], trs.loc['CF', 'spearman_hi'], 2)}). It is reported but "
   f"does not survive multiple-comparison correction. RF and CF do not interact (RF × CF term {f(vmi.iloc[-1].variance_ratio, 2)} {ci(vmi.iloc[-1].ratio_lo, vmi.iloc[-1].ratio_hi, 2)}).")
-F_("rob", F1 / "main" / "Fig05_rf_cf_robustness.png", "Robustness of the RF and CF findings: (a) residual-variance ratios (RF = 4, CF = 3, CF = 4 vs category 1) for every learner and validation scheme; (b) near-replicate repeat SD by RF for matching tolerances of 0.5–5 %; (c) leave-one-series-out variance ratios for CF = 4 and CF = 3. Test-series cluster bootstrap 95 % intervals.")
+F_("rob", F1 / "main" / "Fig05_rf_cf_robustness.png", "Robustness of the RF and CF findings: (a) residual-variance ratios (RF = 4, CF = 3, CF = 4 vs category 1) for every learner and validation scheme; (b) near-replicate repeat SD by RF for matching tolerances of 0.5–5 %; (c) leave-one-series-out variance ratios for CF = 4 and CF = 3 (all series and the four most influential series; all series in Table S7). Test-series cluster bootstrap 95 % intervals.")
 F_("res", F0 / "fig08_residuals_by_rf_cf.png", "Out-of-fold residuals by RF (top) and CF (bottom): distributions, mean absolute residual and within-geometry SD with test-series cluster-bootstrap 95 % intervals.")
 
 # ============================================================================== 6 decomposition
@@ -585,8 +587,8 @@ p(f"Every scale attains the guaranteed quantity, the coverage averaged over held
   f"predict. The hierarchical guarantee does not extend to individual tests, and this must be considered when intervals are read per test. "
   f"Constant intervals cover only {pct(cst.cov_RF4, 1)} of RF = 4 tests ({fref('conf')}). "
   f"Scaling by the RF and CF main effects raises RF = 4 coverage to {pct(qa.cov_RF4, 1)} and reduces the largest coverage deviation across RF from "
-  f"{100 * cst.max_abs_dev_RF:.1f} to {100 * qa.max_abs_dev_RF:.1f} points, at a mean width of {f(qa.mean_width, 2)} against {f(cst.mean_width, 2)}. "
-  f"The lowest interval (Winkler) score is obtained by the {bw.name} scale ({f(bw.winkler, 2)} against {f(cst.winkler, 2)} for constant intervals), "
+  f"{100 * cst.max_abs_dev_RF:.1f} to {100 * qa.max_abs_dev_RF:.1f} points, " + (f"at an unchanged mean width ({f(qa.mean_width, 2)}). " if abs(qa.mean_width - cst.mean_width) < 0.005 else f"at a mean width of {f(qa.mean_width, 2)} against {f(cst.mean_width, 2)}. ")
+  + f"The lowest interval (Winkler) score is obtained by the {bw.name} scale ({f(bw.winkler, 2)} against {f(cst.winkler, 2)} for constant intervals), "
   f"with RF = 4 coverage {pct(bw.cov_RF4, 1)} and a largest RF deviation of {100 * bw.max_abs_dev_RF:.1f} points, at a mean width of {f(bw.mean_width, 2)}. "
   f"Partial pooling of the 16 RF × CF cells gives {pct(C25.loc['RFxCF shrunk cells', 'cov_RF4'], 1)} for RF = 4 and {pct(C25.loc['RFxCF shrunk cells', 'cov_CF3'], 1)} for CF = 3, "
   f"with no unstable widths. The results are stable across calibration fractions (RF = 4 coverage {pct(sens.cov_RF4.min(), 1)}–{pct(sens.cov_RF4.max(), 1)}) and seeds. "
@@ -595,8 +597,8 @@ p(f"Every scale attains the guaranteed quantity, the coverage averaged over held
   f"equalised across all quality categories.")
 p(f"RF records how reliable a completed experiment was, so it is not available for a new structure. For a prospective prediction, CF may be "
   f"assessable from the geometry but RF is not. A scale based on CF alone gives RF = 4 coverage {pct(C25.loc['CF only', 'cov_RF4'], 1)}. A scale based on "
-  f"physical predictors only gives {pct(phy.cov_RF4, 1)} at width {f(phy.mean_width, 2)}, and the learned concepts recover RF = 4 only weakly from the "
-  f"inputs. The quality-aware intervals are therefore a tool for retrospective database auditing and for use of the database as training "
+  f"physical predictors only gives {pct(phy.cov_RF4, 1)} at width {f(phy.mean_width, 2)}, and the physical inputs recover RF = 4 only weakly (probe AUC "
+  f"{f(probe[(probe.target == 'RF=4') & (probe.probe_validation_grouped_by == 'geometry') & (probe.probe_input == 'raw physical predictors')].auc_mean_over_folds.iloc[0], 2)}). The quality-aware intervals are therefore a tool for retrospective database auditing and for use of the database as training "
   f"data, not a prospective uncertainty model for new structures.")
 F_("conf", F1 / "main" / "Fig08_conformal_quality_aware.png", "Quality-aware conformal intervals with all tests retained: coverage of 90 % intervals by (a) RF and (b) CF for six scale functions (geometry-cluster bootstrap 95 % intervals); (c) largest coverage deviation across RF versus calibration fraction.")
 
@@ -630,7 +632,10 @@ p(f"Data-selection policies change engineering decisions. With an allowable disc
   f"Excluding RF = 4 changes the exceed/not-exceed decision for {f(ch2, 1)} % of RF = 4 tests, against {f(chc, 1)} % of common tests "
   f"({fref('eng')}). The pattern holds over the threshold grid (supplementary Table S14), and the safety class of "
   f"{f(e3.loc[('P2_excl_RF4', 'RF4'), 'pct_safety_class_changed'], 0)} % of RF = 4 tests changes under P2. Retaining the tests and widening their intervals (P6b) leaves "
-  f"every point decision unchanged and lowers the probability that an exceedance is missed.")
+  f"every point decision unchanged. It reduces the share of RF = 4 tests that exceed the limit although the upper interval bound lies below it, from "
+  f"{f(e2.loc[(q1, 'P1_retain_all', 'RF4'), 'pct_upper_bound_below_threshold_but_exceeds'], 1)} % to {f(e2.loc[(q1, 'P6b_quality_aware_intervals', 'RF4'), 'pct_upper_bound_below_threshold_but_exceeds'], 1)} %. "
+  f"The mean predicted exceedance probability of the exceeding tests changes little "
+  f"({f(e2.loc[(q1, 'P1_retain_all', 'RF4'), 'mean_P_exceed_measured_exceed'], 2)} against {f(e2.loc[(q1, 'P6b_quality_aware_intervals', 'RF4'), 'mean_P_exceed_measured_exceed'], 2)}).")
 p(f"Category-4 tests are concentrated in particular regimes ({fref('eng')}). Of the depth-limited tests (H_{{m0}}/h > 1), "
   f"{f(E4.loc['depth-limited (Hm0,toe/h > 1)', 'pct_regime_lost_by_P4'], 0)} % would be removed by excluding category 4. So would "
   f"{f(E4.loc['low freeboard (Rc/Hm0 < 0.5)', 'pct_regime_lost_by_P4'], 0)} % of the low-freeboard tests, "
