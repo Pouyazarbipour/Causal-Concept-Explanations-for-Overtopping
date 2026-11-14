@@ -22,6 +22,8 @@ def md_blocks(path):
             flush(); out.append({"t": "h1", "text": conv(l[2:])})
         elif l.startswith("## "):
             flush(); out.append({"t": "h2", "text": conv(l[3:])})
+        elif re.match(r"^\s+\S", l) and not re.match(r"^\s+[-*] ", l) and out and out[-1]["t"] == "bullets" and not para:
+            out[-1]["items"][-1] += " " + conv(l.strip())
         elif re.match(r"^\s{2,}[-*] ", l):
             flush(); out.append({"t": "bullets", "items": [conv(l.strip()[2:])], "level": 1})
         elif re.match(r"^[-*] ", l):

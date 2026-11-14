@@ -16,7 +16,7 @@
 },
 {
 "t": "p",
-"text": "Main paper: 13 sections, about 11 figures and 9 tables. Every number comes from results/tables (original analyses, re-verified) or from revision/tables (new analyses)."
+"text": "Main paper: 13 sections, 9 figures and 10 tables. Every number comes from results/tables (original analyses, re-verified) or from revision/tables (new analyses)."
 },
 {
 "t": "h2",
@@ -25,24 +25,16 @@
 {
 "t": "bullets",
 "items": [
-"1. **Introduction.** How the ratings are used (CLASH NN weights, later exclusions), why that use is untested,"
+"1. **Introduction.** How the ratings are used (CLASH NN weights, later exclusions), why that use is untested, six research questions. RQ3 is reworded: laboratory effects are not identifiable."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "six research questions. RQ3 is reworded: laboratory effects are not identifiable."
 },
 {
 "t": "bullets",
 "items": [
-"2. **CLASH data and quality ratings.** Mutually exclusive record accounting (Table 1, Fig. 1). Input"
+"2. **CLASH data and quality ratings.** Mutually exclusive record accounting (Table 1, Fig. 1). Input unusability confined to RF = 4 (emergent toes). RF/CF distributions (Table 2). Identifiers, reconstructed geometries, CF variation within geometries."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "unusability confined to RF = 4 (emergent toes). RF/CF distributions (Table 2). Identifiers, reconstructed geometries, CF variation within geometries."
 },
 {
 "t": "bullets",
@@ -117,13 +109,9 @@
 {
 "t": "bullets",
 "items": [
-"4. **Predictive model diagnostics.** Baseline vs optimised learners (Table 4, Fig. 2). Budget and"
+"4. **Predictive model diagnostics.** Baseline vs optimised learners (Table 4, Fig. 2). Budget and partition sensitivity. Validation unit. Two-stage occurrence model (Fig. 3)."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "partition sensitivity. Validation unit. Two-stage occurrence model (Fig. 3)."
 },
 {
 "t": "bullets",
@@ -149,13 +137,9 @@
 {
 "t": "bullets",
 "items": [
-"CF geometry table (Table 6), power, leave-one-series-out, CF = 3 series concentration, series-held-out"
+"CF geometry table (Table 6), power, leave-one-series-out, CF = 3 series concentration, series-held-out trend."
 ],
 "level": 1
-},
-{
-"t": "p",
-"text": "trend."
 },
 {
 "t": "bullets",
@@ -167,35 +151,23 @@
 {
 "t": "bullets",
 "items": [
-"6. **Hierarchical error decomposition.** REML table (Table 7, Fig. 6), geometry-definition sensitivity,"
+"6. **Hierarchical error decomposition.** REML table (Table 7, Fig. 6), geometry-definition sensitivity, replicate ratio with CI, laboratory component not identifiable."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "replicate ratio with CI, laboratory component not identifiable."
 },
 {
 "t": "bullets",
 "items": [
-"7. **Counterfactual data-selection policies.** Fixed vs tuned (Table 8, Fig. 7), ESS and weights,"
+"7. **Counterfactual data-selection policies.** Fixed vs tuned (Table 8, Fig. 7), ESS and weights, stability, two-stage occurrence under exclusion."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "stability, two-stage occurrence under exclusion."
 },
 {
 "t": "bullets",
 "items": [
-"8. **Quality-aware uncertainty quantification.** Six scale functions (Table 9, Fig. 8), calibration"
+"8. **Quality-aware uncertainty quantification.** Six scale functions (Table 9, Fig. 8), calibration sensitivity, CF = 3 under-coverage explained, retrospective vs prospective availability of RF and CF."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "sensitivity, CF = 3 under-coverage explained, retrospective vs prospective availability of RF and CF."
 },
 {
 "t": "bullets",
@@ -313,13 +285,9 @@
 {
 "t": "bullets",
 "items": [
-"**S2 Variable audit.** Source, unit, transformation, range, missingness. Recomputation checks of q*, Y,"
+"**S2 Variable audit.** Source, unit, transformation, range, missingness. Recomputation checks of q*, Y, L0 and s0. Physical flags (depth-limited, Ac > Rc, default period ratios)."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "L0 and s0. Physical flags (depth-limited, Ac > Rc, default period ratios)."
 },
 {
 "t": "bullets",
@@ -366,13 +334,9 @@
 {
 "t": "bullets",
 "items": [
-"**S4 Two-stage model.** Stage-A metrics by RF/CF, confusion matrices, reliability (W1–W2). Combined"
+"**S4 Two-stage model.** Stage-A metrics by RF/CF, confusion matrices, reliability (W1–W2). Combined expected discharge (W3). Stage-B reproduction check (W5)."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "expected discharge (W3). Stage-B reproduction check (W5)."
 },
 {
 "t": "bullets",
@@ -440,13 +404,9 @@
 {
 "t": "bullets",
 "items": [
-"**S6 Decomposition.** Grouping and model sensitivity (original Table 8). Geometry-definition sensitivity"
+"**S6 Decomposition.** Grouping and model sensitivity (original Table 8). Geometry-definition sensitivity (G1). Replicate ratio CI (R3b)."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "(G1). Replicate ratio CI (R3b)."
 },
 {
 "t": "bullets",
@@ -535,13 +495,9 @@
 {
 "t": "bullets",
 "items": [
-"**S9 Conformal.** Ten original methods (tableS_conformal). Six v2 scales × three calibration fractions"
+"**S9 Conformal.** Ten original methods (tableS_conformal). Six v2 scales × three calibration fractions (C1–C3). CF = 3 errors by series (C4). Coverage by geometry and series."
 ],
 "level": 0
-},
-{
-"t": "p",
-"text": "(C1–C3). CF = 3 errors by series (C4). Coverage by geometry and series."
 },
 {
 "t": "bullets",

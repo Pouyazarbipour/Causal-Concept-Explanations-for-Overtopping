@@ -1,6 +1,6 @@
 # Revised manuscript structure
 
-Main paper: 13 sections, about 11 figures and 9 tables. Every number comes from `results/tables` (original
+Main paper: 13 sections, 9 figures and 10 tables. Every number comes from `results/tables` (original
 analyses, re-verified) or from `revision/tables` (new analyses).
 
 ## Main manuscript
