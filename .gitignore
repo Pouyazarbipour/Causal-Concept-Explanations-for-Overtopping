@@ -6,3 +6,6 @@ data/interim/
 results/models/ccw_cache/
 results/models/fold_cache/
 revision/logs/
+revision/outputs/fold_cache/
+revision/outputs/policies/cache/
+revision/outputs/wet_dry/cache/
